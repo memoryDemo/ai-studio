@@ -1,0 +1,55 @@
+{
+  "name": "ai-studio-docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "docusaurus": "node ./scripts/run_docusaurus.mjs",
+    "start": "node ./scripts/run_docusaurus.mjs start",
+    "build": "node ./scripts/run_docusaurus.mjs build",
+    "swizzle": "node ./scripts/run_docusaurus.mjs swizzle",
+    "deploy": "node ./scripts/run_docusaurus.mjs deploy",
+    "clear": "node ./scripts/run_docusaurus.mjs clear",
+    "serve": "node ./scripts/run_docusaurus.mjs serve",
+    "write-translations": "node ./scripts/run_docusaurus.mjs write-translations",
+    "write-heading-ids": "node ./scripts/run_docusaurus.mjs write-heading-ids"
+  },
+  "dependencies": {
+    "@docusaurus/core": "3.9.2",
+    "@docusaurus/preset-classic": "3.9.2",
+    "@docusaurus/remark-plugin-npm2yarn": "3.9.2",
+    "@docusaurus/theme-mermaid": "3.9.2",
+    "@easyops-cn/docusaurus-search-local": "^0.55.1",
+    "@mdx-js/react": "^3.1.1",
+    "clsx": "^1.2.1",
+    "flickity": "^2.3.0",
+    "prism-react-renderer": "^2.4.1",
+    "process": "^0.11.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-flickity-component": "^4.0.7",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "3.9.2",
+    "@docusaurus/types": "3.9.2"
+  },
+  "overrides": {
+    "serve-handler": "6.1.7"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0",
+    "bun": ">=1.2.10"
+  }
+}

@@ -1,0 +1,12 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9C7A52"/>
+      <stop offset="1" stop-color="#7C5A3A"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded hexagon plate -->
+  <path fill="url(#g)" d="M78 22h100c6 0 12 3 15 9l45 79c3 6 3 12 0 18l-45 79c-3 6-9 9-15 9H78c-6 0-12-3-15-9L18 128c-3-6-3-12 0-18l45-79c3-6 9-9 15-9z" />
+  <!-- Monogram U (light context) -->
+  <path fill="#F8F7F4" d="M92 72c6 0 10 4 10 10v58c0 22 14 32 26 32s26-10 26-32V82c0-6 4-10 10-10s10 4 10 10v59c0 34-22 53-46 53s-46-19-46-53V82c0-6 4-10 10-10z"/>
+</svg>
