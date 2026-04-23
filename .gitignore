@@ -26,11 +26,15 @@ build/
 venv/
 ENV/
 
-# Local env / secrets
+# Environments
 .env
-.env.*
-!.env.example
-!.env.*.example
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv.make/
 
 # Logs / temp
 *.log
@@ -43,3 +47,27 @@ docs/build/
 docs/.docusaurus/
 docs/.cache-loader/
 docs/bk/
+
+# Ignore
+/examples/**/*.gv
+/examples/**/*.gv.pdf
+/i18n/locales/**/**/*_ai_translated.po
+/i18n/locales/**/**/*~
+configs/my
+.devcontainer/dev.toml
+test_docs
+
+# AI coding assistant configs
+.opencode/
+.cursor/
+.aone_copilot/
+.windsurf/
+.continue/
+.codeium/
+.github/copilot-instructions.md
+.claude/
+.codex/
+.trade/
+.qoder/
+.qwencode/
+.sisyphus/
