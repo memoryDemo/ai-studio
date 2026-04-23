@@ -1,0 +1,173 @@
+services:
+  umber-studio-postgres:
+    image: postgres:18.3
+    container_name: umber-studio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${UMBER_STUDIO_PG_DATABASE:-umber_studio}
+      POSTGRES_USER: ${UMBER_STUDIO_PG_USER:-umber_studio}
+      POSTGRES_PASSWORD: "Zjmzu5EqZzB_4dk7JA7N3yqULeLG@+dq"
+    ports:
+      - "${UMBER_STUDIO_PG_PORT:-14001}:5432"
+    volumes:
+      - umber_studio_pg_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${UMBER_STUDIO_PG_USER:-umber_studio} -d ${UMBER_STUDIO_PG_DATABASE:-umber_studio}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  umber-studio-redis-stack:
+    image: redis/redis-stack:7.4.0-v8
+    container_name: umber-studio-redis-stack
+    restart: unless-stopped
+    environment:
+      REDIS_ARGS: --requirepass PkXWBhDJbeT23W=zGRGyA.6NUkyuTpcx
+    ports:
+      - "${UMBER_STUDIO_REDIS_PORT:-14002}:6379"
+      - "${UMBER_STUDIO_REDIS_INSIGHT_PORT:-14003}:8001"
+    volumes:
+      - umber_studio_redis_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -a 'PkXWBhDJbeT23W=zGRGyA.6NUkyuTpcx' -h 127.0.0.1 -p 6379 ping | grep -q PONG",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  umber-studio-neo4j:
+    image: neo4j:2026.03.1-community
+    container_name: umber-studio-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: "neo4j/2@e93GSJrFE50_-o+kGz0XfJWtLzlpJ0"
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      NO_PROXY: 127.0.0.1,localhost,umber-studio-neo4j
+      no_proxy: 127.0.0.1,localhost,umber-studio-neo4j
+    ports:
+      - "${UMBER_STUDIO_NEO4J_HTTP_PORT:-14004}:7474"
+      - "${UMBER_STUDIO_NEO4J_BOLT_PORT:-14005}:7687"
+    volumes:
+      - umber_studio_neo4j_data:/data
+      - umber_studio_neo4j_logs:/logs
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "cypher-shell -a bolt://127.0.0.1:7687 -u neo4j -p 2@e93GSJrFE50_-o+kGz0XfJWtLzlpJ0 'RETURN 1;' >/dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+
+  umber-studio-etcd:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: umber-studio-etcd
+    restart: unless-stopped
+    command: >
+      etcd
+      -advertise-client-urls=http://umber-studio-etcd:2379
+      -listen-client-urls=http://0.0.0.0:2379
+      --data-dir /etcd
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: "1000"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+      ETCD_SNAPSHOT_COUNT: "50000"
+    ports:
+      - "${UMBER_STUDIO_ETCD_PORT:-14006}:2379"
+    volumes:
+      - umber_studio_etcd_data:/etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "--endpoints=http://127.0.0.1:2379", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  umber-studio-minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    container_name: umber-studio-minio
+    command: minio server /minio_data --console-address ":9001"
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${UMBER_STUDIO_MINIO_ROOT_USER:-umberstudiominio}
+      MINIO_ROOT_PASSWORD: "N8zbG0lNNvnSs3R8.Ea6-ARgy-VpejB@"
+    ports:
+      - "${UMBER_STUDIO_MINIO_API_PORT:-14007}:9000"
+      - "${UMBER_STUDIO_MINIO_CONSOLE_PORT:-14008}:9001"
+    volumes:
+      - umber_studio_minio_data:/minio_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  umber-studio-milvus:
+    image: milvusdb/milvus:v2.6.15
+    container_name: umber-studio-milvus
+    command:
+      - /bin/sh
+      - -c
+      - |
+          cat > /milvus/configs/user.yaml <<'EOF'
+          common:
+            security:
+              authorizationEnabled: true
+              defaultRootPassword: "KW1vK=1Amq8vowOQa.m9aORfUA8A+fyT"
+          EOF
+          exec milvus run standalone
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      ETCD_ENDPOINTS: umber-studio-etcd:2379
+      MINIO_ADDRESS: umber-studio-minio:9000
+      MINIO_ACCESS_KEY_ID: ${UMBER_STUDIO_MINIO_ROOT_USER:-umberstudiominio}
+      MINIO_SECRET_ACCESS_KEY: "N8zbG0lNNvnSs3R8.Ea6-ARgy-VpejB@"
+      MINIO_REGION: us-east-1
+      MQ_TYPE: woodpecker
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      NO_PROXY: 127.0.0.1,localhost,umber-studio-etcd,umber-studio-minio,umber-studio-milvus
+      no_proxy: 127.0.0.1,localhost,umber-studio-etcd,umber-studio-minio,umber-studio-milvus
+    ports:
+      - "${UMBER_STUDIO_MILVUS_PORT:-14009}:19530"
+      - "${UMBER_STUDIO_MILVUS_HTTP_PORT:-14010}:9091"
+    volumes:
+      - umber_studio_milvus_data:/var/lib/milvus
+    depends_on:
+      umber-studio-etcd:
+        condition: service_healthy
+      umber-studio-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 3 bash -lc '</dev/tcp/127.0.0.1/19530'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  umber_studio_pg_data:
+  umber_studio_redis_data:
+  umber_studio_neo4j_data:
+  umber_studio_neo4j_logs:
+  umber_studio_etcd_data:
+  umber_studio_minio_data:
+  umber_studio_milvus_data:

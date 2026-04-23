@@ -6,11 +6,10 @@ title: 基座项目总览
 
 这组文档用于定义 `AI Studio` 的平台级设计基线，而不是某个 demo 页面的使用说明。
 
-当前这套文档只保留 4 篇核心资产：
+当前这套文档现在分两组：
 
-1. [AI Studio 企业级 AgentOS 架构设计文档（实施蓝图版）](./architecture_design.md)
-2. [AI Studio 技术栈](./technology_stack.md)
-3. [AI Studio Memory OS 设计](./memory_os_design.md)
+1. 架构基线
+2. 开发指南
 
 ## 一、项目定位
 
@@ -35,8 +34,13 @@ title: 基座项目总览
 建议按下面顺序阅读：
 
 1. [AI Studio 企业级 AgentOS 架构设计文档（实施蓝图版）](./architecture_design.md)
-2. [AI Studio 技术栈](./technology_stack.md)
-3. [AI Studio Memory OS 设计](./memory_os_design.md)
+2. [AI Studio 功能设计](./functional_design.md)
+3. [AI Studio 技术栈](./technology_stack.md)
+4. [AI Studio Memory OS 设计](./memory_os_design.md)
+5. [快速上手：当前工程骨架与最短阅读路径](./quick_code_onboarding.md)
+6. [目录结构与模块职责](./directory_and_module_map.md)
+7. [Packages 架构与包间分层设计](./packages_architecture.md)
+8. [开发 Playbooks 与使用方式](./development_playbooks.md)
 
 ## 四、目录结构说明
 
@@ -61,3 +65,18 @@ title: 基座项目总览
 - `upgrade/`
 
 当前这些目录大多还只有占位文件，不承载正式内容。
+
+## 五、开发指南
+
+当前已经迁入并适配 `AI Studio` 的开发指南包括：
+
+- [快速上手：当前工程骨架与最短阅读路径](./quick_code_onboarding.md)
+- [目录结构与模块职责](./directory_and_module_map.md)
+- [Packages 架构与包间分层设计](./packages_architecture.md)
+- [开发 Playbooks 与使用方式](./development_playbooks.md)
+
+仓库级 playbooks 位于：
+
+- `docs/playbooks/README.md`
+- `docs/playbooks/add-new-api-endpoint.md`
+- `docs/playbooks/add-new-scene.md`

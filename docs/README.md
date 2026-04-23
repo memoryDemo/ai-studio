@@ -1,34 +1,51 @@
-# AI Studio documentation
+# AI Studio Docs Workspace
 
-## Quick Start
+## 快速开始
 
-### Install dependencies
-- Enter the docs workspace first.
-- Install the Docusaurus dependencies.
+先进入 docs 工作区：
 
+```bash
+cd /Users/memory/CodeRepository/PycharmProjects/ai-studio/docs
 ```
+
+安装依赖：
+
+```bash
 bun install
 ```
 
-### launch
-``` 
+本地启动：
+
+```bash
 bun run start
 ```
 
-### build
-``` 
+构建静态站点：
+
+```bash
 bun run build
 ```
 
-The default service starts on port `3000`, visit `localhost:3000`.
+默认端口是 `3000`。
 
-## Scope
+## 当前文档范围
 
-This docs project reuses the same Docusaurus project structure as `Umber Studio/docs`,
-but is now the documentation workspace for `AI Studio`.
+这个 docs 工作区复用了 `Umber Studio/docs` 的 Docusaurus 工程壳，但当前文档资产已经切到 `AI Studio` 自己的内容。
 
-Key entry docs:
+当前站内重点文档：
 
-- `docs/ai-studio/index.md`
-- `docs/ai-studio/architecture-blueprint.md`
-- `docs/ai-studio/memory-os-design.md`
+- `docs/docs/application/base_project/index.md`
+- `docs/docs/application/base_project/architecture_design.md`
+- `docs/docs/application/base_project/functional_design.md`
+- `docs/docs/application/base_project/technology_stack.md`
+- `docs/docs/application/base_project/memory_os_design.md`
+- `docs/docs/application/base_project/quick_code_onboarding.md`
+- `docs/docs/application/base_project/directory_and_module_map.md`
+- `docs/docs/application/base_project/packages_architecture.md`
+- `docs/docs/application/base_project/development_playbooks.md`
+
+仓库级 playbooks 位于：
+
+- `docs/playbooks/README.md`
+- `docs/playbooks/add-new-api-endpoint.md`
+- `docs/playbooks/add-new-scene.md`

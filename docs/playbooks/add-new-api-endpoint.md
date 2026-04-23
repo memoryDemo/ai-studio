@@ -2,234 +2,166 @@
 title: 新增一个 HTTP 接口
 ---
 
-# Playbook:新增一个 HTTP 接口
+# Playbook：新增一个 HTTP 接口
 
 ## 1. 什么时候用这份 playbook
 
-你的需求命中下面任意一条:
+你的需求命中下面任意一条：
 
 - 前端要调一个新的接口拿数据或触发动作
-- 第三方系统要用一个新的接口
-- 需要一个内部工具接口(调试、手动触发同步等)
+- 第三方系统要调用一个新接口
+- 需要一个内部工具接口做调试或人工触发
 
-**不适用的情况**(请看其他 playbook):
+**当前状态说明：**
 
-- 你要加一个新的"聊天模式" → 看 [`add-new-scene.md`](./add-new-scene.md)
-- 你要接一个新数据源 → 看 `add-new-datasource.md`(待补)
+`AI Studio` 当前还没有完整的 FastAPI / OpenAPI 目录，所以这份 playbook 已经按当前仓库改写成“**预置可落地版本**”。
+
+也就是说：
+
+- 如果你是在补**第一个** HTTP 入口，需要先把 `app` 层 API 骨架建出来
+- 如果仓库以后已经有 `openapi/` 目录，这份 playbook 就可以直接按常规步骤使用
+
+**不适用的情况：**
+
+- 你要加一个新的场景分发层 → 看 [`add-new-scene.md`](./add-new-scene.md)
+- 你要接一个新的 runtime / gateway adapter → 先改 `ext`
 
 ## 2. 主干定位
 
-```
-[2] API 入口 ← 你在这一层加东西
-     ├── packages/umber-studio-app/src/umber_studio_app/openapi/api_v1/*.py
-     └── packages/umber-studio-app/src/umber_studio_app/openapi/api_v2.py
-```
+```text
+[2] API 入口
+     └── packages/ai-studio-app/src/ai_studio_app/openapi/
 
-你**不**应该在这个 playbook 里动:`runtime/`、`scene/`、`umber-studio-serve/`。
-如果你发现自己必须动它们中任何一个,说明这不是一个"纯新增接口"需求,回头找 Lead 讨论。
+[3] App 装配
+     └── packages/ai-studio-app/src/ai_studio_app/
 
-## 3. 改动清单(5 步)
-
-### 步骤 1:选一个归属子模块
-
-看一下 `packages/umber-studio-app/src/umber_studio_app/openapi/api_v1/` 下现有子模块:
-
-```
-api_v1/
-├── agentic_data_api.py     # 工作区、数据态、agent 级聚合入口(最常用的样板)
-├── api_v1.py               # 核心聚合 router(chat / db / model / file)
-├── editor/                 # 编辑器相关
-├── feedback/               # 用户反馈
-├── links/                  # 链接/分享
-├── examples_api.py         # 内置示例
-└── python_upload_api.py    # Python 代码上传
+[5] Serve 服务域
+     └── packages/ai-studio-serve/src/ai_studio_serve/
 ```
 
-**选择原则**:能归到已有子模块就不新建;只有当你确信这是一个全新业务域(且 Lead 同意)时才新建一个 `<domain>_api.py`。
+你不应该在路由函数里直接调 `ext` 或 `core` 的具体实现。
 
-### 步骤 2:定义入参出参模型(Pydantic)
+正确方向是：
 
-集中在 `packages/umber-studio-app/src/umber_studio_app/openapi/api_view_model.py`。
+`app/openapi -> serve -> core contracts / ext implementation`
 
-> **红线**:不要在路由函数里直接写 `dict` 做入参,也不要在路由函数所在文件里随手定义模型类。模型要么放 `api_view_model.py`,要么放 `editor_view_model.py`(编辑器专属)。
+## 3. 改动清单
 
-追加一个请求模型的最小模板:
+### 步骤 1：先确认 API 骨架是否存在
+
+如果下面这些目录还不存在，先补最小骨架：
+
+```text
+packages/ai-studio-app/src/ai_studio_app/openapi/
+├── __init__.py
+├── api_v1.py
+└── view_models.py
+```
+
+如果你是在补仓库里的第一个 API，这一步是必须的。
+
+### 步骤 2：定义入参出参模型
+
+HTTP 视角的入参出参模型，建议放在：
+
+```text
+packages/ai-studio-app/src/ai_studio_app/openapi/view_models.py
+```
+
+系统级运行时模型继续放在：
+
+```text
+packages/ai-studio-core/src/ai_studio_core/contracts/models.py
+```
+
+最小模板：
 
 ```python
-from umber_studio._private.pydantic import BaseModel, ConfigDict, Field
-from typing import Optional
+from pydantic import BaseModel, Field
 
 
-class MyNewRequestVo(BaseModel):
-    """<一句话说明这个请求做什么>"""
-
-    model_config = ConfigDict(protected_namespaces=())
-
-    conv_uid: str = Field(..., description="会话 uid")
-    some_param: Optional[str] = Field(None, description="<业务字段含义>")
+class CreateRunRequestVo(BaseModel):
+    thread_id: str = Field(..., description="thread id")
+    input: str = Field(..., description="user input")
 ```
 
-响应用统一的 `Result[T]`,`T` 可以是 `bool` / `str` / `List[XxxVo]` / `dict`。如果 `T` 是复杂对象,也在 `api_view_model.py` 定义 `XxxVo`。
+### 步骤 3：先在 `serve` 层暴露应用服务
 
-### 步骤 3:写路由函数
+如果接口背后对应的是一个真实 use case，就先在 `serve` 层提供稳定服务入口。
 
-在步骤 1 选中的文件里追加。**路由函数只做 3 件事:解析入参 → 调下游 → 包装返回**。
+当前最接近的样板是：
 
-同步(非流式)接口模板:
+```text
+packages/ai-studio-serve/src/ai_studio_serve/run_service.py
+```
+
+原则：
+
+- 路由不直接拼业务
+- 路由不直接 new 底层实现
+- 路由调 `RunService` 这类服务层对象
+
+### 步骤 4：在 `app` 层写 FastAPI 路由并完成挂载
+
+如果你已经有 FastAPI app，对应路由函数最小模板可以是：
 
 ```python
 import logging
-from fastapi import Body, Depends
-from umber_studio_app.openapi.api_view_model import Result, MyNewRequestVo
-from umber_studio_serve.utils.auth import UserRequest, get_user_from_headers
+from fastapi import APIRouter
+
+from ai_studio_app.openapi.view_models import CreateRunRequestVo
 
 logger = logging.getLogger(__name__)
+router = APIRouter()
 
 
-@router.post("/v1/chat/my-new-endpoint", response_model=Result[dict])
-async def my_new_endpoint(
-    req: MyNewRequestVo = Body(),
-    user_token: UserRequest = Depends(get_user_from_headers),
-):
-    logger.info(f"my_new_endpoint: conv_uid={req.conv_uid}, user={user_token.user_id}")
-    try:
-        # 1) 调下游(Scene / Serve 的 api/,绝不直接 import dao 或 umber_studio.*)
-        result = await _do_business(req, user_token.user_id)
-        # 2) 包装返回
-        return Result.succ(result)
-    except ValueError as e:
-        return Result.failed(code="E1001", msg=str(e))
-    except Exception as e:
-        logger.exception("my_new_endpoint failed")
-        return Result.failed(code="E1000", msg=str(e))
+@router.post("/v1/runs")
+async def create_run(req: CreateRunRequestVo):
+    logger.info("create_run: thread_id=%s", req.thread_id)
+    return {"ok": True}
 ```
 
-流式接口模板(SSE):
+### 步骤 5：做最小验证
 
-```python
-from fastapi.responses import StreamingResponse
+当前仓库最小验证建议：
 
-
-@router.post("/v1/chat/my-stream-endpoint")
-async def my_stream_endpoint(
-    req: MyNewRequestVo = Body(),
-    user_token: UserRequest = Depends(get_user_from_headers),
-):
-    headers = {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
-        "Transfer-Encoding": "chunked",
-    }
-    return StreamingResponse(
-        _do_streaming(req, user_token.user_id),
-        headers=headers,
-        media_type="text/event-stream",
-    )
+```bash
+python -m compileall packages
 ```
 
-**命名规范**:
+如果你已经把 FastAPI app 起起来了，再补：
 
-- 路由路径必须带版本前缀:`/v1/...` 或 `/v2/...`
-- 业务前缀按域划分:`/v1/chat/...`、`/v1/resource/...`、`/v1/feedback/...`、`/v1/permission/...`
-- 不要出现 `/api/my_new_thing` 这种无版本、无域的路径
-
-### 步骤 4:确认 router 被挂进 FastAPI
-
-大多数情况你**不需要动这一步**——只要你的文件里有一个 `router = APIRouter()`,并且这个文件已经被 `openapi/api_v1/api_v1.py` 或 `umber_studio_server.py` 导入/include,路由就自动生效。
-
-**例外**:如果你**新建了一个子模块文件**(步骤 1 里极少发生),必须去检查下列两处之一,确保 router 被 include:
-
-```python
-# packages/umber-studio-app/src/umber_studio_app/openapi/api_v1/api_v1.py
-# 或 umber_studio_server.py 的 mount_routers 函数
-from umber_studio_app.openapi.api_v1.<your_new_module> import router as your_router
-app.include_router(your_router, prefix="/api")
-```
-
-> **红线**:不要自己在业务模块里 `app.include_router(...)`,include 只能发生在聚合层。
-
-### 步骤 5:写一个最小集成测试
-
-在 `tests/` 下新建或扩展一个测试文件(命名 `test_<module>.py`)。最小用例至少覆盖:
-
-- 请求成功路径(返回 `success=True`)
-- 请求失败路径(参数错误 / 无权限)
-
-```python
-from fastapi.testclient import TestClient
-
-
-def test_my_new_endpoint_success(test_client: TestClient, auth_headers: dict):
-    resp = test_client.post(
-        "/api/v1/chat/my-new-endpoint",
-        json={"conv_uid": "abc-123", "some_param": "x"},
-        headers=auth_headers,
-    )
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["success"] is True
+```bash
+uv run pytest
 ```
 
 ## 4. 验证
 
-在仓库根目录依次跑(**全部通过**才能提 PR):
+至少确认：
 
-```bash
-make fmt              # 自动格式化
-make fmt-check        # 格式化自检
-make mypy             # 类型检查(至少 core 层通过)
-make test             # 单元 + 集成测试
-```
+- 新路由没有越过 `serve`
+- `app` 里没有直接 import `ext` 的具体实例去处理业务
+- `core` 没被写进 FastAPI / HTTP 细节
+- `python -m compileall packages` 通过
 
-手动联调:
-
-```bash
-uv run umber-studio start webserver --config configs/umber-studio-proxy-siliconflow-pg-milvus.toml
-```
-
-用 `curl` 或 Postman 打你新增的接口,确认:
-
-- 返回的 JSON 结构是 `{"success": ..., "err_code": ..., "err_msg": ..., "data": ...}`
-- 日志里能看到你写的 `logger.info(...)`
-- 流式接口能看到 `data: ...` 一行行吐出来
-
-## 5. PR 描述模板
+## 5. 影响面说明
 
 ```markdown
 ## 主干定位
-- 落在【API 入口】主干,新增接口 `POST /api/v1/<path>`
-- 归属子模块:`packages/umber-studio-app/src/umber_studio_app/openapi/api_v1/<file>.py`
-- 入参出参模型:`api_view_model.py` 中新增 `MyNewRequestVo`
+- 落在【API 入口】主干
+- 路由所在位置：`packages/ai-studio-app/src/ai_studio_app/openapi/`
+- 服务入口：`packages/ai-studio-serve/src/ai_studio_serve/`
 
 ## 边界检查
-- 依赖方向:✅(本改动只读 serve 的 `api/` 公开函数,未 import dao/models)
-- 绕过主干:✅(未直接调 runtime,也未直接读 DB)
-
-## 红线检查
-- [ ] API 层 import serve.dao 或 umber_studio.*:❌ 未命中
-- [ ] 新建顶级目录/子模块:❌ 未命中(或"命中 + 已讨论")
-- [ ] `except Exception: pass` / `print`:❌ 未命中
+- 路由只调 `serve`，没有越过服务层直接调 `ext` 具体实现
+- `core` 没有新增 HTTP 细节
 
 ## 验证
-- [x] make fmt-check
-- [x] make mypy
-- [x] make test
-- [x] 手动 curl:<贴一条 curl 示例 + 返回>
+- [x] python -m compileall packages
+- [ ] uv run pytest
 
 ## 影响面
-- 前后端契约:是,新增 `MyNewRequestVo` 与响应 schema;已通知前端
-- 需同步文档:否(接口较小)/ 是(同步到 `docs/docs/.../api-reference.md`)
-- 前端联调:需要 / 不需要
+- 是否引入了第一个 FastAPI / OpenAPI 骨架
+- 是否新增了外部 HTTP 契约
+- 是否需要同步文档
 ```
-
-## 反模式速查(这样写会被打回)
-
-| 症状 | 问题 | 正确做法 |
-|---|---|---|
-| 路由函数里 `from umber_studio_serve.xxx.dao import ...` | 破坏依赖方向 | 调 serve 对应域的 `api/` |
-| 路由函数参数是 `data: dict = Body()` | 没走 Pydantic | 定义 `XxxVo` 放 `api_view_model.py` |
-| 返回 `return {"ok": True}` | 没走统一 `Result[T]` | 用 `Result.succ(...)` |
-| 自己 `fastapi.FastAPI()` 并 include_router | 绕过聚合层 | 让聚合层自动 include |
-| 硬编码中文错误消息 | 弱 i18n | 用错误码 + 英文 key,前端按 key 本地化 |
-| 接口路径 `/my_thing` 无版本 | 版本失控 | `/v1/<domain>/<action>` |
