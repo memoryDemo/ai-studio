@@ -1,10 +1,22 @@
 [project]
-name = "ai-studio"
+name = "ai-studio-mono"
 version = "0.1.0"
 description = "ai 能力平台"
+authors = [
+    { name = "jingwei.guan", email = "memory1992@live.com" }
+]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
+[tool.uv.sources]
+ai-studio = { workspace = true }
+ai-studio-accelerator = { workspace = true }
+ai-studio-app = { workspace = true }
+ai-studio-client = { workspace = true }
+ai-studio-ext = { workspace = true }
+ai-studio-sandbox = { workspace = true }
+ai-studio-serve = { workspace = true }
 
 [tool.uv.workspace]
 members = [
@@ -16,3 +28,36 @@ members = [
     "packages/ai-studio-accelerator",
     "packages/ai-studio-app",
 ]
+
+[tool.uv]
+managed = true
+
+
+[tool.ruff]
+# Ruff 的全局配置。
+# 这里一般放整个项目都生效的基础设置，比如最大行宽、目标 Python 版本。
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.format]
+# Ruff 格式化器的配置。
+# 只影响 `ruff format`，决定代码会被格式化成什么样。
+# 比如引号用双引号、缩进用空格、换行符自动适配、docstring 里的示例代码也一起格式化。
+docstring-code-format = true
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ruff.lint]
+# Ruff 静态检查器的配置。
+# 只影响 `ruff check`，决定要检查哪些类型的问题。
+# 这里的 E/F/I 分别表示：
+# E = pycodestyle 错误类规则
+# F = pyflakes 规则
+# I = import 排序规则
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+# import 排序的细分配置。
+# 告诉 Ruff 哪些包属于“你自己项目里的代码”，这样排 import 时会把它们归到 first-party。
+known-first-party = ["ai_studio", "ai_studio_ext", "ai_studio_client", "ai_studio_serve", "ai_studio_app", "ai_studio_sandbox", "ai_studio_accelerator"]

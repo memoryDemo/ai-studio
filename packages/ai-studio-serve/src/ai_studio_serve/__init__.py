@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from ai-studio-serve!")
+"""Service package for AI Studio."""

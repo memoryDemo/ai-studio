@@ -1,5 +1,5 @@
 [project]
-name = "ai-studio-core"
+name = "ai-studio"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -7,11 +7,13 @@ authors = [
     { name = "jingwei.guan", email = "memory1992@live.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
-
-[project.scripts]
-ai-studio-core = "ai_studio_core:main"
+dependencies = [
+    "click>=8.1.0,<9.0.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.7,<0.12.0"]
 build-backend = "uv_build"
+
+[project.scripts]
+ai-studio = "ai_studio.cli.cli_scripts:main"

@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from ai-studio-sandbox!")
+"""Sandbox package for AI Studio."""

@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from ai-studio-accelerator!")
+"""Accelerator package for AI Studio."""

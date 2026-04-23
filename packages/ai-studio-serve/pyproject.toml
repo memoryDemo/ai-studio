@@ -7,10 +7,9 @@ authors = [
     { name = "jingwei.guan", email = "memory1992@live.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
-
-[project.scripts]
-ai-studio-serve = "ai_studio_serve:main"
+dependencies = [
+    "ai-studio-ext",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.7,<0.12.0"]

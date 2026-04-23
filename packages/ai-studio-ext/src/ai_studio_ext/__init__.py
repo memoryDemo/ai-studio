@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from ai-studio-ext!")
+"""Extension package for AI Studio."""

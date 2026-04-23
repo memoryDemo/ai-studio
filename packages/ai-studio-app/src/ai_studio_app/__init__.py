@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from ai-studio-app!")
+"""Application shell for AI Studio."""
