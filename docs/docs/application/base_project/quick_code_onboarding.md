@@ -18,7 +18,7 @@ title: 快速上手：当前工程骨架与最短阅读路径
 这意味着：
 
 - 已经有清晰的架构文档
-- 已经有 `core / ext / client / serve / app / sandbox` 的包边界
+- 已经有 `core / ext / client / serve / app / sandbox / accelerator` 的包边界
 - 已经有最小 contracts、最小 runtime 示例和最小 wiring
 - 但**还没有**完整的 FastAPI WebServer、OpenAPI 路由、Scene 分发和前端工作台
 
@@ -33,7 +33,7 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 你现在真正应该先理解的是：
 
-`workspace 配置 -> core contracts -> ext 实现 -> serve 编排 -> app 装配 -> docs 设计基线`
+`workspace 配置 -> core contracts -> ext 实现 -> serve 编排 -> app 装配 -> accelerator 可选依赖层 -> docs 设计基线`
 
 ## 当前最短阅读路径
 
@@ -103,6 +103,18 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 - 把 `ext` 和 `serve` 装配成一个可用的 `RunService`
 
+### 6. `ai-studio-accelerator`
+
+最后补看：
+
+- `packages/ai-studio-accelerator/ai-studio-acc-auto/pyproject.toml`
+- `packages/ai-studio-accelerator/ai-studio-acc-flash-attn/pyproject.toml`
+
+这一层不承载业务代码，主要负责：
+
+- 维持可选推理加速依赖矩阵
+- 把高风险或高平台耦合的安装策略从主业务包里隔离出来
+
 ## 当前最有效的验证方式
 
 ### 验证 1：代码最小语法检查
@@ -141,4 +153,4 @@ bun run build
 
 而是：
 
-`workspace -> core contracts -> ext impl -> serve service -> app bootstrap -> docs truth`
+`workspace -> core contracts -> ext impl -> serve service -> app bootstrap -> accelerator deps -> docs truth`

@@ -9,6 +9,7 @@ dependencies = [
     "ai-studio-client",
     "ai-studio-serve",
     "ai-studio-sandbox",
+    "ai-studio-acc-auto",
 ]
 
 [build-system]

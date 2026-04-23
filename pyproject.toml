@@ -13,6 +13,8 @@ ai-studio-client = { workspace = true }
 ai-studio-serve = { workspace = true }
 ai-studio-app = { workspace = true }
 ai-studio-sandbox = { workspace = true }
+ai-studio-acc-auto = { workspace = true }
+ai-studio-acc-flash-attn = { workspace = true }
 
 [tool.uv.workspace]
 members = [
@@ -22,6 +24,7 @@ members = [
     "packages/ai-studio-serve",
     "packages/ai-studio-app",
     "packages/ai-studio-sandbox",
+    "packages/ai-studio-accelerator/ai-studio-acc*",
 ]
 
 [tool.uv]

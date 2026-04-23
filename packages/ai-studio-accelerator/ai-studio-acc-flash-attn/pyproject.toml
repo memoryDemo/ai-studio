@@ -1,0 +1,30 @@
+[project]
+name = "ai-studio-acc-flash-attn"
+version = "0.1.0"
+description = "Flash Attention wrapper dependency bundle for AI Studio."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_studio_acc_flash_attn"]
+
+[dependency-groups]
+build = [
+    "setuptools>=75.8.0",
+]
+direct = [
+    "torch>=2.2.1",
+]
+main = [
+    "flash-attn>=2.5.8",
+]
+
+[tool.uv]
+managed = true
+default-groups = ["build", "direct", "main"]
+no-build-isolation-package = ["flash-attn"]

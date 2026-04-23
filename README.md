@@ -26,10 +26,16 @@ AI Studio 是一个 `LangGraph-first` 的 AgentOS 平台项目，目标是为上
   - 放启动、装配与未来 API 入口
 - `packages/ai-studio-sandbox`
   - 放受控执行与沙箱能力边界
+- `packages/ai-studio-accelerator/ai-studio-acc-auto`
+  - 放可选推理加速依赖矩阵与自动安装壳
+- `packages/ai-studio-accelerator/ai-studio-acc-flash-attn`
+  - 放 `flash-attn` 这类单独安装策略的适配壳
 
 依赖方向固定为：
 
 `ai-studio-core <- ai-studio-ext / ai-studio-client / ai-studio-sandbox / ai-studio-serve <- ai-studio-app`
+
+另外，`ai-studio-app` 会侧向依赖 `ai-studio-acc-auto`，把 GPU / 推理加速能力保持在独立附属层，而不是混进核心包。
 
 这意味着：
 

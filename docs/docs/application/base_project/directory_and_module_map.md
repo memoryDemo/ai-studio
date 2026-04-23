@@ -19,7 +19,10 @@ ai-studio/
 │   ├── ai-studio-client/
 │   ├── ai-studio-serve/
 │   ├── ai-studio-app/
-│   └── ai-studio-sandbox/
+│   ├── ai-studio-sandbox/
+│   └── ai-studio-accelerator/
+│       ├── ai-studio-acc-auto/
+│       └── ai-studio-acc-flash-attn/
 ├── tests/                 # 预留测试目录
 ├── pyproject.toml         # uv workspace 根配置
 ├── README.md              # 项目说明
@@ -103,6 +106,13 @@ ai-studio/
 职责：
 
 - 预留给未来的受控执行与沙箱能力
+
+#### `packages/ai-studio-accelerator`
+
+职责：
+
+- 放可选 GPU / 推理加速依赖的安装壳
+- 把 `flash-attn` 这类特殊安装策略从主包依赖里隔离出去
 
 ### `tests/`
 
