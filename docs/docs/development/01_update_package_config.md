@@ -1,25 +1,51 @@
-# 修改初始化 package 配置
-> 默认 init 的 package 都是独立的, 需要统一到workspace管理, 维护 package 的依赖关系
+# 补 package 配置和启动壳
+> 把 `uv init` 生成的默认壳，整理成真正可跑的 workspace 项目
 
-## 一、删除每个包里面生成默认的main入口
-删除默认每个 init package 下的入口脚本代码
+上一节只做了目录和分层。这一节开始把配置接起来。
+
+## 1. 先处理根项目冲突
+
+`uv init` 生成的根项目默认也叫 `ai-studio`，但 `core` 包我们也要命名成 `ai-studio`。
+
+这会导致 `uv sync --all-packages` 报重名冲突。
+
+所以先把根 `pyproject.toml` 改成：
+
 ```toml
-[project.scripts]
-ai-studio-* = "ai_studio_*:main"
+[project]
+name = "ai-studio-mono"
 ```
-删除根目录下默认的 main.py文件
+
+根项目只是 workspace 容器，不参与真正的 CLI 命名。
+
+## 2. 删除默认入口
+
+`uv init` 默认会生成两类入口：
+
+1. 根目录 `main.py`
+2. 每个 package 里的默认 `[project.scripts]`
+
+这些先删掉，只保留一个真正的总入口。
+
+要删的东西：
+
 ```python
+# /main.py
 def main():
     print("Hello from ai-studio!")
-
-
-if __name__ == "__main__":
-    main()
-
 ```
 
-## 二、将 package 统一纳入 workspace 内管理
-修改根目录 pyproject.toml , 将子 package 标记为 workspace
+以及各 package 默认生成的：
+
+```toml
+[project.scripts]
+ai-studio-* = "xxx:main"
+```
+
+## 3. 把本地包声明成 workspace source
+
+根 `pyproject.toml` 里补上：
+
 ```toml
 [tool.uv.sources]
 ai-studio = { workspace = true }
@@ -31,35 +57,59 @@ ai-studio-sandbox = { workspace = true }
 ai-studio-serve = { workspace = true }
 ```
 
-## 三、补充 package 之间的dependency
-ai-studio-core
+这样 `uv` 才会优先使用本地 workspace 里的包，而不是去外面找。
+
+## 4. 补 package 依赖
+
+按当前这版最小壳，依赖关系是：
+
+`ai-studio-core`
+
+```toml
+dependencies = [
+    "click>=8.1.0,<9.0.0",
+]
+```
+
+`ai-studio-ext`
+
+```toml
+dependencies = [
+    "ai-studio",
+]
+```
+
+`ai-studio-client`
+
+```toml
+dependencies = [
+    "ai-studio",
+    "ai-studio-ext",
+]
+```
+
+`ai-studio-serve`
+
+```toml
+dependencies = [
+    "ai-studio-ext",
+]
+```
+
+`ai-studio-sandbox`
+
 ```toml
 dependencies = []
 ```
 
-ai-studio-ext
+`ai-studio-accelerator`
+
 ```toml
-dependencies = [
-    "ai-studio",
-]
+dependencies = []
 ```
 
-ai-studio-serve
-```toml
-dependencies = [
-    "ai-studio-ext",
-]
-```
+`ai-studio-app`
 
-ai-studio-client
-```toml
-dependencies = [
-    "ai-studio",
-    "ai-studio-ext",
-]
-```
-
-ai-studio-app
 ```toml
 dependencies = [
     "ai-studio",
@@ -71,173 +121,103 @@ dependencies = [
 ]
 ```
 
-ai-studio-sandbox
-```toml
-dependencies = []
-```
+## 5. 只保留一个 CLI 入口
 
-## 四、修改项目启动方式为 cli 触发函数
-### 1、标记 core package 为唯一启动入口
+真正的 CLI 入口放在 `core` 包：
+
 ```toml
 [project.scripts]
 ai-studio = "ai_studio.cli.cli_scripts:main"
 ```
 
-### 2、基于标记入口函数的路径,创建对应文件
-#### packages/ai-studio-core
-```python
-# packages/ai-studio-core/src/ai_studio/cli/cli_scripts.py
+文件位置：
 
-"""
-AI Studio 命令行入口与「启动」子命令的装配。
+- `packages/ai-studio-core/src/ai_studio/cli/cli_scripts.py`
 
-本模块提供：
-- 根 CLI 组及日志等级选项；
-- `start` 子命令组：默认不带子命令时等价于 `start web`；
-- 在可选依赖 `ai_studio_app` 可用时，将 Web 服务启动入口注册为 `web` / `webserver` 别名。
+这一层只做两件事：
 
-若未安装 `ai_studio_app`，仅会记录警告，不影响其它 CLI 能力。
-"""
-import copy
-import logging
+- 注册 `ai-studio`
+- 挂 `start` 子命令
 
-import click
+## 6. app 层补启动壳
 
-# 为 CLI 设置默认的日志格式与等级（具体等级由根命令 --log-level 再覆盖）
-logging.basicConfig(
-    level=logging.WARNING,
-    encoding="utf-8",
-    format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
+`app` 包里补 4 个文件：
 
-logger = logging.getLogger("ai_studio_cli")
+- `packages/ai-studio-app/src/ai_studio_app/_cli.py`
+- `packages/ai-studio-app/src/ai_studio_app/cli.py`
+- `packages/ai-studio-app/src/ai_studio_app/ai_studio_server.py`
+- `packages/ai-studio-app/src/ai_studio_app/config.py`
 
+职责分别是：
 
-@click.group()
-@click.option(
-    "--log-level",
-    required=False,
-    type=str,
-    default="warn",
-    help="Log level",
-)
-@click.version_option(package_name="ai-studio")
-def cli(log_level: str) -> None:
-    """根命令组：处理全局 --log-level，并作为所有子命令的父组。"""
-    logger.setLevel(logging.getLevelName(log_level.upper()))
+- `_cli.py`：定义 `webserver` 命令
+- `cli.py`：对外公开导出 `start_webserver`
+- `ai_studio_server.py`：真正执行启动逻辑
+- `config.py`：解析 `--config` 和读取 TOML
 
+当前这版最小链路是：
 
-def add_command_alias(command, name: str, hidden: bool = False, parent_group=None) -> None:
-    """
-    将已有 Click 命令以指定名称注册到父组，实现命令别名（如 web 与 webserver 指向同一实现）。
-
-    通过深拷贝原命令对象，避免同一 Command 实例被多次 add_command 时产生状态冲突。
-
-    参数:
-        command: 已装饰好的 Click 命令（Command 对象）。
-        name: 在父组下暴露的子命令名。
-        hidden: 为 True 时通常不在 --help 中列出该别名（取决于 Click 版本与用法）。
-        parent_group: 挂载的 Click Group；未指定时使用本模块的顶层 ``cli``。
-    """
-    if not parent_group:
-        parent_group = cli
-    new_command = copy.deepcopy(command)
-    new_command.hidden = hidden
-    parent_group.add_command(new_command, name=name)
-
-
-@click.group(invoke_without_command=True)
-@click.pass_context
-def start(ctx) -> None:
-    """
-    「启动」子命令组；允许不带子命令直接调用本组（invoke_without_command=True）。
-
-    当用户只输入 ``ai-studio start`` 且未写 web/webserver 时，自动回退为启动 Web 服务
-   （优先 ``web``，否则 ``webserver``）；若均不存在则仅打印本组帮助。
-    """
-    if ctx.invoked_subcommand is None:
-        cmd = start.commands.get("web") or start.commands.get("webserver")
-        if cmd:
-            ctx.invoke(cmd)
-        else:
-            click.echo(ctx.get_help())
-
-
-cli.add_command(start)
-
-
-# 可选集成：从 ai_studio_app 拉取 Web 服务 CLI，失败则降级（不阻塞核心包安装与使用）
-try:
-    # 通过公开模块导入，避免直接访问受保护成员 `_cli`。
-    from ai_studio_app.cli import start_webserver
-
-    add_command_alias(start_webserver, name="webserver", parent_group=start)
-    add_command_alias(start_webserver, name="web", parent_group=start)
-except ImportError as exc:
-    # 兜底定义，避免静态检查器报「try 中定义的名称在 except 路径未定义」。
-    start_webserver = None
-    logging.warning(
-        "Integrating ai-studio webserver command line tool failed: %s",
-        exc,
-    )
-
-
-def main() -> int:
-    """程序入口：执行 Click 主循环并返回其退出码。"""
-    return cli()
-
-
-if __name__ == "__main__":
-    main()
+```text
+uv run ai-studio start webserver --config /my/dev.toml
+-> pyproject.toml [project.scripts]
+-> ai_studio.cli.cli_scripts:main
+-> ai_studio_app.cli.start_webserver
+-> ai_studio_app.ai_studio_server.run_webserver
 ```
 
-#### packages/ai-studio-app
-```python
-# packages/ai-studio-app/src/ai_studio_app/_cli.py
+## 7. 配置文件解析规则
 
-"""
-ai_studio_app 的内部 CLI 定义模块。
+当前 `config.py` 的规则是：
 
-说明：
-- 本模块定义 Web 服务启动命令 `start_webserver`；
-- 该命令由 `click` 装饰后可被上层 CLI 组挂载为子命令；
-- 通过 `--config` 可选参数传入 TOML 配置文件路径。
-"""
-from typing import Optional
+- 传真实绝对路径，直接用
+- 传 `my/dev.toml`，回退到 `configs/my/dev.toml`
+- 传 `/my/dev.toml`，也回退到 `configs/my/dev.toml`
+- 不传时，默认找 `configs/my/dev.toml`
 
-import click
+所以这两种写法都可以：
 
-
-@click.command(name="webserver")
-@click.option(
-    "-c",
-    "--config",
-    type=str,
-    required=False,
-    default=None,
-    help="Path to a TOML config file.",
-)
-def start_webserver(config: Optional[str]) -> None:
-    """
-    启动 AI Studio Web 服务。
-
-    参数:
-        config: TOML 配置文件路径。为 ``None`` 时，服务端按默认配置查找/加载配置。
-
-    实现说明:
-        这里采用函数内导入 `run_webserver`，可减少模块导入阶段的耦合与启动开销，
-        也能避免某些场景下的循环导入问题。
-    """
-    # 延迟导入真正的启动函数，确保命令被调用时才加载服务相关依赖。
-    from ai_studio_app.ai_studio_server import run_webserver
-
-    # 将 CLI 参数透传给服务启动入口。
-    run_webserver(config)
-
+```shell
+uv run ai-studio start webserver --config configs/my/dev.toml
+uv run ai-studio start webserver --config /my/dev.toml
 ```
 
-五、 使用 uv 命令启动项目:
+## 8. 同步依赖并启动
+
+因为根项目本身不承载业务依赖，统一用：
+
+```shell
+uv sync --all-packages
+```
+
+先看 CLI 有没有挂上：
+
+```shell
+uv run ai-studio --help
+```
+
+再启动：
+
 ```shell
 uv run ai-studio start webserver --config /my/dev.toml
 ```
+
+当前这版最小壳的输出是：
+
+```text
+Hello from ai-studio!
+```
+
+## 9. 到这里得到什么
+
+做完这一步，项目已经从：
+
+- 根 `main.py`
+- 每个包各自一个默认入口
+
+变成：
+
+- 一个统一的 workspace
+- 一个统一的 CLI 入口
+- 一个最小可跑的启动链路
+
+后面再继续往里补业务代码就行。
