@@ -1,2 +1,2 @@
-"""Client SDK boundary for future AI Studio consumers."""
-
+def main() -> None:
+    print("Hello from ai-studio-client!")

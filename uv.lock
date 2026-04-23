@@ -1,0 +1,55 @@
+version = 1
+revision = 3
+requires-python = ">=3.12"
+
+[manifest]
+members = [
+    "ai-studio",
+    "ai-studio-accelerator",
+    "ai-studio-app",
+    "ai-studio-client",
+    "ai-studio-core",
+    "ai-studio-ext",
+    "ai-studio-sandbox",
+    "ai-studio-serve",
+]
+
+[[package]]
+name = "ai-studio"
+version = "0.1.0"
+source = { virtual = "." }
+
+[[package]]
+name = "ai-studio-accelerator"
+version = "0.1.0"
+source = { editable = "packages/ai-studio-accelerator" }
+
+[[package]]
+name = "ai-studio-app"
+version = "0.1.0"
+source = { editable = "packages/ai-studio-app" }
+
+[[package]]
+name = "ai-studio-client"
+version = "0.1.0"
+source = { editable = "packages/ai-studio-client" }
+
+[[package]]
+name = "ai-studio-core"
+version = "0.1.0"
+source = { editable = "packages/ai-studio-core" }
+
+[[package]]
+name = "ai-studio-ext"
+version = "0.1.0"
+source = { editable = "packages/ai-studio-ext" }
+
+[[package]]
+name = "ai-studio-sandbox"
+version = "0.1.0"
+source = { editable = "packages/ai-studio-sandbox" }
+
+[[package]]
+name = "ai-studio-serve"
+version = "0.1.0"
+source = { editable = "packages/ai-studio-serve" }

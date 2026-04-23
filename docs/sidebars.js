@@ -28,6 +28,7 @@ const sidebars = {
       collapsible: true,
       items: [
         { type: "doc", id: "application/base_project/quick_code_onboarding", label: "快速上手" },
+        { type: "doc", id: "application/base_project/from_zero_to_running", label: "从零开始上手" },
         { type: "doc", id: "application/base_project/directory_and_module_map", label: "目录结构与模块职责" },
         { type: "doc", id: "application/base_project/packages_architecture", label: "Packages 架构与分层" },
         { type: "doc", id: "application/base_project/development_playbooks", label: "开发 Playbooks" },

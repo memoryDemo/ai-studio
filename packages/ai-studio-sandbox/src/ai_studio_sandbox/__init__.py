@@ -1,2 +1,2 @@
-"""Sandbox boundary for controlled execution in AI Studio."""
-
+def main() -> None:
+    print("Hello from ai-studio-sandbox!")

@@ -38,9 +38,10 @@ title: 基座项目总览
 3. [AI Studio 技术栈](./technology_stack.md)
 4. [AI Studio Memory OS 设计](./memory_os_design.md)
 5. [快速上手：当前工程骨架与最短阅读路径](./quick_code_onboarding.md)
-6. [目录结构与模块职责](./directory_and_module_map.md)
-7. [Packages 架构与包间分层设计](./packages_architecture.md)
-8. [开发 Playbooks 与使用方式](./development_playbooks.md)
+6. [从零开始上手：uv、Workspace 与包加载链路](./from_zero_to_running.md)
+7. [目录结构与模块职责](./directory_and_module_map.md)
+8. [Packages 架构与包间分层设计](./packages_architecture.md)
+9. [开发 Playbooks 与使用方式](./development_playbooks.md)
 
 ## 四、目录结构说明
 
@@ -71,6 +72,7 @@ title: 基座项目总览
 当前已经迁入并适配 `AI Studio` 的开发指南包括：
 
 - [快速上手：当前工程骨架与最短阅读路径](./quick_code_onboarding.md)
+- [从零开始上手：uv、Workspace 与包加载链路](./from_zero_to_running.md)
 - [目录结构与模块职责](./directory_and_module_map.md)
 - [Packages 架构与包间分层设计](./packages_architecture.md)
 - [开发 Playbooks 与使用方式](./development_playbooks.md)

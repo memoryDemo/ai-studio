@@ -11,6 +11,16 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 目标不是把全仓库讲完，而是给你一条**最短阅读路径**。
 
+如果你是第一次接触：
+
+- `uv`
+- Python workspace / monorepo
+- 多 package 分层
+
+建议先读：
+
+- [从零开始上手：uv、Workspace 与包加载链路](./from_zero_to_running.md)
+
 ## 先建立正确认知
 
 `AI Studio` 当前还是一个 **docs-first + package skeleton** 阶段的项目。
@@ -47,8 +57,10 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 你重点关注：
 
+- `project.dependencies`
 - `tool.uv.workspace`
 - `tool.uv.sources`
+- `dependency-groups`
 - 当前有哪些 package
 - 根仓库默认的开发工具约束
 

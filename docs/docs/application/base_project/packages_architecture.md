@@ -10,6 +10,10 @@ title: Packages 架构与包间分层设计
 - 包之间的依赖方向是什么
 - 新代码应该写到哪里
 
+如果你还不熟 `uv workspace`、`pyproject.toml`、或者“依赖关系”和“加载链路”的区别，先看：
+
+- [从零开始上手：uv、Workspace 与包加载链路](./from_zero_to_running.md)
+
 ## 一句话先记住
 
 `AI Studio` 当前采用的是一个 **uv workspace 风格的 Python monorepo**，由 8 个子包组成，其中 `accelerator` 层包含 2 个可选附属包；整体目标仍然是复用 `Umber Studio` 的分层思想，但保持更低复杂度。

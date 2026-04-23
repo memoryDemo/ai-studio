@@ -1,20 +1,10 @@
 [project]
 name = "ai-studio"
 version = "0.1.0"
-description = "AI Studio is a LangGraph-first AgentOS platform project."
+description = "ai 能力平台"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = []
-
-[tool.uv.sources]
-ai-studio-core = { workspace = true }
-ai-studio-ext = { workspace = true }
-ai-studio-client = { workspace = true }
-ai-studio-serve = { workspace = true }
-ai-studio-app = { workspace = true }
-ai-studio-sandbox = { workspace = true }
-ai-studio-acc-auto = { workspace = true }
-ai-studio-acc-flash-attn = { workspace = true }
 
 [tool.uv.workspace]
 members = [
@@ -22,38 +12,7 @@ members = [
     "packages/ai-studio-ext",
     "packages/ai-studio-client",
     "packages/ai-studio-serve",
-    "packages/ai-studio-app",
     "packages/ai-studio-sandbox",
-    "packages/ai-studio-accelerator/ai-studio-acc*",
+    "packages/ai-studio-accelerator",
+    "packages/ai-studio-app",
 ]
-
-[tool.uv]
-managed = true
-dev-dependencies = [
-    "mypy>=1.15.0",
-    "pytest>=8.3.0",
-    "ruff>=0.11.0",
-]
-
-[tool.pytest.ini_options]
-python_files = ["test_*.py", "*_test.py"]
-testpaths = ["tests"]
-
-[tool.ruff]
-line-length = 88
-target-version = "py311"
-
-[tool.ruff.format]
-docstring-code-format = true
-quote-style = "double"
-indent-style = "space"
-line-ending = "auto"
-
-[tool.ruff.lint]
-select = ["E", "F", "I"]
-
-[tool.mypy]
-python_version = "3.11"
-pretty = true
-warn_unused_ignores = true
-warn_redundant_casts = true

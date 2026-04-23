@@ -55,3 +55,29 @@ AI Studio 是一个 `LangGraph-first` 的 AgentOS 平台项目，目标是为上
 - [AI Studio 功能设计](/Users/memory/CodeRepository/PycharmProjects/ai-studio/docs/docs/application/base_project/functional_design.md)
 - [AI Studio 技术栈](/Users/memory/CodeRepository/PycharmProjects/ai-studio/docs/docs/application/base_project/technology_stack.md)
 - [AI Studio Memory OS 设计](/Users/memory/CodeRepository/PycharmProjects/ai-studio/docs/docs/application/base_project/memory_os_design.md)
+
+## 最小启动
+
+先同步 workspace：
+
+```bash
+uv sync --all-packages
+```
+
+然后启动当前最小 webserver：
+
+```bash
+uv run ai-studio start webserver --config /my/dev.toml
+```
+
+`--config` 会优先按以下规则解析：
+
+- 真实存在的绝对路径，直接使用
+- 以 `/` 开头但不是实际绝对文件时，按 `configs/` 根目录解析
+- 普通相对路径找不到时，也回退到 `configs/` 下查找
+
+所以这条命令等价于：
+
+```bash
+uv run ai-studio start webserver --config configs/my/dev.toml
+```
