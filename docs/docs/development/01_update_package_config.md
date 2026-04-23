@@ -1,3 +1,93 @@
+# 修改初始化 package 配置
+> 默认 init 的 package 都是独立的, 需要统一到workspace管理, 维护 package 的依赖关系
+
+## 一、删除每个包里面生成默认的main入口
+删除默认每个 init package 下的入口脚本代码
+```toml
+[project.scripts]
+ai-studio-* = "ai_studio_*:main"
+```
+删除根目录下默认的 main.py文件
+```python
+def main():
+    print("Hello from ai-studio!")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+## 二、将 package 统一纳入 workspace 内管理
+修改根目录 pyproject.toml , 将子 package 标记为 workspace
+```toml
+[tool.uv.sources]
+ai-studio = { workspace = true }
+ai-studio-accelerator = { workspace = true }
+ai-studio-app = { workspace = true }
+ai-studio-client = { workspace = true }
+ai-studio-ext = { workspace = true }
+ai-studio-sandbox = { workspace = true }
+ai-studio-serve = { workspace = true }
+```
+
+## 三、补充 package 之间的dependency
+ai-studio-core
+```toml
+dependencies = []
+```
+
+ai-studio-ext
+```toml
+dependencies = [
+    "ai-studio",
+]
+```
+
+ai-studio-serve
+```toml
+dependencies = [
+    "ai-studio-ext",
+]
+```
+
+ai-studio-client
+```toml
+dependencies = [
+    "ai-studio",
+    "ai-studio-ext",
+]
+```
+
+ai-studio-app
+```toml
+dependencies = [
+    "ai-studio",
+    "ai-studio-accelerator",
+    "ai-studio-client",
+    "ai-studio-ext",
+    "ai-studio-sandbox",
+    "ai-studio-serve",
+]
+```
+
+ai-studio-sandbox
+```toml
+dependencies = []
+```
+
+## 四、修改项目启动方式为 cli 触发函数
+### 1、标记 core package 为唯一启动入口
+```toml
+[project.scripts]
+ai-studio = "ai_studio.cli.cli_scripts:main"
+```
+
+### 2、基于标记入口函数的路径,创建对应文件
+#### packages/ai-studio-core
+```python
+# packages/ai-studio-core/src/ai_studio/cli/cli_scripts.py
+
 """
 AI Studio 命令行入口与「启动」子命令的装配。
 
@@ -100,3 +190,54 @@ def main() -> int:
 
 if __name__ == "__main__":
     main()
+```
+
+#### packages/ai-studio-app
+```python
+# packages/ai-studio-app/src/ai_studio_app/_cli.py
+
+"""
+ai_studio_app 的内部 CLI 定义模块。
+
+说明：
+- 本模块定义 Web 服务启动命令 `start_webserver`；
+- 该命令由 `click` 装饰后可被上层 CLI 组挂载为子命令；
+- 通过 `--config` 可选参数传入 TOML 配置文件路径。
+"""
+from typing import Optional
+
+import click
+
+
+@click.command(name="webserver")
+@click.option(
+    "-c",
+    "--config",
+    type=str,
+    required=False,
+    default=None,
+    help="Path to a TOML config file.",
+)
+def start_webserver(config: Optional[str]) -> None:
+    """
+    启动 AI Studio Web 服务。
+
+    参数:
+        config: TOML 配置文件路径。为 ``None`` 时，服务端按默认配置查找/加载配置。
+
+    实现说明:
+        这里采用函数内导入 `run_webserver`，可减少模块导入阶段的耦合与启动开销，
+        也能避免某些场景下的循环导入问题。
+    """
+    # 延迟导入真正的启动函数，确保命令被调用时才加载服务相关依赖。
+    from ai_studio_app.ai_studio_server import run_webserver
+
+    # 将 CLI 参数透传给服务启动入口。
+    run_webserver(config)
+
+```
+
+五、 使用 uv 命令启动项目:
+```shell
+uv run ai-studio start webserver --config /my/dev.toml
+```
