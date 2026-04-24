@@ -31,13 +31,13 @@ requires-python = ">=3.12"
 先把第一层骨架建出来：
 
 ```shell
-uv init --package packages/ai-studio-core
-uv init --package packages/ai-studio-ext
-uv init --package packages/ai-studio-client
-uv init --package packages/ai-studio-serve
-uv init --package packages/ai-studio-sandbox
-uv init --package packages/ai-studio-accelerator
-uv init --package packages/ai-studio-app
+uv init --package packages/meyo-core
+uv init --package packages/meyo-ext
+uv init --package packages/meyo-client
+uv init --package packages/meyo-serve
+uv init --package packages/meyo-sandbox
+uv init --package packages/meyo-accelerator
+uv init --package packages/meyo-app
 ```
 
 这一步先解决“目录和包名有了”，不解决“谁依赖谁”。
@@ -49,13 +49,13 @@ uv init --package packages/ai-studio-app
 ```toml
 [tool.uv.workspace]
 members = [
-    "packages/ai-studio-core",
-    "packages/ai-studio-ext",
-    "packages/ai-studio-client",
-    "packages/ai-studio-serve",
-    "packages/ai-studio-sandbox",
-    "packages/ai-studio-accelerator",
-    "packages/ai-studio-app",
+    "packages/meyo-core",
+    "packages/meyo-ext",
+    "packages/meyo-client",
+    "packages/meyo-serve",
+    "packages/meyo-sandbox",
+    "packages/meyo-accelerator",
+    "packages/meyo-app",
 ]
 ```
 
@@ -75,13 +75,13 @@ members = [
 
 ```mermaid
 flowchart LR
-    Core["ai-studio-core"]
-    Ext["ai-studio-ext"]
-    Client["ai-studio-client"]
-    Serve["ai-studio-serve"]
-    Sandbox["ai-studio-sandbox"]
-    Accelerator["ai-studio-accelerator"]
-    App["ai-studio-app"]
+    Core["meyo-core"]
+    Ext["meyo-ext"]
+    Client["meyo-client"]
+    Serve["meyo-serve"]
+    Sandbox["meyo-sandbox"]
+    Accelerator["meyo-accelerator"]
+    App["meyo-app"]
 
     Ext -->|"依赖"| Core
     Client -->|"依赖"| Core
@@ -107,32 +107,32 @@ flowchart LR
 
 ## 6. 每个包先干什么
 
-`ai-studio-core`
+`meyo-core`
 - 协议
 - 类型
 - CLI 总入口
 
-`ai-studio-ext`
+`meyo-ext`
 - runtime adapter
 - gateway adapter
 - 具体实现
 
-`ai-studio-client`
+`meyo-client`
 - SDK
 - client 封装
 
-`ai-studio-serve`
+`meyo-serve`
 - use case service
 - 服务编排
 
-`ai-studio-sandbox`
+`meyo-sandbox`
 - 受控执行
 - 隔离运行
 
-`ai-studio-accelerator`
+`meyo-accelerator`
 - 可选加速依赖
 
-`ai-studio-app`
+`meyo-app`
 - 配置加载
 - webserver 启动
 - 最终装配

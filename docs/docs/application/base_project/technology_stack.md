@@ -1,12 +1,12 @@
 ---
-title: AI Studio 技术栈
+title: Meyo 技术栈
 ---
 
-# AI Studio 技术栈
+# Meyo 技术栈
 
 ## 一、总览
 
-`AI Studio` 的技术栈不是“哪个框架火就全量押上去”，而是按平台分层做技术落位。
+`Meyo` 的技术栈不是“哪个框架火就全量押上去”，而是按平台分层做技术落位。
 
 一句话版本：
 
@@ -16,7 +16,7 @@ title: AI Studio 技术栈
 
 ### 2.1 API / BFF
 
-- `Python 3.11+`
+- `Python 3.12+`
 - `FastAPI`
 - `Pydantic v2`
 - `Uvicorn / Gunicorn`
@@ -139,7 +139,7 @@ title: AI Studio 技术栈
 
 ## 四、为什么不是 Mem0-first
 
-`Mem0` 可以接，但 `AI Studio` 不以它作为主记忆底座。
+`Mem0` 可以接，但 `Meyo` 不以它作为主记忆底座。
 
 原因：
 
@@ -154,7 +154,7 @@ title: AI Studio 技术栈
 
 ## 五、为什么是 LangGraph-first
 
-选择 `LangGraph`，是因为它在 `AI Studio` 需要的那一层最强：
+选择 `LangGraph`，是因为它在 `Meyo` 需要的那一层最强：
 
 - durable execution
 - thread state
@@ -162,7 +162,7 @@ title: AI Studio 技术栈
 - interrupt / resume
 - HITL
 
-而 `AI Studio` 平台自身仍然负责：
+而 `Meyo` 平台自身仍然负责：
 
 - Run API
 - Memory OS
@@ -189,9 +189,41 @@ title: AI Studio 技术栈
 - Langfuse + OpenTelemetry + Prometheus/Grafana
 - Kafka（异步规模化后再接）
 
-## 七、最终结论
+## 七、当前依赖落位
 
-`AI Studio` 的技术栈不是靠单一框架兜底，而是：
+当前代码壳先把核心依赖放在两个地方：
+
+- `packages/meyo-core/pyproject.toml`
+- `packages/meyo-ext/pyproject.toml`
+
+`meyo` core 包负责平台基础依赖：
+
+| extra | 对应技术栈 |
+|---|---|
+| `cli` | CLI |
+| `client` | HTTP client |
+| `simple_framework` | FastAPI / Uvicorn / Gunicorn |
+| `runtime` | LangGraph / LangChain Core |
+| `framework` | SQLAlchemy / Alembic / JSON Schema |
+| `proxy_openai` | OpenAI-compatible proxy |
+| `tool` | MCP |
+| `observability` | Langfuse / OpenTelemetry / Prometheus |
+
+`meyo-ext` 负责外部基础设施依赖：
+
+| extra | 对应技术栈 |
+|---|---|
+| `storage_postgres` | PostgreSQL |
+| `storage_redis` | Redis |
+| `storage_milvus` | Milvus |
+| `storage_neo4j` | Neo4j |
+| `file_s3` | MinIO / S3 |
+
+最终由 `meyo-app` 选择这些 extras，组成当前可运行应用。
+
+## 八、最终结论
+
+`Meyo` 的技术栈不是靠单一框架兜底，而是：
 
 - `FastAPI` 管平台入口
 - `LangGraph` 管 agent runtime

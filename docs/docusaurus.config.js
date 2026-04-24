@@ -39,20 +39,20 @@ function getNextVersionName() {
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'AI Studio',
+  title: 'Meyo',
   tagline: '面向知识、技能、工具网格与混合记忆系统的 LangGraph-first AgentOS 平台',
-  favicon: 'img/umber-favicon.svg',
+  favicon: 'img/brand/meyo-favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://docs.ai-studio.local',
+  url: 'https://docs.meyo.local',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'ai-studio', // Usually your GitHub org/user name.
-  projectName: 'ai-studio', // Usually your repo name.
+  organizationName: 'meyo', // Usually your GitHub org/user name.
+  projectName: 'meyo', // Usually your repo name.
 
   onBrokenLinks: isDev ? 'throw' : 'warn',
 
@@ -203,9 +203,9 @@ const config = {
       navbar: {
         hideOnScroll: true,
         logo: {
-          alt: 'AI Studio Logo',
-          src: 'img/umber-logo.svg',
-          srcDark: 'img/umber-logo-dark.svg',
+          alt: 'Meyo Logo',
+          src: 'img/brand/meyo-logo-narrow.png',
+          srcDark: 'img/brand/meyo-logo-narrow-dark.png',
           href: "/docs/application/base_project"
         },
 
@@ -259,7 +259,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} AI Studio`,
+        copyright: `Copyright © ${new Date().getFullYear()} Meyo`,
       },
       prism: {
         theme: lightCodeTheme,

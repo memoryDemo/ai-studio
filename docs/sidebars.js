@@ -14,11 +14,11 @@ const sidebars = {
         {
           type: "doc",
           id: "application/base_project/architecture_design",
-          label: "AI Studio 企业级 AgentOS 架构设计文档（实施蓝图版）",
+          label: "Meyo 企业级 AgentOS 架构设计文档（实施蓝图版）",
         },
-        { type: "doc", id: "application/base_project/functional_design", label: "AI Studio 功能设计" },
-        { type: "doc", id: "application/base_project/technology_stack", label: "AI Studio 技术栈" },
-        { type: "doc", id: "application/base_project/memory_os_design", label: "AI Studio Memory OS 设计" },
+        { type: "doc", id: "application/base_project/functional_design", label: "Meyo 功能设计" },
+        { type: "doc", id: "application/base_project/technology_stack", label: "Meyo 技术栈" },
+        { type: "doc", id: "application/base_project/memory_os_design", label: "Meyo Memory OS 设计" },
       ],
     },
     {

@@ -4,7 +4,7 @@ title: Packages 架构与包间分层设计
 
 # Packages 架构与包间分层设计
 
-本文档解释 `AI Studio` 的 `packages/` 目录当前是怎么设计的：
+本文档解释 `Meyo` 的 `packages/` 目录当前是怎么设计的：
 
 - 每个包负责什么
 - 包之间的依赖方向是什么
@@ -16,74 +16,68 @@ title: Packages 架构与包间分层设计
 
 ## 一句话先记住
 
-`AI Studio` 当前采用的是一个 **uv workspace 风格的 Python monorepo**，由 8 个子包组成，其中 `accelerator` 层包含 2 个可选附属包；整体目标仍然是复用 `Umber Studio` 的分层思想，但保持更低复杂度。
+`Meyo` 当前采用的是一个 **uv workspace 风格的 Python monorepo**，由 7 个子包组成；整体目标仍然是复用 `Umber Studio` 的分层思想，但保持更低复杂度。
 
 核心设计哲学是：
 
 > 稳定协议放内层，具体实现放外层，系统启动和装配永远放最外层。
 
-## 当前 8 个包
+## 当前 7 个包
 
 | 包 | 目录名 | pyproject `name` | Python import 命名空间 |
 |---|---|---|---|
-| core | `packages/ai-studio-core/` | `ai-studio-core` | `ai_studio_core` |
-| ext | `packages/ai-studio-ext/` | `ai-studio-ext` | `ai_studio_ext` |
-| serve | `packages/ai-studio-serve/` | `ai-studio-serve` | `ai_studio_serve` |
-| app | `packages/ai-studio-app/` | `ai-studio-app` | `ai_studio_app` |
-| client | `packages/ai-studio-client/` | `ai-studio-client` | `ai_studio_client` |
-| sandbox | `packages/ai-studio-sandbox/` | `ai-studio-sandbox` | `ai_studio_sandbox` |
-| acc-auto | `packages/ai-studio-accelerator/ai-studio-acc-auto/` | `ai-studio-acc-auto` | `ai_studio_acc_auto` |
-| acc-flash-attn | `packages/ai-studio-accelerator/ai-studio-acc-flash-attn/` | `ai-studio-acc-flash-attn` | `ai_studio_acc_flash_attn` |
+| core | `packages/meyo-core/` | `meyo` | `meyo` |
+| ext | `packages/meyo-ext/` | `meyo-ext` | `meyo_ext` |
+| serve | `packages/meyo-serve/` | `meyo-serve` | `meyo_serve` |
+| app | `packages/meyo-app/` | `meyo-app` | `meyo_app` |
+| client | `packages/meyo-client/` | `meyo-client` | `meyo_client` |
+| sandbox | `packages/meyo-sandbox/` | `meyo-sandbox` | `meyo_sandbox` |
+| accelerator | `packages/meyo-accelerator/` | `meyo-accelerator` | `meyo_accelerator` |
 
 ## 每个包的职责
 
-### `ai-studio-core`
+### `meyo-core`
 
-定义“是什么”：
+定义主包和稳定入口：
 
-- contracts
-- gateway 协议
-- runtime 协议
-- 输入输出模型
+- `meyo` CLI
+- 版本号
+- core optional dependencies
+- 未来的 contracts / gateway / runtime 协议
 
-### `ai-studio-ext`
+### `meyo-ext`
 
-定义“用什么实现”：
+定义“用什么实现”，当前先承接外部系统依赖：
 
-- runtime adapter
-- gateway adapter
-- 基础扩展实现
+- PostgreSQL / Redis
+- Milvus / Neo4j
+- S3 / MinIO
+- 未来 runtime adapter / gateway adapter
 
-当前它承载的是：
-
-- `EchoAgentRuntime`
-- `NoopMemoryGateway`
-- `NoopKnowledgeGateway`
-- `NoopToolGateway`
-
-### `ai-studio-serve`
+### `meyo-serve`
 
 定义“怎么把底层能力组织成稳定服务”：
 
 - application service
 - use-case 编排
 
-### `ai-studio-app`
+### `meyo-app`
 
 定义“怎么启动和装配系统”：
 
-- bootstrap
-- 未来的 FastAPI 入口
-- 未来的 CLI 入口
+- CLI webserver 子命令
+- 配置加载
+- FastAPI 入口
+- 静态首页
 
-### `ai-studio-client`
+### `meyo-client`
 
 定义“怎么给外部消费者调”：
 
 - 未来 Python SDK
 - 未来 HTTP client 封装
 
-### `ai-studio-sandbox`
+### `meyo-sandbox`
 
 定义“怎么隔离执行”：
 
@@ -91,21 +85,20 @@ title: Packages 架构与包间分层设计
 - shell 执行
 - 工具副作用隔离
 
-### `ai-studio-accelerator`
+### `meyo-accelerator`
 
 定义“怎么挂可选推理加速依赖”：
 
-- PyTorch / torchaudio / torchvision 的安装矩阵
-- `vllm` / `mlx` / quantization 这类可选依赖组
-- `flash-attn` 这种需要单独壳处理的附属包
+- 当前还是空壳
+- 后续放 GPU、推理加速或平台相关依赖
+- 避免这些重依赖污染主包
 
 ## 包之间的依赖方向
 
 当前目标依赖方向是：
 
 ```text
-ai-studio-core <- ai-studio-ext / ai-studio-client / ai-studio-sandbox / ai-studio-serve <- ai-studio-app
-ai-studio-acc-auto <- ai-studio-app
+meyo <- meyo-ext / meyo-client / meyo-serve <- meyo-app
 ```
 
 这意味着：
@@ -113,20 +106,16 @@ ai-studio-acc-auto <- ai-studio-app
 1. `core` 不依赖任何上层包
 2. `ext` / `client` / `sandbox` / `serve` 都不能依赖 `app`
 3. `app` 是最外层，只负责装配
+4. `sandbox` 和 `accelerator` 是侧向能力，由 `app` 最终选择是否装配
 
 ### 当前实际依赖声明
 
 目前根 `pyproject.toml` 和各子包 `pyproject.toml` 已经表达了一个更保守的版本：
 
-- `ext -> core`
-- `client -> core`
-- `sandbox -> core`
-- `serve -> core`
-- `app -> core/ext/client/serve/sandbox/acc-auto`
-
-其中 `acc-flash-attn` 不直接被 `app` 依赖，而是通过 `ai-studio-acc-auto[flash_attn]` 这类可选 extra 间接挂入。
-
-这里故意没有把 `serve -> ext` 直接写死，因为当前仓库还没长到需要那层耦合的程度。
+- `ext -> meyo`
+- `client -> meyo/ext`
+- `serve -> ext`
+- `app -> meyo/ext/client/serve/sandbox/accelerator`
 
 ## 新代码应该写到哪里
 
@@ -182,7 +171,7 @@ ai-studio-acc-auto <- ai-studio-app
 
 ## 和 Umber Studio 的关系
 
-`AI Studio` 现在学的是 `Umber Studio` 的这几件事：
+`Meyo` 现在学的是 `Umber Studio` 的这几件事：
 
 - package 分层方式
 - 单向依赖方向
@@ -196,6 +185,6 @@ ai-studio-acc-auto <- ai-studio-app
 
 ## 一句话收口
 
-当前 `AI Studio` 的 packages 架构，不是要一夜之间复制 `Umber Studio`，而是：
+当前 `Meyo` 的 packages 架构，不是要一夜之间复制 `Umber Studio`，而是：
 
 **先把正确的包边界立住，再按这个边界慢慢长功能。**

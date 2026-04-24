@@ -14,7 +14,7 @@ title: 新增一个 HTTP 接口
 
 **当前状态说明：**
 
-`AI Studio` 当前还没有完整的 FastAPI / OpenAPI 目录，所以这份 playbook 已经按当前仓库改写成“**预置可落地版本**”。
+`Meyo` 当前还没有完整的 FastAPI / OpenAPI 目录，所以这份 playbook 已经按当前仓库改写成“**预置可落地版本**”。
 
 也就是说：
 
@@ -30,13 +30,13 @@ title: 新增一个 HTTP 接口
 
 ```text
 [2] API 入口
-     └── packages/ai-studio-app/src/ai_studio_app/openapi/
+     └── packages/meyo-app/src/meyo_app/openapi/
 
 [3] App 装配
-     └── packages/ai-studio-app/src/ai_studio_app/
+     └── packages/meyo-app/src/meyo_app/
 
 [5] Serve 服务域
-     └── packages/ai-studio-serve/src/ai_studio_serve/
+     └── packages/meyo-serve/src/meyo_serve/
 ```
 
 你不应该在路由函数里直接调 `ext` 或 `core` 的具体实现。
@@ -52,7 +52,7 @@ title: 新增一个 HTTP 接口
 如果下面这些目录还不存在，先补最小骨架：
 
 ```text
-packages/ai-studio-app/src/ai_studio_app/openapi/
+packages/meyo-app/src/meyo_app/openapi/
 ├── __init__.py
 ├── api_v1.py
 └── view_models.py
@@ -65,13 +65,13 @@ packages/ai-studio-app/src/ai_studio_app/openapi/
 HTTP 视角的入参出参模型，建议放在：
 
 ```text
-packages/ai-studio-app/src/ai_studio_app/openapi/view_models.py
+packages/meyo-app/src/meyo_app/openapi/view_models.py
 ```
 
 系统级运行时模型继续放在：
 
 ```text
-packages/ai-studio-core/src/ai_studio_core/contracts/models.py
+packages/meyo-core/src/meyo/contracts/models.py
 ```
 
 最小模板：
@@ -92,7 +92,7 @@ class CreateRunRequestVo(BaseModel):
 当前最接近的样板是：
 
 ```text
-packages/ai-studio-serve/src/ai_studio_serve/run_service.py
+packages/meyo-serve/src/meyo_serve/run_service.py
 ```
 
 原则：
@@ -109,7 +109,7 @@ packages/ai-studio-serve/src/ai_studio_serve/run_service.py
 import logging
 from fastapi import APIRouter
 
-from ai_studio_app.openapi.view_models import CreateRunRequestVo
+from meyo_app.openapi.view_models import CreateRunRequestVo
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -149,8 +149,8 @@ uv run pytest
 ```markdown
 ## 主干定位
 - 落在【API 入口】主干
-- 路由所在位置：`packages/ai-studio-app/src/ai_studio_app/openapi/`
-- 服务入口：`packages/ai-studio-serve/src/ai_studio_serve/`
+- 路由所在位置：`packages/meyo-app/src/meyo_app/openapi/`
+- 服务入口：`packages/meyo-serve/src/meyo_serve/`
 
 ## 边界检查
 - 路由只调 `serve`，没有越过服务层直接调 `ext` 具体实现

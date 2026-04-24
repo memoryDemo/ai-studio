@@ -1,8 +1,8 @@
 ---
-title: AI Studio 功能设计
+title: Meyo 功能设计
 ---
 
-# AI Studio 功能设计
+# Meyo 功能设计
 
 ## 0. 设计目标
 
@@ -11,7 +11,7 @@ title: AI Studio 功能设计
 1. `knowledge + skill` 这套能力在产品侧到底怎么维护。
 2. `PostgreSQL + Milvus + Neo4j` 三库如何协同，而不是各自为政。
 3. 业务人员、系统和工程人员分别维护到哪一层。
-4. Skill 如何从业务 Spec 变成 `AI Studio` 可运行能力。
+4. Skill 如何从业务 Spec 变成 `Meyo` 可运行能力。
 
 ## 1. 总体结论
 
@@ -56,7 +56,7 @@ flowchart TB
     GDB["图库<br/>实体 / 关系 / 子图"]
   end
 
-  subgraph ENGINE["AI Studio 引擎层"]
+  subgraph ENGINE["Meyo 引擎层"]
     FLOW["Studio Flow / LangGraph Runtime"]
     OPS2["Operators"]
     SKILL["Published Skills"]
@@ -176,7 +176,7 @@ Skill 需要被拆成两层：
    - 给业务维护
    - 存在数据库里
 2. `Published Skill Package`
-   - 给 `AI Studio` 运行
+   - 给 `Meyo` 运行
    - 由系统编译生成
 
 ### 4.2 Skill Spec 字段
@@ -207,7 +207,7 @@ flowchart LR
   S2 --> S3["选择 Flow 模板<br/>检索型 / 图谱型 / 分析型 / 报告型"]
   S3 --> S4["绑定知识资产<br/>文档 / QA / 图谱 / 规则 / 数据源"]
   S4 --> S5["编译 Published Skill"]
-  S5 --> S6["发布到 AI Studio Skills"]
+  S5 --> S6["发布到 Meyo Skills"]
 ```
 
 ### 4.4 Skill 类型
@@ -274,7 +274,7 @@ my-skill/
 
 ## 6. Published Skill 具像化方案
 
-在 `AI Studio` 里，Skill 不应该等于“业务写一个 md”，而应该定义成：
+在 `Meyo` 里，Skill 不应该等于“业务写一个 md”，而应该定义成：
 
 **Skill = Task Contract + Asset Binding + Flow Binding + Optional Runtime Template**
 
@@ -368,6 +368,6 @@ Skill 运行时再按 `asset_id / version / profile` 拉取。
 
 ## 9. 一句话收口
 
-`AI Studio` 这套平台的合理产品定义是：
+`Meyo` 这套平台的合理产品定义是：
 
-**业务人员维护知识源和 Skill Spec，DataOps 把知识源归一化成三库资产，Skill Compiler 再把 Skill Spec 和知识资产绑定编译成 `AI Studio` 可运行的 Skill。**
+**业务人员维护知识源和 Skill Spec，DataOps 把知识源归一化成三库资产，Skill Compiler 再把 Skill Spec 和知识资产绑定编译成 `Meyo` 可运行的 Skill。**

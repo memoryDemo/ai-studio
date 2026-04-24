@@ -6,7 +6,7 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 这篇文档只解决两个问题：
 
-1. 第一次接手 `AI Studio`，应该按什么顺序看代码。
+1. 第一次接手 `Meyo`，应该按什么顺序看代码。
 2. 当前仓库还没长成完整产品时，怎么验证你改的东西没有跑偏。
 
 目标不是把全仓库讲完，而是给你一条**最短阅读路径**。
@@ -23,14 +23,14 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 ## 先建立正确认知
 
-`AI Studio` 当前还是一个 **docs-first + package skeleton** 阶段的项目。
+`Meyo` 当前还是一个 **package skeleton + 最小 WebServer** 阶段的项目。
 
 这意味着：
 
 - 已经有清晰的架构文档
 - 已经有 `core / ext / client / serve / app / sandbox / accelerator` 的包边界
-- 已经有最小 contracts、最小 runtime 示例和最小 wiring
-- 但**还没有**完整的 FastAPI WebServer、OpenAPI 路由、Scene 分发和前端工作台
+- 已经有统一 CLI、配置加载、最小 FastAPI WebServer 和静态首页
+- 但**还没有**完整的 OpenAPI 路由、Scene 分发和前端工作台
 
 所以第一次看代码时，不要先找：
 
@@ -43,7 +43,7 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 你现在真正应该先理解的是：
 
-`workspace 配置 -> core contracts -> ext 实现 -> serve 编排 -> app 装配 -> accelerator 可选依赖层 -> docs 设计基线`
+`workspace 配置 -> core CLI -> app 配置与 WebServer -> ext/serve 预留层 -> accelerator 可选依赖层 -> docs 设计基线`
 
 ## 当前最短阅读路径
 
@@ -53,7 +53,7 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 先看：
 
-- `/Users/memory/CodeRepository/PycharmProjects/ai-studio/pyproject.toml`
+- `<repo-root>/pyproject.toml`
 
 你重点关注：
 
@@ -64,63 +64,74 @@ title: 快速上手：当前工程骨架与最短阅读路径
 - 当前有哪些 package
 - 根仓库默认的开发工具约束
 
-### 2. `ai-studio-core`
+### 2. `meyo-core`
 
 再看：
 
-- `packages/ai-studio-core/src/ai_studio_core/contracts/models.py`
-- `packages/ai-studio-core/src/ai_studio_core/contracts/gateways.py`
-- `packages/ai-studio-core/src/ai_studio_core/contracts/runtime.py`
+- `packages/meyo-core/pyproject.toml`
+- `packages/meyo-core/src/meyo/__init__.py`
+- `packages/meyo-core/src/meyo/cli/cli_scripts.py`
 
 这一层定义的是：
 
-- `RunRequest`
-- `RunContext`
-- `RunResult`
-- `MemoryGateway`
-- `KnowledgeGateway`
-- `ToolGateway`
-- `AgentRuntime`
+- 主包名 `meyo`
+- CLI 命令 `meyo`
+- `start webserver` 子命令挂载方式
+- 核心 optional dependencies
 
-### 3. `ai-studio-ext`
+### 3. `meyo-ext`
 
 再看：
 
-- `packages/ai-studio-ext/src/ai_studio_ext/runtime/echo_runtime.py`
-- `packages/ai-studio-ext/src/ai_studio_ext/gateways/noop_gateways.py`
+- `packages/meyo-app/src/meyo_app/_cli.py`
+- `packages/meyo-app/src/meyo_app/cli.py`
+- `packages/meyo-app/src/meyo_app/config.py`
+- `packages/meyo-app/src/meyo_app/meyo_server.py`
+- `packages/meyo-app/src/meyo_app/static/web/index.html`
 
-这一层当前还很薄，但已经表达了一个关键方向：
+这一层当前负责：
 
-- `core` 只定义协议
-- `ext` 放具体实现
+- 接收 CLI 参数
+- 解析 `configs/my/dev.toml`
+- 创建 FastAPI app
+- 挂载最小静态页
 
-### 4. `ai-studio-serve`
+### 4. `meyo-serve`
 
 再看：
 
-- `packages/ai-studio-serve/src/ai_studio_serve/run_service.py`
+- `packages/meyo-ext/pyproject.toml`
+- `packages/meyo-ext/src/meyo_ext/__init__.py`
 
-这一层现在的目标很清楚：
+这一层现在主要表达依赖边界：
 
-- `serve` 负责应用服务编排
-- `serve` 调 runtime，但不负责系统启动
+- 具体外部系统驱动放这里
+- PG / Redis / Milvus / Neo4j / S3 通过 extras 打开
 
-### 5. `ai-studio-app`
+### 4. `meyo-serve`
 
-最后看：
+再看：
 
-- `packages/ai-studio-app/src/ai_studio_app/bootstrap.py`
+- `packages/meyo-serve/pyproject.toml`
+- `packages/meyo-serve/src/meyo_serve/__init__.py`
 
-这一层目前只做一件事：
+这一层现在还很薄，后续负责应用服务编排。
 
-- 把 `ext` 和 `serve` 装配成一个可用的 `RunService`
+### 5. `meyo-client`
 
-### 6. `ai-studio-accelerator`
+再看：
+
+- `packages/meyo-client/pyproject.toml`
+- `packages/meyo-client/src/meyo_client/__init__.py`
+
+这一层预留给未来 SDK / API client。
+
+### 6. `meyo-accelerator`
 
 最后补看：
 
-- `packages/ai-studio-accelerator/ai-studio-acc-auto/pyproject.toml`
-- `packages/ai-studio-accelerator/ai-studio-acc-flash-attn/pyproject.toml`
+- `packages/meyo-accelerator/pyproject.toml`
+- `packages/meyo-accelerator/src/meyo_accelerator/__init__.py`
 
 这一层不承载业务代码，主要负责：
 
@@ -142,7 +153,7 @@ python -m compileall packages
 在 docs 工作区执行：
 
 ```bash
-cd /Users/memory/CodeRepository/PycharmProjects/ai-studio/docs
+cd <repo-root>/docs
 bun install
 bun run build
 ```
@@ -159,10 +170,10 @@ bun run build
 
 ## 一句话收口
 
-当前 `AI Studio` 的最短阅读路径，不是：
+当前 `Meyo` 的最短阅读路径，不是：
 
 `前端页面 -> 某个 API -> 某个业务函数`
 
 而是：
 
-`workspace -> core contracts -> ext impl -> serve service -> app bootstrap -> accelerator deps -> docs truth`
+`workspace -> core CLI -> app webserver -> ext/serve/client boundaries -> accelerator deps -> docs truth`

@@ -1,8 +1,8 @@
 ---
-title: AI Studio 企业级 AgentOS 架构设计文档（实施蓝图版）
+title: Meyo 企业级 AgentOS 架构设计文档（实施蓝图版）
 ---
 
-# AI Studio 企业级 AgentOS 架构设计文档（实施蓝图版）
+# Meyo 企业级 AgentOS 架构设计文档（实施蓝图版）
 
 版本：v1.0  
 日期：2026-04-22  
@@ -11,7 +11,7 @@ title: AI Studio 企业级 AgentOS 架构设计文档（实施蓝图版）
 
 ## 0. 文档目标
 
-这份文档不是框架选型笔记，也不是某个 demo 的设计说明，而是 `AI Studio` 的完整架构基线。
+这份文档不是框架选型笔记，也不是某个 demo 的设计说明，而是 `Meyo` 的完整架构基线。
 
 它回答 4 个问题：
 
@@ -22,7 +22,7 @@ title: AI Studio 企业级 AgentOS 架构设计文档（实施蓝图版）
 
 ## 1. 总体结论
 
-`AI Studio` 采用 **三层架构 + 双平面边界 + Memory OS + Evidence-first** 的整体模型。
+`Meyo` 采用 **三层架构 + 双平面边界 + Memory OS + Evidence-first** 的整体模型。
 
 ### 1.1 三层架构
 
@@ -62,7 +62,7 @@ Memory 不是 transcript 的别名，而是分层系统：
 
 ### 1.4 一句话收口
 
-`AI Studio` 的核心不是“让 LLM 多调几个工具”，而是：
+`Meyo` 的核心不是“让 LLM 多调几个工具”，而是：
 
 **以 `LangGraph` 作为 agent runtime 内核，以 `PostgreSQL + Milvus + Neo4j` 作为知识与记忆底座，以 `MemoryGateway / KnowledgeGateway / ToolGateway / Run API` 作为平台稳定边界。**
 
@@ -173,7 +173,7 @@ flowchart TB
 - 错误无法恢复
 - 审计无法落地
 
-所以 `AI Studio` 强制采用双平面边界。
+所以 `Meyo` 强制采用双平面边界。
 
 ```mermaid
 flowchart LR
@@ -211,7 +211,7 @@ flowchart LR
 
 ## 4. Agent Kernel
 
-`AI Studio` 的 Agent Kernel 不是具体框架，而是一组平台 primitives。
+`Meyo` 的 Agent Kernel 不是具体框架，而是一组平台 primitives。
 
 必须先定义的内核能力：
 
@@ -232,7 +232,7 @@ flowchart LR
 
 ## 5. Orchestrator：Durable State Machine + HITL
 
-`LangGraph` 在 `AI Studio` 中的首要角色，是实现可恢复的编排运行时。
+`LangGraph` 在 `Meyo` 中的首要角色，是实现可恢复的编排运行时。
 
 ```mermaid
 stateDiagram-v2
@@ -264,7 +264,7 @@ stateDiagram-v2
 - 可 interrupt
 - 可 replay
 
-这也是为什么 `AI Studio` 选择 `LangGraph-first`，但不让业务层直接依赖 `LangGraph` 类型。
+这也是为什么 `Meyo` 选择 `LangGraph-first`，但不让业务层直接依赖 `LangGraph` 类型。
 
 ## 6. Scheduler：队列、并发、预算、重试、背压
 
@@ -349,7 +349,7 @@ flowchart TB
 
 ## 9. DataOps：Knowledge + Retrieval + GraphRAG
 
-`AI Studio` 的知识层不是一个单向量库，而是三段式：
+`Meyo` 的知识层不是一个单向量库，而是三段式：
 
 1. metadata / registry
 2. semantic retrieval
@@ -377,7 +377,7 @@ flowchart LR
 
 ## 10. Memory OS
 
-`AI Studio` 的 Memory OS 设计单独见 [AI Studio Memory OS 设计](./memory_os_design.md)，但在总体架构里必须先记住一句话：
+`Meyo` 的 Memory OS 设计单独见 [Meyo Memory OS 设计](./memory_os_design.md)，但在总体架构里必须先记住一句话：
 
 **memory 不是对话历史，而是分层系统。**
 
@@ -419,7 +419,7 @@ flowchart LR
 
 ## 12. Security
 
-`AI Studio` 的安全模型默认认为：
+`Meyo` 的安全模型默认认为：
 
 - 模型不可信
 - 工具返回不可信
@@ -530,6 +530,6 @@ flowchart LR
 
 ## 17. 一句话收口
 
-`AI Studio` 的架构设计，不是“多加几个 agent 模块”，而是：
+`Meyo` 的架构设计，不是“多加几个 agent 模块”，而是：
 
 **把 `LangGraph` 放在最合适的 runtime 位置，把 `PostgreSQL + Milvus + Neo4j` 放在最合适的知识和记忆位置，再用 `MemoryGateway / KnowledgeGateway / ToolGateway / Run API` 把整个平台稳定下来。**

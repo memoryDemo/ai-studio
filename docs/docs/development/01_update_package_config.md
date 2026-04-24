@@ -5,7 +5,7 @@
 
 ## 1. 先处理根项目冲突
 
-`uv init` 生成的根项目默认也叫 `ai-studio`，但 `core` 包我们也要命名成 `ai-studio`。
+`uv init` 生成的根项目默认也叫 `meyo`，但 `core` 包我们也要命名成 `meyo`。
 
 这会导致 `uv sync --all-packages` 报重名冲突。
 
@@ -13,7 +13,7 @@
 
 ```toml
 [project]
-name = "ai-studio-mono"
+name = "meyo-mono"
 ```
 
 根项目只是 workspace 容器，不参与真正的 CLI 命名。
@@ -32,14 +32,14 @@ name = "ai-studio-mono"
 ```python
 # /main.py
 def main():
-    print("Hello from ai-studio!")
+    print("Hello from Meyo!")
 ```
 
 以及各 package 默认生成的：
 
 ```toml
 [project.scripts]
-ai-studio-* = "xxx:main"
+meyo-* = "xxx:main"
 ```
 
 ## 3. 把本地包声明成 workspace source
@@ -48,78 +48,160 @@ ai-studio-* = "xxx:main"
 
 ```toml
 [tool.uv.sources]
-ai-studio = { workspace = true }
-ai-studio-accelerator = { workspace = true }
-ai-studio-app = { workspace = true }
-ai-studio-client = { workspace = true }
-ai-studio-ext = { workspace = true }
-ai-studio-sandbox = { workspace = true }
-ai-studio-serve = { workspace = true }
+meyo = { workspace = true }
+meyo-accelerator = { workspace = true }
+meyo-app = { workspace = true }
+meyo-client = { workspace = true }
+meyo-ext = { workspace = true }
+meyo-sandbox = { workspace = true }
+meyo-serve = { workspace = true }
 ```
 
 这样 `uv` 才会优先使用本地 workspace 里的包，而不是去外面找。
 
 ## 4. 补 package 依赖
 
-按当前这版最小壳，依赖关系是：
+按当前技术栈，依赖分两类看：
 
-`ai-studio-core`
+- 包之间的依赖：谁依赖谁
+- 第三方依赖：FastAPI、LangGraph、数据库驱动这些装在哪里
+
+这里参考 `Umber Studio` 的做法：
+
+- `core` 包名直接叫 `meyo`
+- `core` 默认依赖保持轻量
+- Web、Runtime、DB、观测这类依赖通过 optional extras 打开
+- `app` 作为最终装配层，一次性选择需要的 extras
+
+`meyo-core`
 
 ```toml
 dependencies = [
+    "pydantic>=2.6,<3.0",
+]
+
+[project.optional-dependencies]
+cli = [
     "click>=8.1.0,<9.0.0",
+    "rich>=13.0,<15.0",
+    "tomlkit>=0.13,<1.0",
+]
+client = [
+    "httpx>=0.24,<1.0",
+    "tenacity>=8.0,<10.0",
+]
+simple_framework = [
+    "aiofiles>=24.0,<25.0",
+    "fastapi>=0.136,<0.137",
+    "gunicorn>=23.0,<24.0",
+    "pydantic-settings>=2.0,<3.0",
+    "python-multipart>=0.0.20,<1.0",
+    "uvicorn[standard]>=0.46,<0.47",
+]
+runtime = [
+    "langchain-core>=1.0,<2.0",
+    "langgraph>=1.0,<2.0",
+]
+framework = [
+    "alembic>=1.13,<2.0",
+    "jsonschema>=4.0,<5.0",
+    "SQLAlchemy>=2.0,<3.0",
+]
+proxy_openai = [
+    "httpx[socks]>=0.24,<1.0",
+    "openai>=1.59,<3.0",
+    "tiktoken>=0.8,<1.0",
+]
+tool = [
+    "mcp>=1.0,<2.0",
+]
+observability = [
+    "langfuse>=3.0,<4.0",
+    "opentelemetry-api>=1.28,<2.0",
+    "opentelemetry-exporter-otlp>=1.28,<2.0",
+    "opentelemetry-instrumentation-fastapi>=0.50b0,<1.0",
+    "opentelemetry-sdk>=1.28,<2.0",
+    "prometheus-client>=0.20,<1.0",
+    "structlog>=24.0,<26.0",
 ]
 ```
 
-`ai-studio-ext`
+`meyo-ext`
 
 ```toml
 dependencies = [
-    "ai-studio",
+    "meyo",
+]
+
+[project.optional-dependencies]
+storage_postgres = [
+    "asyncpg>=0.29,<1.0",
+    "psycopg[binary,pool]>=3.2,<4.0",
+]
+storage_redis = [
+    "redis>=5.0,<8.0",
+]
+storage_milvus = [
+    "pymilvus>=2.4,<3.0",
+]
+storage_neo4j = [
+    "neo4j>=5.0,<7.0",
+]
+file_s3 = [
+    "boto3>=1.34,<2.0",
+    "minio>=7.0,<8.0",
 ]
 ```
 
-`ai-studio-client`
+`meyo-client`
 
 ```toml
 dependencies = [
-    "ai-studio",
-    "ai-studio-ext",
+    "meyo[client,cli]",
+    "meyo-ext",
 ]
 ```
 
-`ai-studio-serve`
+`meyo-serve`
 
 ```toml
 dependencies = [
-    "ai-studio-ext",
+    "meyo-ext",
 ]
 ```
 
-`ai-studio-sandbox`
+`meyo-sandbox`
 
 ```toml
 dependencies = []
 ```
 
-`ai-studio-accelerator`
+`meyo-accelerator`
 
 ```toml
 dependencies = []
 ```
 
-`ai-studio-app`
+`meyo-app`
 
 ```toml
 dependencies = [
-    "ai-studio",
-    "ai-studio-accelerator",
-    "ai-studio-client",
-    "ai-studio-ext",
-    "ai-studio-sandbox",
-    "ai-studio-serve",
+    "meyo[cli,client,framework,observability,proxy_openai,runtime,simple_framework,tool]",
+    "meyo-accelerator",
+    "meyo-client",
+    "meyo-ext[file_s3,storage_milvus,storage_neo4j,storage_postgres,storage_redis]",
+    "meyo-sandbox",
+    "meyo-serve",
 ]
 ```
+
+这里的重点是：
+
+- `FastAPI / Uvicorn` 不直接写在 `app`，而是从 `meyo[simple_framework]` 打开
+- `LangGraph` 从 `meyo[runtime]` 打开
+- `OpenAI / tiktoken` 从 `meyo[proxy_openai]` 打开
+- `MCP` 从 `meyo[tool]` 打开
+- `PostgreSQL / Redis / Milvus / Neo4j / S3` 从 `meyo-ext[...]` 打开
 
 ## 5. 只保留一个 CLI 入口
 
@@ -127,42 +209,42 @@ dependencies = [
 
 ```toml
 [project.scripts]
-ai-studio = "ai_studio.cli.cli_scripts:main"
+meyo = "meyo.cli.cli_scripts:main"
 ```
 
 文件位置：
 
-- `packages/ai-studio-core/src/ai_studio/cli/cli_scripts.py`
+- `packages/meyo-core/src/meyo/cli/cli_scripts.py`
 
 这一层只做两件事：
 
-- 注册 `ai-studio`
+- 注册 `meyo`
 - 挂 `start` 子命令
 
 ## 6. app 层补启动壳
 
 `app` 包里补 4 个文件：
 
-- `packages/ai-studio-app/src/ai_studio_app/_cli.py`
-- `packages/ai-studio-app/src/ai_studio_app/cli.py`
-- `packages/ai-studio-app/src/ai_studio_app/ai_studio_server.py`
-- `packages/ai-studio-app/src/ai_studio_app/config.py`
+- `packages/meyo-app/src/meyo_app/_cli.py`
+- `packages/meyo-app/src/meyo_app/cli.py`
+- `packages/meyo-app/src/meyo_app/meyo_server.py`
+- `packages/meyo-app/src/meyo_app/config.py`
 
 职责分别是：
 
 - `_cli.py`：定义 `webserver` 命令
 - `cli.py`：对外公开导出 `start_webserver`
-- `ai_studio_server.py`：真正执行启动逻辑
+- `meyo_server.py`：真正执行启动逻辑
 - `config.py`：解析 `--config` 和读取 TOML
 
 当前这版最小链路是：
 
 ```text
-uv run ai-studio start webserver --config /my/dev.toml
+uv run meyo start webserver --config /my/dev.toml
 -> pyproject.toml [project.scripts]
--> ai_studio.cli.cli_scripts:main
--> ai_studio_app.cli.start_webserver
--> ai_studio_app.ai_studio_server.run_webserver
+-> meyo.cli.cli_scripts:main
+-> meyo_app.cli.start_webserver
+-> meyo_app.meyo_server.run_webserver
 ```
 
 ## 7. 配置文件解析规则
@@ -177,8 +259,8 @@ uv run ai-studio start webserver --config /my/dev.toml
 所以这两种写法都可以：
 
 ```shell
-uv run ai-studio start webserver --config configs/my/dev.toml
-uv run ai-studio start webserver --config /my/dev.toml
+uv run meyo start webserver --config configs/my/dev.toml
+uv run meyo start webserver --config /my/dev.toml
 ```
 
 ## 8. 同步依赖并启动
@@ -192,19 +274,27 @@ uv sync --all-packages
 先看 CLI 有没有挂上：
 
 ```shell
-uv run ai-studio --help
+uv run meyo --help
 ```
 
 再启动：
 
 ```shell
-uv run ai-studio start webserver --config /my/dev.toml
+uv run meyo start webserver --config /my/dev.toml
 ```
 
-当前这版最小壳的输出是：
+当前这版会启动一个最小 FastAPI WebServer。
 
 ```text
-Hello from ai-studio!
+http://0.0.0.0:5670
+```
+
+可以用下面三个地址确认链路：
+
+```shell
+curl http://127.0.0.1:5670/
+curl http://127.0.0.1:5670/api/healthz
+curl http://127.0.0.1:5670/api/hello
 ```
 
 ## 9. 到这里得到什么
@@ -218,6 +308,7 @@ Hello from ai-studio!
 
 - 一个统一的 workspace
 - 一个统一的 CLI 入口
-- 一个最小可跑的启动链路
+- 一个最小可跑的 FastAPI WebServer
+- 一套按技术栈分层的核心依赖
 
 后面再继续往里补业务代码就行。

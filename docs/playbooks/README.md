@@ -2,7 +2,7 @@
 title: Playbooks 索引
 ---
 
-# AI Studio Playbooks — 填空式操作手册
+# Meyo Playbooks — 填空式操作手册
 
 ## 这是什么
 
@@ -10,7 +10,7 @@ title: Playbooks 索引
 
 目标是：
 
-- 在 `AI Studio` 还处于骨架期时，先把常见改动方式标准化
+- 在 `Meyo` 还处于骨架期时，先把常见改动方式标准化
 - 避免一边写代码一边临时改边界
 - 把从 `Umber Studio` 学到的方法论迁过来，但不照抄它的现状
 

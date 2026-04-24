@@ -4,7 +4,7 @@ title: 开发 Playbooks 与使用方式
 
 # 开发 Playbooks 与使用方式
 
-`AI Studio` 当前保留了一组仓库级 playbooks，位置在：
+`Meyo` 当前保留了一组仓库级 playbooks，位置在：
 
 ```text
 docs/playbooks/
@@ -14,7 +14,7 @@ docs/playbooks/
 
 ## 当前为什么需要 playbooks
 
-`AI Studio` 现在还在从“文档基线”向“真实可运行系统”过渡。
+`Meyo` 现在还在从“文档基线”向“真实可运行系统”过渡。
 
 这个阶段最怕两种问题：
 
@@ -25,15 +25,15 @@ docs/playbooks/
 
 | Playbook | 路径 | 当前状态 |
 |---|---|---|
-| 索引 | `docs/playbooks/README.md` | 已适配 `AI Studio` |
-| 新增一个 HTTP 接口 | `docs/playbooks/add-new-api-endpoint.md` | 已改成 `AI Studio` 现状版本 |
+| 索引 | `docs/playbooks/README.md` | 已适配 `Meyo` |
+| 新增一个 HTTP 接口 | `docs/playbooks/add-new-api-endpoint.md` | 已改成 `Meyo` 现状版本 |
 | 新增一个 Agent 场景 | `docs/playbooks/add-new-scene.md` | 已改成“预置 playbook” |
 
 ## 这些 playbooks 和 Umber Studio 的主要差别
 
 最大的差别只有一个：
 
-**`AI Studio` 当前还没有完整的 `openapi/`、`scene/` 和前端工作台。**
+**`Meyo` 当前还没有完整的 `openapi/`、`scene/` 和前端工作台。**
 
 所以这里的 playbooks 都做了两类调整：
 
@@ -42,7 +42,7 @@ docs/playbooks/
 
 ## 当前最适合使用的开发切片
 
-如果你现在在 `AI Studio` 里写代码，最适合按下面顺序推进：
+如果你现在在 `Meyo` 里写代码，最适合按下面顺序推进：
 
 1. 新增 `core` contract
 2. 新增 `ext` adapter
@@ -67,6 +67,6 @@ uv run pytest
 
 ## 一句话收口
 
-`AI Studio` 的 playbooks 不是为了复制 `Umber Studio` 的现状，而是为了：
+`Meyo` 的 playbooks 不是为了复制 `Umber Studio` 的现状，而是为了：
 
-**把 `Umber` 那套开发方法论迁进来，同时诚实地反映 `AI Studio` 当前真实阶段。**
+**把 `Umber` 那套开发方法论迁进来，同时诚实地反映 `Meyo` 当前真实阶段。**

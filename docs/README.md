@@ -1,11 +1,11 @@
-# AI Studio Docs Workspace
+# Meyo Docs Workspace
 
 ## 快速开始
 
 先进入 docs 工作区：
 
 ```bash
-cd /Users/memory/CodeRepository/PycharmProjects/ai-studio/docs
+cd <repo-root>/docs
 ```
 
 安装依赖：
@@ -30,7 +30,7 @@ bun run build
 
 ## 当前文档范围
 
-这个 docs 工作区复用了 `Umber Studio/docs` 的 Docusaurus 工程壳，但当前文档资产已经切到 `AI Studio` 自己的内容。
+这个 docs 工作区复用了 `Umber Studio/docs` 的 Docusaurus 工程壳，但当前文档资产已经切到 `Meyo` 自己的内容。
 
 当前站内重点文档：
 

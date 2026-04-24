@@ -4,7 +4,7 @@ title: 基座项目总览
 
 # 基座项目总览
 
-这组文档用于定义 `AI Studio` 的平台级设计基线，而不是某个 demo 页面的使用说明。
+这组文档用于定义 `Meyo` 的平台级设计基线，而不是某个 demo 页面的使用说明。
 
 当前这套文档现在分两组：
 
@@ -13,7 +13,7 @@ title: 基座项目总览
 
 ## 一、项目定位
 
-`AI Studio` 是一个 **LangGraph-first 的 AgentOS 平台工程**，目标是为上层 AI 应用提供统一的：
+`Meyo` 是一个 **LangGraph-first 的 AgentOS 平台工程**，目标是为上层 AI 应用提供统一的：
 
 - agent runtime
 - knowledge / skill
@@ -33,10 +33,10 @@ title: 基座项目总览
 
 建议按下面顺序阅读：
 
-1. [AI Studio 企业级 AgentOS 架构设计文档（实施蓝图版）](./architecture_design.md)
-2. [AI Studio 功能设计](./functional_design.md)
-3. [AI Studio 技术栈](./technology_stack.md)
-4. [AI Studio Memory OS 设计](./memory_os_design.md)
+1. [Meyo 企业级 AgentOS 架构设计文档（实施蓝图版）](./architecture_design.md)
+2. [Meyo 功能设计](./functional_design.md)
+3. [Meyo 技术栈](./technology_stack.md)
+4. [Meyo Memory OS 设计](./memory_os_design.md)
 5. [快速上手：当前工程骨架与最短阅读路径](./quick_code_onboarding.md)
 6. [从零开始上手：uv、Workspace 与包加载链路](./from_zero_to_running.md)
 7. [目录结构与模块职责](./directory_and_module_map.md)
@@ -69,7 +69,7 @@ title: 基座项目总览
 
 ## 五、开发指南
 
-当前已经迁入并适配 `AI Studio` 的开发指南包括：
+当前已经迁入并适配 `Meyo` 的开发指南包括：
 
 - [快速上手：当前工程骨架与最短阅读路径](./quick_code_onboarding.md)
 - [从零开始上手：uv、Workspace 与包加载链路](./from_zero_to_running.md)

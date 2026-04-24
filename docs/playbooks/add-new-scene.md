@@ -14,7 +14,7 @@ title: 新增一个 Chat 场景(chat_mode)
 
 **当前状态说明：**
 
-`AI Studio` 当前仓库**还没有正式的 `scene/` 目录和 `chat_mode` 契约**。
+`Meyo` 当前仓库**还没有正式的 `scene/` 目录和 `chat_mode` 契约**。
 
 所以这份文档现在是一个**预置 playbook**：
 
@@ -31,13 +31,13 @@ title: 新增一个 Chat 场景(chat_mode)
 
 ```text
 [4] Scene 分发
-     └── packages/ai-studio-app/src/ai_studio_app/scene/
+     └── packages/meyo-app/src/meyo_app/scene/
 
 [5] Serve 服务域
-     └── packages/ai-studio-serve/src/ai_studio_serve/
+     └── packages/meyo-serve/src/meyo_serve/
 
 [3] Ext 实现层
-     └── packages/ai-studio-ext/src/ai_studio_ext/
+     └── packages/meyo-ext/src/meyo_ext/
 ```
 
 ## 3. 改动清单
@@ -73,7 +73,7 @@ RunRequest(
 当 `scene/` 主链建立后，建议目录至少是：
 
 ```text
-packages/ai-studio-app/src/ai_studio_app/scene/my_new_scene/
+packages/meyo-app/src/meyo_app/scene/my_new_scene/
 ├── __init__.py
 ├── chat.py
 ├── config.py
