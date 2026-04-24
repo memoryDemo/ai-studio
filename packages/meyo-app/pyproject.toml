@@ -1,0 +1,28 @@
+[project]
+name = "meyo-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "jingwei.guan", email = "memory1992@live.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    # core 主包，同时打开 CLI、Web、Runtime、OpenAI 代理、MCP 和观测能力。
+    "meyo[cli,client,framework,observability,proxy_openai,runtime,simple_framework,tool]",
+    # 可选加速能力包，后续放性能优化或硬件相关依赖。
+    "meyo-accelerator",
+    # SDK / client 侧封装，app 可复用对外调用能力。
+    "meyo-client",
+    # 外部系统适配层，同时打开 PG、Redis、Milvus、Neo4j、S3/MinIO 驱动。
+    "meyo-ext[file_s3,storage_milvus,storage_neo4j,storage_postgres,storage_redis]",
+    # 隔离执行能力，后续承接工具运行、代码执行、受控环境。
+    "meyo-sandbox",
+    # 服务编排层，后续把 core 协议和 ext 实现组织成业务服务。
+    "meyo-serve",
+]
+
+[build-system]
+# uv 的 PEP 517 构建后端，只在构建/安装本 package 时使用。
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"

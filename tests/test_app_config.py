@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ai_studio_app.config import load_app_config, resolve_config_path
+from meyo_app.config import load_app_config, resolve_config_path
 
 
 def test_resolve_config_path_maps_slash_prefixed_values_into_configs_root(tmp_path: Path):
@@ -33,14 +33,14 @@ def test_load_app_config_expands_env_placeholders(tmp_path: Path, monkeypatch):
         "\n".join(
             [
                 "[service.web]",
-                'host = "${env:AI_STUDIO_HOST:-0.0.0.0}"',
-                'port = "${env:AI_STUDIO_PORT:-14000}"',
+                'host = "${env:MEYO_HOST:-0.0.0.0}"',
+                'port = "${env:MEYO_PORT:-14000}"',
             ]
         ),
         encoding="utf-8",
     )
-    monkeypatch.setenv("AI_STUDIO_HOST", "127.0.0.1")
-    monkeypatch.setenv("AI_STUDIO_PORT", "18080")
+    monkeypatch.setenv("MEYO_HOST", "127.0.0.1")
+    monkeypatch.setenv("MEYO_PORT", "18080")
 
     loaded = load_app_config("/my/dev.toml", repo_root=repo_root, cwd=repo_root)
 

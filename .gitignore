@@ -40,6 +40,8 @@ venv.bak/
 *.log
 *.tmp
 *.temp
+tmp/
+output/
 
 # Docs frontend artifacts
 docs/node_modules/

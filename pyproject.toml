@@ -1,5 +1,5 @@
 [project]
-name = "ai-studio-mono"
+name = "meyo-mono"
 version = "0.1.0"
 description = "ai 能力平台"
 authors = [
@@ -7,30 +7,36 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.12"
+# 根项目只做 workspace 容器，不直接承载运行时业务依赖。
 dependencies = []
 
 [tool.uv.sources]
-ai-studio = { workspace = true }
-ai-studio-accelerator = { workspace = true }
-ai-studio-app = { workspace = true }
-ai-studio-client = { workspace = true }
-ai-studio-ext = { workspace = true }
-ai-studio-sandbox = { workspace = true }
-ai-studio-serve = { workspace = true }
+meyo = { workspace = true }
+meyo-accelerator = { workspace = true }
+meyo-app = { workspace = true }
+meyo-client = { workspace = true }
+meyo-ext = { workspace = true }
+meyo-sandbox = { workspace = true }
+meyo-serve = { workspace = true }
 
 [tool.uv.workspace]
 members = [
-    "packages/ai-studio-core",
-    "packages/ai-studio-ext",
-    "packages/ai-studio-client",
-    "packages/ai-studio-serve",
-    "packages/ai-studio-sandbox",
-    "packages/ai-studio-accelerator",
-    "packages/ai-studio-app",
+    "packages/meyo-core",
+    "packages/meyo-ext",
+    "packages/meyo-client",
+    "packages/meyo-serve",
+    "packages/meyo-sandbox",
+    "packages/meyo-accelerator",
+    "packages/meyo-app",
 ]
 
 [tool.uv]
 managed = true
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0,<10.0",
+]
 
 
 [tool.ruff]
@@ -60,4 +66,4 @@ select = ["E", "F", "I"]
 [tool.ruff.lint.isort]
 # import 排序的细分配置。
 # 告诉 Ruff 哪些包属于“你自己项目里的代码”，这样排 import 时会把它们归到 first-party。
-known-first-party = ["ai_studio", "ai_studio_ext", "ai_studio_client", "ai_studio_serve", "ai_studio_app", "ai_studio_sandbox", "ai_studio_accelerator"]
+known-first-party = ["meyo", "meyo_ext", "meyo_client", "meyo_serve", "meyo_app", "meyo_sandbox", "meyo_accelerator"]

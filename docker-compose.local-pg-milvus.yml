@@ -1,37 +1,37 @@
 services:
-  umber-studio-postgres:
+  meyo-postgres:
     image: postgres:18.3
-    container_name: umber-studio-postgres
+    container_name: meyo-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${UMBER_STUDIO_PG_DATABASE:-umber_studio}
-      POSTGRES_USER: ${UMBER_STUDIO_PG_USER:-umber_studio}
+      POSTGRES_DB: ${MEYO_PG_DATABASE:-meyo}
+      POSTGRES_USER: ${MEYO_PG_USER:-meyo}
       POSTGRES_PASSWORD: "Zjmzu5EqZzB_4dk7JA7N3yqULeLG@+dq"
     ports:
-      - "${UMBER_STUDIO_PG_PORT:-14001}:5432"
+      - "${MEYO_PG_PORT:-14001}:5432"
     volumes:
-      - umber_studio_pg_data:/var/lib/postgresql
+      - meyo_pg_data:/var/lib/postgresql
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${UMBER_STUDIO_PG_USER:-umber_studio} -d ${UMBER_STUDIO_PG_DATABASE:-umber_studio}",
+          "pg_isready -U ${MEYO_PG_USER:-meyo} -d ${MEYO_PG_DATABASE:-meyo}",
         ]
       interval: 5s
       timeout: 5s
       retries: 20
 
-  umber-studio-redis-stack:
+  meyo-redis-stack:
     image: redis/redis-stack:7.4.0-v8
-    container_name: umber-studio-redis-stack
+    container_name: meyo-redis-stack
     restart: unless-stopped
     environment:
       REDIS_ARGS: --requirepass PkXWBhDJbeT23W=zGRGyA.6NUkyuTpcx
     ports:
-      - "${UMBER_STUDIO_REDIS_PORT:-14002}:6379"
-      - "${UMBER_STUDIO_REDIS_INSIGHT_PORT:-14003}:8001"
+      - "${MEYO_REDIS_PORT:-14002}:6379"
+      - "${MEYO_REDIS_INSIGHT_PORT:-14003}:8001"
     volumes:
-      - umber_studio_redis_data:/data
+      - meyo_redis_data:/data
     healthcheck:
       test:
         [
@@ -42,9 +42,9 @@ services:
       timeout: 5s
       retries: 20
 
-  umber-studio-neo4j:
+  meyo-neo4j:
     image: neo4j:2026.03.1-community
-    container_name: umber-studio-neo4j
+    container_name: meyo-neo4j
     restart: unless-stopped
     environment:
       NEO4J_AUTH: "neo4j/2@e93GSJrFE50_-o+kGz0XfJWtLzlpJ0"
@@ -54,14 +54,14 @@ services:
       http_proxy: ""
       https_proxy: ""
       all_proxy: ""
-      NO_PROXY: 127.0.0.1,localhost,umber-studio-neo4j
-      no_proxy: 127.0.0.1,localhost,umber-studio-neo4j
+      NO_PROXY: 127.0.0.1,localhost,meyo-neo4j
+      no_proxy: 127.0.0.1,localhost,meyo-neo4j
     ports:
-      - "${UMBER_STUDIO_NEO4J_HTTP_PORT:-14004}:7474"
-      - "${UMBER_STUDIO_NEO4J_BOLT_PORT:-14005}:7687"
+      - "${MEYO_NEO4J_HTTP_PORT:-14004}:7474"
+      - "${MEYO_NEO4J_BOLT_PORT:-14005}:7687"
     volumes:
-      - umber_studio_neo4j_data:/data
-      - umber_studio_neo4j_logs:/logs
+      - meyo_neo4j_data:/data
+      - meyo_neo4j_logs:/logs
     healthcheck:
       test:
         [
@@ -72,13 +72,13 @@ services:
       timeout: 10s
       retries: 20
 
-  umber-studio-etcd:
+  meyo-etcd:
     image: quay.io/coreos/etcd:v3.5.18
-    container_name: umber-studio-etcd
+    container_name: meyo-etcd
     restart: unless-stopped
     command: >
       etcd
-      -advertise-client-urls=http://umber-studio-etcd:2379
+      -advertise-client-urls=http://meyo-etcd:2379
       -listen-client-urls=http://0.0.0.0:2379
       --data-dir /etcd
     environment:
@@ -87,37 +87,37 @@ services:
       ETCD_QUOTA_BACKEND_BYTES: "4294967296"
       ETCD_SNAPSHOT_COUNT: "50000"
     ports:
-      - "${UMBER_STUDIO_ETCD_PORT:-14006}:2379"
+      - "${MEYO_ETCD_PORT:-14006}:2379"
     volumes:
-      - umber_studio_etcd_data:/etcd
+      - meyo_etcd_data:/etcd
     healthcheck:
       test: ["CMD", "etcdctl", "--endpoints=http://127.0.0.1:2379", "endpoint", "health"]
       interval: 10s
       timeout: 5s
       retries: 20
 
-  umber-studio-minio:
+  meyo-minio:
     image: minio/minio:RELEASE.2025-02-28T09-55-16Z
-    container_name: umber-studio-minio
+    container_name: meyo-minio
     command: minio server /minio_data --console-address ":9001"
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: ${UMBER_STUDIO_MINIO_ROOT_USER:-umberstudiominio}
+      MINIO_ROOT_USER: ${MEYO_MINIO_ROOT_USER:-meyominio}
       MINIO_ROOT_PASSWORD: "N8zbG0lNNvnSs3R8.Ea6-ARgy-VpejB@"
     ports:
-      - "${UMBER_STUDIO_MINIO_API_PORT:-14007}:9000"
-      - "${UMBER_STUDIO_MINIO_CONSOLE_PORT:-14008}:9001"
+      - "${MEYO_MINIO_API_PORT:-14007}:9000"
+      - "${MEYO_MINIO_CONSOLE_PORT:-14008}:9001"
     volumes:
-      - umber_studio_minio_data:/minio_data
+      - meyo_minio_data:/minio_data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
       interval: 10s
       timeout: 5s
       retries: 20
 
-  umber-studio-milvus:
+  meyo-milvus:
     image: milvusdb/milvus:v2.6.15
-    container_name: umber-studio-milvus
+    container_name: meyo-milvus
     command:
       - /bin/sh
       - -c
@@ -133,9 +133,9 @@ services:
     security_opt:
       - seccomp:unconfined
     environment:
-      ETCD_ENDPOINTS: umber-studio-etcd:2379
-      MINIO_ADDRESS: umber-studio-minio:9000
-      MINIO_ACCESS_KEY_ID: ${UMBER_STUDIO_MINIO_ROOT_USER:-umberstudiominio}
+      ETCD_ENDPOINTS: meyo-etcd:2379
+      MINIO_ADDRESS: meyo-minio:9000
+      MINIO_ACCESS_KEY_ID: ${MEYO_MINIO_ROOT_USER:-meyominio}
       MINIO_SECRET_ACCESS_KEY: "N8zbG0lNNvnSs3R8.Ea6-ARgy-VpejB@"
       MINIO_REGION: us-east-1
       MQ_TYPE: woodpecker
@@ -145,17 +145,17 @@ services:
       http_proxy: ""
       https_proxy: ""
       all_proxy: ""
-      NO_PROXY: 127.0.0.1,localhost,umber-studio-etcd,umber-studio-minio,umber-studio-milvus
-      no_proxy: 127.0.0.1,localhost,umber-studio-etcd,umber-studio-minio,umber-studio-milvus
+      NO_PROXY: 127.0.0.1,localhost,meyo-etcd,meyo-minio,meyo-milvus
+      no_proxy: 127.0.0.1,localhost,meyo-etcd,meyo-minio,meyo-milvus
     ports:
-      - "${UMBER_STUDIO_MILVUS_PORT:-14009}:19530"
-      - "${UMBER_STUDIO_MILVUS_HTTP_PORT:-14010}:9091"
+      - "${MEYO_MILVUS_PORT:-14009}:19530"
+      - "${MEYO_MILVUS_HTTP_PORT:-14010}:9091"
     volumes:
-      - umber_studio_milvus_data:/var/lib/milvus
+      - meyo_milvus_data:/var/lib/milvus
     depends_on:
-      umber-studio-etcd:
+      meyo-etcd:
         condition: service_healthy
-      umber-studio-minio:
+      meyo-minio:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "timeout 3 bash -lc '</dev/tcp/127.0.0.1/19530'"]
@@ -164,10 +164,10 @@ services:
       retries: 30
 
 volumes:
-  umber_studio_pg_data:
-  umber_studio_redis_data:
-  umber_studio_neo4j_data:
-  umber_studio_neo4j_logs:
-  umber_studio_etcd_data:
-  umber_studio_minio_data:
-  umber_studio_milvus_data:
+  meyo_pg_data:
+  meyo_redis_data:
+  meyo_neo4j_data:
+  meyo_neo4j_logs:
+  meyo_etcd_data:
+  meyo_minio_data:
+  meyo_milvus_data:

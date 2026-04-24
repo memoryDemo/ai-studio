@@ -1,0 +1,93 @@
+[project]
+name = "meyo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "jingwei.guan", email = "memory1992@live.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    # 数据模型、配置校验、API 入参/出参 schema 的基础库。
+    "pydantic>=2.7,<3.0",
+]
+
+[project.optional-dependencies]
+cli = [
+    # CLI 命令框架，用来注册 `meyo start webserver` 这类命令。
+    "click>=8.1.0,<9.0.0",
+    # 终端富文本输出，后续用于更好看的日志、表格、错误提示。
+    "rich>=13.0,<15.0",
+    # TOML 读写工具，适合后续做配置文件生成、修改、格式保留。
+    "tomlkit>=0.13,<1.0",
+]
+client = [
+    # 异步/同步 HTTP client，SDK 调服务、代理模型接口都会用到。
+    "httpx>=0.24,<1.0",
+    # 重试工具，用于网络请求、模型调用、外部服务调用的失败重试。
+    "tenacity>=8.0,<10.0",
+]
+simple_framework = [
+    # 异步文件 IO，适合上传文件、静态资源、报告文件读写。
+    "aiofiles>=24.0,<25.0",
+    # Web API 框架，当前 webserver 后端入口。
+    "fastapi>=0.136,<0.137",
+    # 生产部署常用 WSGI/ASGI 进程管理器。
+    "gunicorn>=23.0,<24.0",
+    # Pydantic 官方配置管理库，后续可替代部分手写配置解析。
+    "pydantic-settings>=2.0,<3.0",
+    # FastAPI 处理表单和文件上传需要它。
+    "python-multipart>=0.0.20,<1.0",
+    # ASGI Server，本地和生产都可以用它启动 FastAPI。
+    "uvicorn[standard]>=0.46,<0.47",
+]
+runtime = [
+    # LangChain 的核心抽象，不包含完整 LangChain 大包。
+    "langchain-core>=1.0,<2.0",
+    # Agent 状态机/编排运行时，作为 Meyo 的 runtime 主轴。
+    "langgraph>=1.0,<2.0",
+]
+framework = [
+    # 数据库 migration 工具，配合 SQLAlchemy 管理表结构演进。
+    "alembic>=1.13,<2.0",
+    # JSON Schema 校验，适合工具 schema、配置 schema、协议校验。
+    "jsonschema>=4.0,<5.0",
+    # Python ORM / SQL Toolkit，作为关系数据库访问基础。
+    "SQLAlchemy>=2.0,<3.0",
+]
+proxy_openai = [
+    # 带 SOCKS 支持的 HTTP client，用于代理场景。
+    "httpx[socks]>=0.24,<1.0",
+    # OpenAI 官方 SDK，也兼容很多 OpenAI-compatible 模型服务。
+    "openai>=1.59,<3.0",
+    # Token 计数工具，用于预算、上下文截断、成本统计。
+    "tiktoken>=0.8,<1.0",
+]
+tool = [
+    # Model Context Protocol SDK，用于接 MCP 工具生态。
+    "mcp>=1.0,<2.0",
+]
+observability = [
+    # LLM 观测平台 SDK，用于 trace prompt、completion、token 和成本。
+    "langfuse>=3.0,<4.0",
+    # OpenTelemetry API，定义 trace/metric/log 的标准接口。
+    "opentelemetry-api>=1.28,<2.0",
+    # OTLP exporter，把观测数据发到 collector / APM 后端。
+    "opentelemetry-exporter-otlp>=1.28,<2.0",
+    # FastAPI 自动埋点，用于 HTTP 请求链路追踪。
+    "opentelemetry-instrumentation-fastapi>=0.50b0,<1.0",
+    # OpenTelemetry SDK，真正创建和导出 trace/metric。
+    "opentelemetry-sdk>=1.28,<2.0",
+    # Prometheus 指标客户端，用于暴露平台 metrics。
+    "prometheus-client>=0.20,<1.0",
+    # 结构化日志库，后续方便输出 JSON 日志和绑定上下文。
+    "structlog>=24.0,<26.0",
+]
+
+[build-system]
+# uv 的 PEP 517 构建后端，只在构建/安装本 package 时使用。
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
+
+[project.scripts]
+meyo = "meyo.cli.cli_scripts:main"

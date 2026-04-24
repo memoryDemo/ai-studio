@@ -1,0 +1,20 @@
+[project]
+name = "meyo-client"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "jingwei.guan", email = "memory1992@live.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    # core 主包，client 侧需要 HTTP client 和 CLI 相关基础能力。
+    "meyo[client,cli]",
+    # 复用 ext 中的外部系统适配类型或实现。
+    "meyo-ext",
+]
+
+[build-system]
+# uv 的 PEP 517 构建后端，只在构建/安装本 package 时使用。
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"

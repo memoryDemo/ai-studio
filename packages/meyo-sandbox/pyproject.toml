@@ -1,0 +1,16 @@
+[project]
+name = "meyo-sandbox"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "jingwei.guan", email = "memory1992@live.com" }
+]
+requires-python = ">=3.12"
+# 当前还是空壳，先不引入 Docker、浏览器自动化、代码执行等重依赖。
+dependencies = []
+
+[build-system]
+# uv 的 PEP 517 构建后端，只在构建/安装本 package 时使用。
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"

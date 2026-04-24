@@ -1,0 +1,44 @@
+[project]
+name = "meyo-ext"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "jingwei.guan", email = "memory1992@live.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    # 依赖 core 包里的基础类型、版本、协议和通用能力。
+    "meyo",
+]
+
+[project.optional-dependencies]
+storage_postgres = [
+    # PostgreSQL 异步驱动，适合 FastAPI/async runtime 场景。
+    "asyncpg>=0.29,<1.0",
+    # PostgreSQL 官方新一代驱动，binary 方便本地安装，pool 提供连接池。
+    "psycopg[binary,pool]>=3.2,<4.0",
+]
+storage_redis = [
+    # Redis client，用于缓存、队列、短期状态或分布式锁。
+    "redis>=5.0,<8.0",
+]
+storage_milvus = [
+    # Milvus 向量数据库 SDK，用于 embedding 检索和语义记忆。
+    "pymilvus>=2.4,<3.0",
+]
+storage_neo4j = [
+    # Neo4j 图数据库驱动，用于实体关系、GraphRAG、洞见网络。
+    "neo4j>=5.0,<7.0",
+]
+file_s3 = [
+    # AWS S3 官方 SDK，也可兼容部分 S3 协议对象存储。
+    "boto3>=1.34,<2.0",
+    # MinIO 官方 SDK，用于本地/私有化 S3 对象存储。
+    "minio>=7.0,<8.0",
+]
+
+[build-system]
+# uv 的 PEP 517 构建后端，只在构建/安装本 package 时使用。
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
