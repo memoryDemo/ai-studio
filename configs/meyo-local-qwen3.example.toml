@@ -1,0 +1,41 @@
+[system]
+# 从环境变量读取默认语言，未设置时使用默认值。
+language = "${env:MEYO_LANG:-zh}"
+api_keys = []
+encrypt_key = "${env:MEYO_ENCRYPT_KEY:-your_secret_key}"
+
+# 服务配置
+[service.web]
+host = "0.0.0.0"
+port = 5670
+
+[service.web.database]
+type = "sqlite"
+path = "pilot/meta_data/meyo.db"
+
+[rag.storage]
+[rag.storage.vector]
+type = "chroma"
+persist_path = "pilot/data"
+
+# 模型配置
+[models]
+[[models.llms]]
+name = "Qwen/Qwen3-14B"
+provider = "hf"
+# 未配置时会从 Hugging Face 模型仓库下载。
+# 如需使用本地模型路径，取消下面配置的注释。
+# path = "本地模型路径"
+# 强制模型使用非思考模式时设置为 false。
+# reasoning_model = false
+
+[[models.embeddings]]
+name = "Qwen/Qwen3-Embedding-0.6B"
+provider = "hf"
+# 未配置时会从 Hugging Face 模型仓库下载。
+# 如需使用本地模型路径，取消下面配置的注释。
+# path = "本地模型路径"
+
+[[models.rerankers]]
+name = "Qwen/Qwen3-Reranker-0.6B"
+provider = "qwen"

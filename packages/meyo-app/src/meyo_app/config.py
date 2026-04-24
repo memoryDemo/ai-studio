@@ -1,146 +1,391 @@
-"""
-Meyo 应用配置加载与解析工具。
+"""应用配置定义，负责把开发配置文件解析为网页服务、模型服务和系统参数。"""
 
-本模块负责：
-- 解析配置文件路径（支持绝对路径、相对路径与 `configs/` 下回退查找）；
-- 读取 TOML 配置并构造强类型配置对象；
-- 对配置中的 `${env:VAR}` / `${env:VAR:-default}` 占位符做环境变量替换。
-"""
-import os
-import re
-import tomllib
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Optional
+from dataclasses import dataclass, field
+from typing import List, Optional
 
-# 匹配环境变量占位符：
-# - ${env:NAME}
-# - ${env:NAME:-default_value}
-_ENV_PATTERN = re.compile(r"\$\{env:([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\}")
-# 未显式传入配置路径时的默认配置文件（相对仓库根目录）
-_DEFAULT_CONFIG = Path("configs/my/dev.toml")
-
-
-@dataclass(slots=True)
-class WebServerConfig:
-    """Web 服务核心配置。"""
-
-    # 监听地址（默认仅本机可访问）
-    host: str = "127.0.0.1"
-    # 监听端口
-    port: int = 5670
+from meyo.datasource.parameter import BaseDatasourceParameters
+from meyo.model.parameter import (
+    ModelsDeployParameters,
+    ModelServiceConfig,
+)
+from meyo.storage.cache.manager import ModelCacheParameters
+from meyo.util.configure import HookConfig
+from meyo.util.i18n_utils import _
+from meyo.util.parameter_utils import BaseParameters
+from meyo.util.tracer import TracerParameters
+from meyo.util.utils import LoggingParameters
+from meyo_ext.datasource.rdbms.conn_postgresql import PostgreSQLParameters  # noqa:F401
+from meyo_ext.datasource.rdbms.conn_sqlite import SQLiteConnectorParameters
+from meyo_ext.storage.graph_store.tugraph_store import TuGraphStoreConfig
+from meyo_ext.storage.vector_store.chroma_store import ChromaVectorConfig
+from meyo_ext.storage.vector_store.elastic_store import ElasticsearchStoreConfig
+from meyo_ext.storage.vector_store.milvus_store import MilvusVectorConfig  # noqa:F401
+from meyo_serve.core.config import BaseServeConfig
+from meyo_serve.core.config import GPTsAppConfig
 
 
-@dataclass(slots=True)
-class AppConfig:
-    """应用配置聚合对象。"""
+@dataclass
+class SystemParameters:
+    """配置参数定义。"""
 
-    # 实际命中的配置文件绝对路径
-    path: Path
-    # 结构化后的 Web 服务配置
-    web: WebServerConfig
-    # 完整配置字典（已完成环境变量解析）
-    raw: dict[str, Any]
-
-
-def resolve_config_path(
-    config_value: Optional[str],
-    repo_root: Optional[Path] = None,
-    cwd: Optional[Path] = None,
-) -> Path:
-    """
-    根据用户输入解析配置文件路径。
-
-    解析顺序：
-    1) `config_value` 为空：尝试 `<repo_root>/configs/my/dev.toml`；
-    2) 若为存在的绝对路径，直接返回；
-    3) 按当前工作目录 `cwd` 解析相对路径；
-    4) 回退到 `<repo_root>/configs/<relative_path>`；
-    5) 均失败则抛出 `FileNotFoundError`。
-    """
-    # 允许调用方覆盖 repo_root / cwd，便于测试或特殊运行环境注入。
-    repo_root = (repo_root or _default_repo_root()).resolve()
-    cwd = (cwd or Path.cwd()).resolve()
-    configs_root = repo_root / "configs"
-
-    if not config_value:
-        # 未传参时走默认配置文件。
-        default_path = (repo_root / _DEFAULT_CONFIG).resolve()
-        if default_path.exists():
-            return default_path
-        raise FileNotFoundError("No config file provided and configs/my/dev.toml was not found.")
-
-    raw = Path(config_value)
-    if raw.is_absolute() and raw.exists():
-        return raw.resolve()
-
-    # 优先按当前工作目录解析。
-    direct = (cwd / raw).resolve()
-    if direct.exists():
-        return direct
-
-    # 将可能的绝对/相对前缀去掉后，拼到 configs 目录下作为回退路径。
-    relative = raw.as_posix().lstrip("/") if raw.is_absolute() else raw.as_posix().lstrip("./")
-    fallback = (configs_root / relative).resolve()
-    if fallback.exists():
-        return fallback
-
-    raise FileNotFoundError(f"Config file not found: {config_value}")
-
-
-def load_app_config(
-    config_value: Optional[str],
-    repo_root: Optional[Path] = None,
-    cwd: Optional[Path] = None,
-) -> AppConfig:
-    """
-    加载并解析应用配置。
-
-    流程：
-    - 先解析最终配置文件路径；
-    - 读取 TOML 并做环境变量替换；
-    - 从 `service.web` 提取 Web 配置并填充默认值；
-    - 返回 `AppConfig`（含路径、结构化 web 配置与完整原始配置）。
-    """
-    path = resolve_config_path(config_value, repo_root=repo_root, cwd=cwd)
-    raw = tomllib.loads(path.read_text(encoding="utf-8"))
-    resolved = _resolve_env(raw)
-    # 只抽取当前启动阶段所需的 web 子配置，其它内容保留在 raw 里供后续使用。
-    web = resolved.get("service", {}).get("web", {})
-
-    return AppConfig(
-        path=path,
-        web=WebServerConfig(
-            host=str(web.get("host", "127.0.0.1")),
-            port=int(str(web.get("port", 5670))),
-        ),
-        raw=resolved,
+    language: str = field(
+        default="en",
+        metadata={
+            "help": _("Language setting"),
+            "valid_values": ["en", "zh", "fr", "ja", "ko", "ru"],
+        },
+    )
+    log_level: str = field(
+        default="INFO",
+        metadata={
+            "help": _("Logging level"),
+            "valid_values": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        },
+    )
+    api_keys: List[str] = field(
+        default_factory=list,
+        metadata={
+            "help": _("API keys"),
+        },
+    )
+    encrypt_key: Optional[str] = field(
+        default="your_secret_key",
+        metadata={"help": _("The key to encrypt the data")},
     )
 
 
-def _default_repo_root() -> Path:
-    """推断仓库根目录（基于当前文件相对层级回溯）。"""
-    return Path(__file__).resolve().parents[4]
+@dataclass
+class StorageConfig(BaseParameters):
+    __cfg_type__ = "app"
+
+    vector: Optional[ChromaVectorConfig] = field(
+        default_factory=lambda: ChromaVectorConfig(),
+        metadata={
+            "help": _("default vector type"),
+        },
+    )
+    graph: Optional[TuGraphStoreConfig] = field(
+        default=None,
+        metadata={
+            "help": _("default graph type"),
+        },
+    )
+    full_text: Optional[ElasticsearchStoreConfig] = field(
+        default=None,
+        metadata={
+            "help": _("default full text type"),
+        },
+    )
 
 
-def _resolve_env(value: Any) -> Any:
-    """
-    递归解析配置中的环境变量占位符。
+@dataclass
+class RagParameters(BaseParameters):
+    """配置参数定义。"""
 
-    支持类型：
-    - dict: 递归处理 value；
-    - list: 递归处理元素；
-    - str: 执行 `${env:VAR}` / `${env:VAR:-default}` 替换；
-    - 其它类型：原样返回。
-    """
-    if isinstance(value, dict):
-        return {k: _resolve_env(v) for k, v in value.items()}
-    if isinstance(value, list):
-        return [_resolve_env(v) for v in value]
-    if isinstance(value, str):
-        # 未设置环境变量时，使用 `:-` 后的默认值；若默认值也缺失，则替换为空字符串。
-        return _ENV_PATTERN.sub(
-            lambda match: os.environ.get(match.group(1), match.group(2) or ""),
-            value,
-        )
-    return value
+    __cfg_type__ = "app"
+
+    chunk_size: Optional[int] = field(
+        default=500,
+        metadata={"help": _("Whether to verify the SSL certificate of the database")},
+    )
+    chunk_overlap: Optional[int] = field(
+        default=50,
+        metadata={
+            "help": _(
+                "The default thread pool size, If None, use default config of python "
+                "thread pool"
+            )
+        },
+    )
+    similarity_top_k: Optional[int] = field(
+        default=10,
+        metadata={"help": _("knowledge search top k")},
+    )
+    similarity_score_threshold: Optional[float] = field(
+        default=0.0,
+        metadata={"help": _("knowledge search top similarity score")},
+    )
+    query_rewrite: Optional[bool] = field(
+        default=False,
+        metadata={"help": _("knowledge search rewrite")},
+    )
+    max_chunks_once_load: Optional[int] = field(
+        default=10,
+        metadata={"help": _("knowledge max chunks once load")},
+    )
+    max_threads: Optional[int] = field(
+        default=1,
+        metadata={"help": _("knowledge max load thread")},
+    )
+    rerank_top_k: Optional[int] = field(
+        default=3,
+        metadata={"help": _("knowledge rerank top k")},
+    )
+    storage: StorageConfig = field(
+        default_factory=lambda: StorageConfig(),
+        metadata={"help": _("Storage configuration")},
+    )
+    knowledge_graph_chunk_search_top_k: Optional[int] = field(
+        default=5,
+        metadata={"help": _("knowledge graph search top k")},
+    )
+    kg_enable_summary: Optional[bool] = field(
+        default=False,
+        metadata={"help": _("graph community summary enabled")},
+    )
+    llm_model: Optional[str] = field(
+        default=None,
+        metadata={"help": _("kg extract llm model")},
+    )
+    kg_extract_top_k: Optional[int] = field(
+        default=5,
+        metadata={"help": _("kg extract top k")},
+    )
+    kg_extract_score_threshold: Optional[float] = field(
+        default=0.3,
+        metadata={"help": _("kg extract score threshold")},
+    )
+    kg_community_top_k: Optional[int] = field(
+        default=50,
+        metadata={"help": _("kg community top k")},
+    )
+    kg_community_score_threshold: Optional[float] = field(
+        default=0.3,
+        metadata={"help": _("kg_community_score_threshold")},
+    )
+    kg_triplet_graph_enabled: Optional[bool] = field(
+        default=True,
+        metadata={"help": _("kg_triplet_graph_enabled")},
+    )
+    kg_document_graph_enabled: Optional[bool] = field(
+        default=True,
+        metadata={"help": _("kg_document_graph_enabled")},
+    )
+    kg_chunk_search_top_k: Optional[int] = field(
+        default=5,
+        metadata={"help": _("kg_chunk_search_top_k")},
+    )
+    kg_extraction_batch_size: Optional[int] = field(
+        default=3,
+        metadata={"help": _("kg_extraction_batch_size")},
+    )
+    kg_community_summary_batch_size: Optional[int] = field(
+        default=20,
+        metadata={"help": _("kg_community_summary_batch_size")},
+    )
+    kg_embedding_batch_size: Optional[int] = field(
+        default=20,
+        metadata={"help": _("kg_embedding_batch_size")},
+    )
+    kg_similarity_top_k: Optional[int] = field(
+        default=5,
+        metadata={"help": _("kg_similarity_top_k")},
+    )
+    kg_similarity_score_threshold: Optional[float] = field(
+        default=0.7,
+        metadata={"help": _("kg_similarity_score_threshold")},
+    )
+    kg_enable_text_search: Optional[bool] = field(
+        default=False,
+        metadata={"help": _("kg_enable_text_search")},
+    )
+    kg_text2gql_model_enabled: Optional[bool] = field(
+        default=False,
+        metadata={"help": _("kg_text2gql_model_enabled")},
+    )
+    kg_text2gql_model_name: Optional[str] = field(
+        default=None,
+        metadata={"help": _("text2gql_model_name")},
+    )
+    bm25_k1: Optional[float] = field(
+        default=2.0,
+        metadata={"help": _("bm25_k1")},
+    )
+    bm25_b: Optional[float] = field(
+        default=0.75,
+        metadata={"help": _("bm25_b")},
+    )
+
+
+@dataclass
+class ServiceWebParameters(BaseParameters):
+    __cfg_type__ = "service"
+    host: str = field(default="0.0.0.0", metadata={"help": _("Webserver deploy host")})
+    port: int = field(
+        default=5670, metadata={"help": _("Webserver deploy port, default is 5670")}
+    )
+    light: Optional[bool] = field(
+        default=False, metadata={"help": _("Run Webserver in light mode")}
+    )
+    controller_addr: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": _(
+                "The Model controller address to connect. If None, read model "
+                "controller address from environment key `MODEL_SERVER`."
+            )
+        },
+    )
+    database: BaseDatasourceParameters = field(
+        default_factory=lambda: SQLiteConnectorParameters(
+            path="pilot/meta_data/meyo.db"
+        ),
+        metadata={
+            "help": _(
+                "Database connection config, now support SQLite, OceanBase and MySQL"
+            )
+        },
+    )
+    model_storage: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": _(
+                "The storage type of model configures, if None, use the default "
+                "storage(current database). When you run in light mode, it will not "
+                "use any storage."
+            ),
+            "valid_values": ["database", "memory"],
+        },
+    )
+    trace: Optional[TracerParameters] = field(
+        default=None,
+        metadata={
+            "help": _("Tracer config for web server, if None, use global tracer config")
+        },
+    )
+    log: Optional[LoggingParameters] = field(
+        default=None,
+        metadata={
+            "help": _(
+                "Logging configuration for web server, if None, use global config"
+            )
+        },
+    )
+    disable_alembic_upgrade: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": _(
+                "Whether to disable alembic to initialize and upgrade database metadata"
+            )
+        },
+    )
+    db_ssl_verify: Optional[bool] = field(
+        default=False,
+        metadata={"help": _("Whether to verify the SSL certificate of the database")},
+    )
+    default_thread_pool_size: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": _(
+                "The default thread pool size, If None, use default config of python "
+                "thread pool"
+            )
+        },
+    )
+    remote_embedding: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": _(
+                "Whether to enable remote embedding models. If it is True, you need"
+                " to start a embedding model through `meyo start worker --worker_type "
+                "text2vec --model_name xxx --model_path xxx`"
+            )
+        },
+    )
+    remote_rerank: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": _(
+                "Whether to enable remote rerank models. If it is True, you need"
+                " to start a rerank model through `meyo start worker --worker_type "
+                "text2vec --rerank --model_name xxx --model_path xxx`"
+            )
+        },
+    )
+    awel_dirs: Optional[str] = field(
+        default=None,
+        metadata={"help": _("The directories to search awel files, split by `,`")},
+    )
+    new_web_ui: bool = field(
+        default=True,
+        metadata={"help": _("Whether to use the new web UI, default is True")},
+    )
+    model_cache: ModelCacheParameters = field(
+        default_factory=ModelCacheParameters,
+        metadata={"help": _("Model cache configuration")},
+    )
+    embedding_model_max_seq_len: Optional[int] = field(
+        default=512,
+        metadata={
+            "help": _("The max sequence length of the embedding model, default is 512")
+        },
+    )
+
+
+@dataclass
+class ServiceConfig(BaseParameters):
+    __cfg_type__ = "service"
+
+    web: ServiceWebParameters = field(
+        default_factory=ServiceWebParameters,
+        metadata={"help": _("Web service configuration")},
+    )
+    model: ModelServiceConfig = field(
+        default_factory=ModelServiceConfig,
+        metadata={"help": _("Model service configuration")},
+    )
+
+
+@dataclass
+class ApplicationConfig(BaseParameters):
+    """配置参数定义。"""
+
+    hooks: List[HookConfig] = field(
+        default_factory=list,
+        metadata={
+            "help": _(
+                "Configuration hooks, which will be executed before the configuration "
+                "loading"
+            ),
+        },
+    )
+
+    system: SystemParameters = field(
+        default_factory=SystemParameters,
+        metadata={
+            "help": _("System configuration"),
+        },
+    )
+    service: ServiceConfig = field(default_factory=ServiceConfig)
+    models: ModelsDeployParameters = field(
+        default_factory=ModelsDeployParameters,
+        metadata={
+            "help": _("Model deployment configuration"),
+        },
+    )
+    serves: List[BaseServeConfig] = field(
+        default_factory=list,
+        metadata={
+            "help": _("Serve configuration"),
+        },
+    )
+    rag: RagParameters = field(
+        default_factory=lambda: RagParameters(),
+        metadata={"help": _("Rag Knowledge Parameters")},
+    )
+    app: GPTsAppConfig = field(
+        default_factory=lambda: GPTsAppConfig(),
+        metadata={"help": _("GPTs application configuration")},
+    )
+    trace: TracerParameters = field(
+        default_factory=TracerParameters,
+        metadata={
+            "help": _("Global tracer configuration"),
+        },
+    )
+    log: LoggingParameters = field(
+        default_factory=LoggingParameters,
+        metadata={
+            "help": _("Logging configuration"),
+        },
+    )

@@ -1,0 +1,45 @@
+"""通用工具模块，支撑模型服务配置、网络、日志、结构化数据、数据库查询和参数处理。"""
+
+from typing import Generic, List, TypeVar
+
+from meyo._private.pydantic import BaseModel, ConfigDict, Field
+
+T = TypeVar("T")
+
+
+class PaginationResult(BaseModel, Generic[T]):
+    """当前类的职责定义。"""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    items: List[T] = Field(..., description="The items in the current page")
+    total_count: int = Field(..., description="Total number of items")
+    total_pages: int = Field(..., description="total number of pages")
+    page: int = Field(..., description="Current page number")
+    page_size: int = Field(..., description="Number of items per page")
+
+    @classmethod
+    def build_from_all(
+        cls, all_items: List[T], page: int, page_size: int
+    ) -> "PaginationResult[T]":
+        """构建目标对象。"""
+        if page < 1:
+            page = 1
+        if page_size < 1:
+            page_size = 1
+        total_count = len(all_items)
+        total_pages = (
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
+        )
+        page = max(1, min(page, total_pages)) if total_pages > 0 else 0
+        start_index = (page - 1) * page_size if page > 0 else 0
+        end_index = min(start_index + page_size, total_count)
+        items = all_items[start_index:end_index]
+
+        return cls(
+            items=items,
+            total_count=total_count,
+            total_pages=total_pages,
+            page=page,
+            page_size=page_size,
+        )

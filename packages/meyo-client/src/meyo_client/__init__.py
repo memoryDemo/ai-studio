@@ -1,1 +1,1 @@
-"""Client package for Meyo."""
+"""包入口，集中导出当前目录下的能力。"""

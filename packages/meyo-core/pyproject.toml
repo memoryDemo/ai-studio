@@ -8,8 +8,16 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    # embedding/rerank provider 在模块导入阶段依赖 aiohttp。
+    "aiohttp>=3.8,<4.0",
+    # 轻量缓存、模块扫描和配置运行时辅助能力。
+    "cachetools",
+    "msgpack",
     # 数据模型、配置校验、API 入参/出参 schema 的基础库。
     "pydantic>=2.7,<3.0",
+    "pympler",
+    "typeguard",
+    "typing-inspect",
 ]
 
 [project.optional-dependencies]
@@ -38,6 +46,8 @@ simple_framework = [
     "pydantic-settings>=2.0,<3.0",
     # FastAPI 处理表单和文件上传需要它。
     "python-multipart>=0.0.20,<1.0",
+    # 模型 APIServer 用它生成 OpenAI-compatible 响应 ID。
+    "shortuuid>=1.0,<2.0",
     # ASGI Server，本地和生产都可以用它启动 FastAPI。
     "uvicorn[standard]>=0.46,<0.47",
 ]
@@ -54,6 +64,8 @@ framework = [
     "jsonschema>=4.0,<5.0",
     # Python ORM / SQL Toolkit，作为关系数据库访问基础。
     "SQLAlchemy>=2.0,<3.0",
+    # RDBMS 连接器解析 SQL 时使用。
+    "sqlparse>=0.4.4,<1.0",
 ]
 proxy_openai = [
     # 带 SOCKS 支持的 HTTP client，用于代理场景。

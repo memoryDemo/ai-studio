@@ -1,0 +1,61 @@
+[system]
+# 从环境变量读取默认语言，未设置时使用默认值。
+language = "${env:MEYO_LANG:-zh}"
+api_keys = []
+encrypt_key = "${env:MEYO_ENCRYPT_KEY:-your_secret_key}"
+
+# 服务配置
+[service.web]
+host = "0.0.0.0"
+port = 5670
+
+[service.web.database]
+type = "sqlite"
+path = "pilot/meta_data/meyo.db"
+[service.model.worker]
+host = "127.0.0.1"
+
+[rag.storage]
+[rag.storage.vector]
+type = "chroma"
+persist_path = "pilot/data"
+
+# 模型配置
+[models]
+# Claude 模型
+[[models.llms]]
+name = "claude-sonnet-4-20250514"
+provider = "proxy/burncloud"
+api_key = "${env:BURNCLOUD_API_KEY}"
+
+[[models.llms]]
+name = "claude-3-7-sonnet-20250219"
+provider = "proxy/burncloud"
+api_key = "${env:BURNCLOUD_API_KEY}"
+
+[[models.llms]]
+name = "claude-opus-4-20250514"
+provider = "proxy/burncloud"
+api_key = "${env:BURNCLOUD_API_KEY}"
+
+[[models.llms]]
+name = "gpt-5"
+provider = "proxy/burncloud"
+api_key = "${env:BURNCLOUD_API_KEY}"
+
+[[models.llms]]
+name = "gpt-5-chat-latest"
+provider = "proxy/burncloud"
+api_key = "${env:BURNCLOUD_API_KEY}"
+
+# Gemini 模型
+[[models.llms]]
+name = "gemini-2.5-pro"
+provider = "proxy/burncloud"
+api_key = "${env:BURNCLOUD_API_KEY}"
+
+# DeepSeek 模型
+[[models.llms]]
+name = "DeepSeek-V3"
+provider = "proxy/burncloud"
+api_key = "${env:BURNCLOUD_API_KEY}"

@@ -1,0 +1,43 @@
+[system]
+language = "${env:MEYO_LANG:-zh}"
+api_keys = []
+encrypt_key = "${env:MEYO_ENCRYPT_KEY:-meyo_local_encrypt_key}"
+
+[service.web]
+host = "0.0.0.0"
+port = 5670
+
+[service.web.database]
+type = "postgresql"
+host = "${env:MEYO_PG_HOST:-127.0.0.1}"
+port = "${env:MEYO_PG_PORT:-14001}"
+database = "${env:MEYO_PG_DATABASE:-meyo}"
+user = "${env:MEYO_PG_USER:-meyo}"
+password = "${env:MEYO_PG_PASSWORD:-meyo_local_20260321}"
+schema = "public"
+
+[service.model.worker]
+host = "127.0.0.1"
+
+[rag.storage]
+[rag.storage.vector]
+type = "milvus"
+uri = "${env:MEYO_MILVUS_HOST:-127.0.0.1}"
+port = "${env:MEYO_MILVUS_PORT:-14009}"
+alias = "default"
+
+[models]
+[[models.llms]]
+name = "deepseek-ai/DeepSeek-V3"
+provider = "proxy/siliconflow"
+api_key = "${env:SILICONFLOW_API_KEY}"
+
+[[models.embeddings]]
+name = "BAAI/bge-m3"
+provider = "proxy/siliconflow"
+api_key = "${env:SILICONFLOW_API_KEY}"
+
+[[models.rerankers]]
+name = "BAAI/bge-reranker-v2-m3"
+provider = "proxy/siliconflow"
+api_key = "${env:SILICONFLOW_API_KEY}"

@@ -400,13 +400,13 @@ uv sync --all-packages
 先用一个最小 WebServer 验证链路：
 
 ```text
-uv run meyo start webserver --config /my/dev.toml
+uv run meyo start webserver --config meyo.toml
 ```
 
 启动链路仍然是上一节整理出来的那条：
 
 ```text
-uv run meyo start webserver --config /my/dev.toml
+uv run meyo start webserver --config meyo.toml
 -> pyproject.toml [project.scripts]
 -> meyo.cli.cli_scripts:main
 -> meyo_app.cli.start_webserver

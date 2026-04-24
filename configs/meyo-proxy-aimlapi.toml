@@ -1,0 +1,29 @@
+[system]
+language = "${env:MEYO_LANG:-en}"
+api_keys = []
+encrypt_key = "${env:MEYO_ENCRYPT_KEY:-your_secret_key}"
+
+[service.web]
+host = "0.0.0.0"
+port = 5670
+
+[service.web.database]
+type = "sqlite"
+path = "pilot/meta_data/meyo.db"
+
+[rag.storage]
+[rag.storage.vector]
+type = "chroma"
+persist_path = "pilot/data"
+
+[models]
+[[models.llms]]
+name = "${env:LLM_MODEL_NAME:-gpt-4o}"
+provider = "proxy/aimlapi"
+api_key = "${env:AIMLAPI_API_KEY}"
+
+[[models.embeddings]]
+name = "${env:EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
+provider = "proxy/aimlapi"
+api_url = "https://api.aimlapi.com/v1/embeddings"
+api_key = "${env:AIMLAPI_API_KEY}"

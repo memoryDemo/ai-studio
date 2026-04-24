@@ -18,7 +18,7 @@ Meyo 目标是为上层 AI 应用提供统一的：
 
 ## 项目分层
 
-当前仓库采用向 `Umber Studio` 对齐的多 package 分层，但规模先保持克制。
+当前仓库采用 Meyo 自己的多 package 分层，规模先保持克制。
 
 | Package | Python import | 职责 |
 |---|---|---|
@@ -69,13 +69,13 @@ uv run meyo start --help
 启动当前最小 WebServer：
 
 ```bash
-uv run meyo start webserver --config /my/dev.toml
+uv run meyo start webserver --config meyo.toml
 ```
 
-`--config /my/dev.toml` 会映射到：
+`--config meyo.toml` 会映射到：
 
 ```text
-configs/my/dev.toml
+configs/meyo.toml
 ```
 
 访问：

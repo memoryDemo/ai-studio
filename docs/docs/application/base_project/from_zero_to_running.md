@@ -10,7 +10,7 @@ title: 从零开始上手：uv、Workspace 与包加载链路
 
 - `uv` 怎么把环境装起来
 - workspace 里的 package 是怎么互相依赖的
-- `uv run meyo start webserver --config /my/dev.toml` 到底走了哪些代码
+- `uv run meyo start webserver --config meyo.toml` 到底走了哪些代码
 
 ## 1. 先记住一句话
 
@@ -20,7 +20,7 @@ title: 从零开始上手：uv、Workspace 与包加载链路
 
 ```shell
 uv sync --all-packages
-uv run meyo start webserver --config /my/dev.toml
+uv run meyo start webserver --config meyo.toml
 ```
 
 启动后：
@@ -243,7 +243,7 @@ packages/meyo-core/src/meyo/cli/cli_scripts.py
 执行：
 
 ```shell
-uv run meyo start webserver --config /my/dev.toml
+uv run meyo start webserver --config meyo.toml
 ```
 
 真实链路是：
@@ -263,7 +263,7 @@ uv run
 
 ```mermaid
 flowchart TD
-    Cmd["uv run meyo start webserver --config /my/dev.toml"]
+    Cmd["uv run meyo start webserver --config meyo.toml"]
     Script["project.scripts: meyo.cli.cli_scripts:main"]
     AppCli["meyo_app.cli.start_webserver"]
     InternalCli["meyo_app._cli.start_webserver"]
@@ -277,26 +277,26 @@ flowchart TD
     Server --> Uvicorn --> FastAPI
 ```
 
-## 10. `/my/dev.toml` 为什么能工作
+## 10. `meyo.toml` 为什么能工作
 
 你传的是：
 
 ```shell
---config /my/dev.toml
+--config meyo.toml
 ```
 
 但项目会把它映射到：
 
 ```text
-configs/my/dev.toml
+configs/meyo.toml
 ```
 
 当前解析规则是：
 
-- 不传 `--config`，默认找 `configs/my/dev.toml`
+- 不传 `--config`，默认找 `configs/meyo.toml`
 - 传真实存在的绝对路径，直接用
-- 传 `my/dev.toml`，先按当前目录找，找不到再去 `configs/my/dev.toml`
-- 传 `/my/dev.toml`，如果真实绝对路径不存在，也会回退到 `configs/my/dev.toml`
+- 传 `meyo.toml`，先按当前目录找，找不到再去 `configs/meyo.toml`
+- 传 `/meyo.toml` 这类伪绝对路径，如果真实文件不存在，也会回退到 `configs/meyo.toml`
 
 这样本地启动不用写一大串绝对路径。
 
@@ -371,4 +371,4 @@ packages/meyo-app/src/meyo_app/meyo_server.py
 2. core 包目录叫 `meyo-core`，但 pip 包名是 `meyo`。
 3. CLI 注册在 `packages/meyo-core/pyproject.toml` 的 `[project.scripts]`。
 4. WebServer 由 `meyo-app` 启动，依赖通过 core/ext extras 装配。
-5. 本地启动固定用 `uv sync --all-packages` 和 `uv run meyo start webserver --config /my/dev.toml`。
+5. 本地启动固定用 `uv sync --all-packages` 和 `uv run meyo start webserver --config meyo.toml`。

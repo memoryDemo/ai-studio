@@ -240,7 +240,7 @@ meyo = "meyo.cli.cli_scripts:main"
 当前这版最小链路是：
 
 ```text
-uv run meyo start webserver --config /my/dev.toml
+uv run meyo start webserver --config meyo.toml
 -> pyproject.toml [project.scripts]
 -> meyo.cli.cli_scripts:main
 -> meyo_app.cli.start_webserver
@@ -252,15 +252,15 @@ uv run meyo start webserver --config /my/dev.toml
 当前 `config.py` 的规则是：
 
 - 传真实绝对路径，直接用
-- 传 `my/dev.toml`，回退到 `configs/my/dev.toml`
-- 传 `/my/dev.toml`，也回退到 `configs/my/dev.toml`
-- 不传时，默认找 `configs/my/dev.toml`
+- 传 `meyo.toml`，回退到 `configs/meyo.toml`
+- 传 `/meyo.toml` 这类伪绝对路径，也回退到 `configs/meyo.toml`
+- 不传时，默认找 `configs/meyo.toml`
 
 所以这两种写法都可以：
 
 ```shell
-uv run meyo start webserver --config configs/my/dev.toml
-uv run meyo start webserver --config /my/dev.toml
+uv run meyo start webserver --config meyo.toml
+uv run meyo start webserver --config /meyo.toml
 ```
 
 ## 8. 同步依赖并启动
@@ -280,7 +280,7 @@ uv run meyo --help
 再启动：
 
 ```shell
-uv run meyo start webserver --config /my/dev.toml
+uv run meyo start webserver --config meyo.toml
 ```
 
 当前这版会启动一个最小 FastAPI WebServer。
