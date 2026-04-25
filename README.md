@@ -143,13 +143,13 @@ export OPENAI_API_KEY=
 cd apps/meyo-chatbot
 
 npm install
-npm run build
+npm run build:backend
 
-python -m venv .venv
+uv venv --python 3.12 --allow-existing .venv
 source .venv/bin/activate
-pip install -e .
+python -m pip install -e .
 
-open-webui serve --host 0.0.0.0 --port 8080
+meyo-chatbot serve --host 0.0.0.0 --port 8080
 ```
 
 访问：
@@ -168,7 +168,7 @@ export ENABLE_OPENAI_API=true
 export ENABLE_OLLAMA_API=false
 export OPENAI_API_BASE_URL=http://127.0.0.1:5670/api/v1
 
-open-webui dev --host 0.0.0.0 --port 8080
+meyo-chatbot dev --host 0.0.0.0 --port 8080
 ```
 
 另开一个终端：
