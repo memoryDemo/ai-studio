@@ -31,6 +31,7 @@ title: Meyo 企业级 AgentOS 架构设计文档（实施蓝图版）
    - 工作台
    - HITL Console
    - Studio / Admin
+   - Open WebUI / Langflow 等独立应用入口
 
 2. **Infra Layer**
    - Orchestrator

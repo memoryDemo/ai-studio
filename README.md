@@ -24,7 +24,8 @@ Meyo 目标是为上层 AI 应用提供统一的：
 
 | App | 职责 |
 |---|---|
-| `apps/chatbot` | 客户聊天前端，基于 Open WebUI，包含 SvelteKit 前端和 Open WebUI FastAPI 后端 |
+| `apps/meyo-chatbot` | 客户聊天前端，基于 Open WebUI，包含 SvelteKit 前端和 Open WebUI FastAPI 后端 |
+| `apps/meyo-studio-flow` | 可视化 Agent / Workflow 编排平台，基于 Langflow，作为 Meyo 的低代码工作流实验台 |
 | `apps/docs-site` | Docusaurus 文档站 |
 
 | Package | Python import | 职责 |
@@ -102,9 +103,9 @@ curl http://127.0.0.1:5670/api/hello
 curl http://127.0.0.1:5670/api/v1/models
 ```
 
-## Chatbot 客户前端
+## Meyo Chatbot 客户前端
 
-`apps/chatbot` 是独立的 Open WebUI 应用，不直接 import `packages/meyo-*`。它包含：
+`apps/meyo-chatbot` 是独立的 Open WebUI 应用，不直接 import `packages/meyo-*`。它包含：
 
 - `src/`：SvelteKit 前端
 - `backend/open_webui/`：Open WebUI FastAPI 后端
@@ -114,7 +115,7 @@ curl http://127.0.0.1:5670/api/v1/models
 推荐接入链路：
 
 ```text
-浏览器 -> apps/chatbot 前端 -> apps/chatbot 后端 /openai -> Meyo /api/v1 -> model provider
+浏览器 -> apps/meyo-chatbot 前端 -> apps/meyo-chatbot 后端 /openai -> Meyo /api/v1 -> model provider
 ```
 
 先启动 Meyo 后端：
@@ -123,10 +124,10 @@ curl http://127.0.0.1:5670/api/v1/models
 uv run meyo start webserver --config meyo.toml
 ```
 
-然后配置 chatbot 连接 Meyo 的模型接口：
+然后配置 Meyo Chatbot 连接 Meyo 的模型接口：
 
 ```bash
-cd apps/chatbot
+cd apps/meyo-chatbot
 
 export ENABLE_OPENAI_API=true
 export ENABLE_OLLAMA_API=false
@@ -136,10 +137,10 @@ export OPENAI_API_KEY=
 
 如果 Meyo 在 `[service.model.api]` 配置了 `api_keys`，这里的 `OPENAI_API_KEY` 必须填对应 key；如果未配置，开发环境可以留空。
 
-首次本地启动 chatbot：
+首次本地启动 Meyo Chatbot：
 
 ```bash
-cd apps/chatbot
+cd apps/meyo-chatbot
 
 npm install
 npm run build
@@ -160,7 +161,7 @@ http://127.0.0.1:8080
 前后端分离开发时，后端跑在 `8080`，前端跑在 Vite 默认端口：
 
 ```bash
-cd apps/chatbot
+cd apps/meyo-chatbot
 source .venv/bin/activate
 
 export ENABLE_OPENAI_API=true
@@ -173,7 +174,7 @@ open-webui dev --host 0.0.0.0 --port 8080
 另开一个终端：
 
 ```bash
-cd apps/chatbot
+cd apps/meyo-chatbot
 npm run dev
 ```
 
@@ -182,3 +183,71 @@ npm run dev
 ```bash
 export OPENAI_API_BASE_URL=http://meyo-api:5670/api/v1
 ```
+
+## Meyo Studio Flow 工作流编排平台
+
+`apps/meyo-studio-flow` 是独立的 Langflow 源码副本，不直接 import `packages/meyo-*`，也不进入根 `uv workspace`。它从本地 Langflow 仓库复制而来，并排除了 `.git`、虚拟环境、`node_modules`、构建产物、缓存、文档资源和 IDE 本地配置。
+
+Langflow 的主要用途是：
+
+- 用可视化画布搭建 AI agent / workflow
+- 组合 LLM、Prompt、工具、向量数据库、检索和多 agent 流程
+- 在 Playground 里调试流程
+- 把流程发布为 API 或 MCP server，供外部系统调用
+
+放进 Meyo 的定位是“工作流实验台”和“可视化编排层”：Meyo 负责沉淀平台级 runtime、memory、knowledge、tool mesh 和治理边界；Langflow 用来快速搭流程、验证节点组合、把成熟流程再接回 Meyo 的 API / MCP / 工具体系。
+
+### 启动 Langflow
+
+Langflow 是独立源码项目，启动时要进入它自己的目录。首次启动前建议先准备本地 `.env`。当前 `apps/meyo-studio-flow/.env.example` 已经填了本地启动所需的布尔、端口和缓存默认值，不要把这些 typed 配置留成空字符串。
+
+```bash
+cd apps/meyo-studio-flow
+
+cp .env.example .env
+```
+
+然后启动 Langflow：
+
+```bash
+make run_cli open_browser=false
+```
+
+`make run_cli` 会安装后端依赖、安装前端依赖、构建前端，然后通过 `uv run langflow run` 启动服务。首次运行会比较慢，后续会复用缓存。
+
+默认访问：
+
+```text
+http://127.0.0.1:7860
+```
+
+如果 `7860` 端口被占用，可以换端口：
+
+```bash
+make run_cli open_browser=false port=7861
+```
+
+如果要让 Langflow 调 Meyo 当前的 OpenAI-compatible 模型服务，另开一个终端启动 Meyo：
+
+```bash
+cd <repo-root>
+uv run meyo start webserver --config meyo.toml
+```
+
+然后在 Langflow 的模型组件里使用：
+
+```text
+OpenAI API Base URL: http://127.0.0.1:5670/api/v1
+OpenAI API Key: 按 configs/meyo.toml 的 service.model.api.api_keys 配置填写；开发环境未配置时可留空
+```
+
+为了不改 Langflow 原生 provider，Meyo Studio Flow 额外新增了独立的 `Meyo` 组件分类，里面提供两个自定义模型组件：`Meyo Language Model` 和 `Meyo Embedding Model`。可以在 `apps/meyo-studio-flow/.env` 里配置默认值：
+
+```env
+MEYO_OPENAI_API_BASE_URL=http://127.0.0.1:5670/api/v1
+MEYO_LANGUAGE_MODEL_NAME=Pro/zai-org/GLM-5.1
+MEYO_EMBEDDING_MODEL_NAME=Qwen/Qwen3-Embedding-8B
+MEYO_OPENAI_API_KEY=
+```
+
+已有 Flow 里的旧节点不会自动改值，需要手动更新节点字段或重新拖一个新的 Meyo 节点。

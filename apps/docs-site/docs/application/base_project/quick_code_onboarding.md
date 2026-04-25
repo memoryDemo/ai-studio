@@ -30,7 +30,8 @@ title: 快速上手：当前工程骨架与最短阅读路径
 - 已经有清晰的架构文档
 - 已经有 `core / ext / client / serve / app / sandbox / accelerator` 的包边界
 - 已经有统一 CLI、配置加载、最小 FastAPI WebServer 和静态首页
-- 但**还没有**完整的 OpenAPI 路由、Scene 分发和前端工作台
+- `apps/` 下已经接入 Open WebUI、Langflow 和文档站这类独立应用
+- 但 Meyo 自己还没有完整的 OpenAPI 路由、Scene 分发和自研前端工作台
 
 所以第一次看代码时，不要先找：
 
@@ -42,7 +43,7 @@ title: 快速上手：当前工程骨架与最短阅读路径
 
 你现在真正应该先理解的是：
 
-`workspace 配置 -> core CLI -> app 配置与 WebServer -> ext/serve 预留层 -> accelerator 可选依赖层 -> docs 设计基线`
+`workspace 配置 -> core CLI -> app 配置与 WebServer -> ext/serve 预留层 -> accelerator 可选依赖层 -> apps 独立应用 -> docs 设计基线`
 
 ## 当前最短阅读路径
 
@@ -137,6 +138,22 @@ title: 快速上手：当前工程骨架与最短阅读路径
 - 维持可选推理加速依赖矩阵
 - 把高风险或高平台耦合的安装策略从主业务包里隔离出来
 
+### 7. `apps`
+
+最后看：
+
+- `apps/meyo-chatbot`
+- `apps/meyo-studio-flow`
+- `apps/docs-site`
+
+这一层是上层应用和工具入口：
+
+- `meyo-chatbot` 承接客户聊天体验，基于 Open WebUI。
+- `meyo-studio-flow` 承接可视化 agent / workflow 编排和流程调试。
+- `docs-site` 承接 Docusaurus 文档站。
+
+这些应用保持独立，不进入根 `uv workspace`；它们通过 HTTP API、OpenAI-compatible API 或 MCP 边界接 Meyo。
+
 ## 当前最有效的验证方式
 
 ### 验证 1：代码最小语法检查
@@ -152,9 +169,9 @@ python -m compileall packages
 在 docs 工作区执行：
 
 ```bash
-cd <repo-root>/docs
-bun install
-bun run build
+cd <repo-root>/apps/docs-site
+npm install
+npm run build
 ```
 
 ## 当前推荐的开发顺序
@@ -175,4 +192,4 @@ bun run build
 
 而是：
 
-`workspace -> core CLI -> app webserver -> ext/serve/client boundaries -> accelerator deps -> docs truth`
+`workspace -> core CLI -> app webserver -> ext/serve/client boundaries -> accelerator deps -> apps -> docs truth`

@@ -12,7 +12,10 @@ title: 目录结构与模块职责
 
 ```text
 meyo/
-├── docs/                  # Docusaurus 文档站
+├── apps/                  # 独立应用入口
+│   ├── meyo-chatbot/      # Open WebUI 客户聊天前端
+│   ├── meyo-studio-flow/  # Langflow 可视化 Agent / Workflow 编排平台
+│   └── docs-site/         # Docusaurus 文档站
 ├── packages/              # Python workspace 子包
 │   ├── meyo-core/
 │   ├── meyo-ext/
@@ -30,7 +33,31 @@ meyo/
 
 ## 关键目录怎么读
 
-### `docs/`
+### `apps/`
+
+应用层放这里。它们是上层产品或工具入口，不直接进入根 `uv workspace`。
+
+#### `apps/meyo-chatbot`
+
+职责：
+
+- 客户聊天前端
+- 基于 Open WebUI
+- 通过 OpenAI-compatible API 调 Meyo 模型服务
+
+#### `apps/meyo-studio-flow`
+
+职责：
+
+- 可视化搭建 AI agent / workflow
+- 调试 LLM、Prompt、工具、检索、向量数据库和多 agent 编排
+- 将成熟流程发布成 API 或 MCP server
+
+当前这个目录是本地 Langflow 仓库的源码副本，复制时排除了 `.git`、虚拟环境、`node_modules`、构建产物、缓存、文档资源和 IDE 本地配置。
+
+它在 Meyo 中的定位是工作流实验台和可视化编排层；Meyo 继续沉淀平台级 runtime、memory、knowledge、tool mesh 和治理边界。
+
+#### `apps/docs-site`
 
 文档工作区，当前已经是仓库里最完整的一层。
 
@@ -124,7 +151,7 @@ meyo/
 
 下面这些目录在 `Umber Studio` 很重要，但在 `Meyo` 当前阶段**故意还没建**：
 
-- `web/`
+- Meyo 自研 `web/`
 - `docker/`
 - `scripts/`
 - `openapi/`
@@ -141,7 +168,7 @@ meyo/
 3. `packages/meyo-ext`
 4. `packages/meyo-serve`
 5. `packages/meyo-app`
-6. `docs/docs/application/base_project/`
+6. `apps/docs-site/docs/application/base_project/`
 
 ## 一句话收口
 
