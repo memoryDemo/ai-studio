@@ -1,4 +1,4 @@
-import langflowAssistantIcon from "@/assets/langflow_assistant.svg";
+import meyoAssistantIcon from "@/assets/meyo-icon-square.png";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +17,8 @@ export function AssistantEmptyState({
     <div className="flex flex-1 flex-col items-center justify-center px-8">
       <div className="mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl">
         <img
-          src={langflowAssistantIcon}
-          alt="Langflow Assistant"
+          src={meyoAssistantIcon}
+          alt="Meyo Assistant"
           className="h-full w-full object-cover"
         />
       </div>

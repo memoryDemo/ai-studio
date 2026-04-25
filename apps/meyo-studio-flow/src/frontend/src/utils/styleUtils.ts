@@ -297,7 +297,7 @@ export const SIDEBAR_CATEGORIES = [
   {
     display_name: "Meyo",
     name: "Meyo",
-    icon: "Workflow",
+    icon: "Blocks",
   },
   {
     display_name: "sidebar.category.modelsAndAgents",
@@ -505,7 +505,7 @@ export const categoryIcons: Record<string, string> = {
   vectorstores: "Layers",
   embeddings: "Binary",
   agents: "Bot",
-  Meyo: "Workflow",
+  Meyo: "Blocks",
   chains: "Link",
   documentloaders: "Paperclip",
   langchain_utilities: "PocketKnife",
@@ -533,7 +533,7 @@ export const nodeIconToDisplayIconMap: Record<string, string> = {
   vectorstores: "Layers",
   embeddings: "Binary",
   agents: "Bot",
-  Meyo: "Workflow",
+  Meyo: "Blocks",
   chains: "Link",
   documentloaders: "Paperclip",
   langchain_utilities: "PocketKnife",

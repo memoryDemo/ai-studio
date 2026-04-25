@@ -64,7 +64,7 @@ jest.mock("../HelpDropdown", () => ({
   default: () => <div data-testid="help-dropdown" />,
 }));
 
-jest.mock("@/assets/langflow_assistant.svg", () => "mock-assistant-icon.svg");
+jest.mock("@/assets/meyo-icon-square.png", () => "mock-assistant-icon.png");
 
 jest.mock("@/stores/assistantManagerStore", () => ({
   __esModule: true,
@@ -107,7 +107,7 @@ describe("CanvasControls", () => {
     render(<CanvasControls selectedNode={null} />);
 
     expect(screen.getByText("New")).toBeInTheDocument();
-    expect(screen.getByAltText("Langflow Assistant")).toBeInTheDocument();
+    expect(screen.getByAltText("Meyo Assistant")).toBeInTheDocument();
   });
 
   it("should_render_sticky_note_button", () => {

@@ -3,7 +3,7 @@ import ChatMessage from "../chat-message";
 import ThinkingMessage from "../thinking-message";
 
 // Mock SVG imports
-jest.mock("@/assets/LangflowLogo.svg?react", () => ({
+jest.mock("@/assets/MeyoLogo", () => ({
   __esModule: true,
   default: () => <div data-testid="langflow-logo" />,
 }));

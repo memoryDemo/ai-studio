@@ -328,6 +328,8 @@ export const lazyIconsMapping = {
   Maritalk: () =>
     import("@/icons/Maritalk").then((mod) => ({ default: mod.MaritalkIcon })),
   Mcp: () => import("@/icons/MCP").then((mod) => ({ default: mod.McpIcon })),
+  MeyoIcon: () =>
+    import("@/icons/Meyo").then((mod) => ({ default: mod.MeyoIcon })),
   Mem0: () => import("@/icons/Mem0").then((mod) => ({ default: mod.Mem0 })),
   Mem0Composio: () =>
     import("@/icons/Mem0Composio").then((mod) => ({

@@ -1,7 +1,7 @@
 import { Panel, useStoreApi } from "@xyflow/react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import langflowAssistantIcon from "@/assets/langflow_assistant.svg";
+import meyoAssistantIcon from "@/assets/meyo-icon-square.png";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import { ENABLE_INSPECTION_PANEL } from "@/customization/feature-flags";
@@ -104,8 +104,8 @@ const CanvasControls = ({
             </svg>
             {/* Colorful icon - hover state */}
             <img
-              src={langflowAssistantIcon}
-              alt="Langflow Assistant"
+              src={meyoAssistantIcon}
+              alt="Meyo Assistant"
               className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-150 group-hover:opacity-100"
             />
           </Button>
