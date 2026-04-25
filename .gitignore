@@ -74,3 +74,4 @@ test_docs
 .qwencode/
 .sisyphus/
 /logs/
+/.junie/
