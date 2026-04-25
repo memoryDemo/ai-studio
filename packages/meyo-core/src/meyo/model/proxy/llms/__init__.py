@@ -1,8 +1,4 @@
-"""包入口，集中导出当前目录下的模型服务相关能力。"""
-
-from meyo.model.proxy.llms.siliconflow import (
-    SiliconFlowDeployModelParameters,
-    SiliconFlowLLMClient,
-)
-
-__all__ = ["SiliconFlowDeployModelParameters", "SiliconFlowLLMClient"]
+"""
+私有化部署大模型通常会遇到部署成本高、推理性能不稳定等限制。
+在数据隐私要求相对较低的场景下，接入商业大模型可以更快、更高质量地完成产品落地。
+"""

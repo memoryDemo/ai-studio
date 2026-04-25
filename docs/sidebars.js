@@ -34,6 +34,17 @@ const sidebars = {
         { type: "doc", id: "application/base_project/development_playbooks", label: "开发 Playbooks" },
       ],
     },
+    {
+      type: "category",
+      label: "设计文档",
+      collapsed: false,
+      collapsible: true,
+      items: [
+        { type: "doc", id: "design/project_architecture_dependency_design", label: "项目架构与按需依赖设计" },
+        { type: "doc", id: "design/model_provider_manager_design", label: "Model Provider Manager 详细设计" },
+        { type: "doc", id: "design/logging_system_design", label: "日志系统设计" },
+      ],
+    },
   ],
 };
 

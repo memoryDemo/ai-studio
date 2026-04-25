@@ -242,11 +242,11 @@ LLM_MODEL_CONFIG = {
     "qwen2.5-coder-0.5b-instruct": os.path.join(
         MODEL_PATH, "Qwen2.5-Coder-0.5B-Instruct"
     ),
-    # (Llama2 based) We only support WizardLM-13B-V1.2 for now, which is trained from Llama-2 13b, see https://huggingface.co/WizardLM/WizardLM-13B-V1.2 # noqa
+    # 基于 Llama2，目前仅支持由 Llama-2 13B 训练得到的 WizardLM-13B-V1.2，参考：https://huggingface.co/WizardLM/WizardLM-13B-V1.2 # noqa
     "wizardlm-13b": os.path.join(MODEL_PATH, "WizardLM-13B-V1.2"),
-    # wget https://huggingface.co/TheBloke/vicuna-13B-v1.5-GGUF/resolve/main/vicuna-13b-v1.5.Q4_K_M.gguf -O models/ggml-model-q4_0.gguf # noqa
+    # 下载示例：wget https://huggingface.co/TheBloke/vicuna-13B-v1.5-GGUF/resolve/main/vicuna-13b-v1.5.Q4_K_M.gguf -O models/ggml-model-q4_0.gguf # noqa
     "llama-cpp": os.path.join(MODEL_PATH, "ggml-model-q4_0.gguf"),
-    # https://huggingface.co/internlm/internlm-chat-7b-v1_1, 7b vs 7b-v1.1: https://github.com/InternLM/InternLM/issues/288 # noqa
+    # InternLM 7B 与 7B v1.1 的差异参考：https://huggingface.co/internlm/internlm-chat-7b-v1_1 和 https://github.com/InternLM/InternLM/issues/288 # noqa
     "internlm-7b": os.path.join(MODEL_PATH, "internlm-chat-7b"),
     "internlm-7b-8k": os.path.join(MODEL_PATH, "internlm-chat-7b-8k"),
     "internlm-20b": os.path.join(MODEL_PATH, "internlm-chat-20b"),

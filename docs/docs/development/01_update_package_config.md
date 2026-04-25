@@ -186,12 +186,23 @@ dependencies = []
 
 ```toml
 dependencies = [
-    "meyo[cli,client,framework,observability,proxy_openai,runtime,simple_framework,tool]",
+    "meyo",
     "meyo-accelerator",
     "meyo-client",
-    "meyo-ext[file_s3,storage_milvus,storage_neo4j,storage_postgres,storage_redis]",
+    "meyo-ext",
     "meyo-sandbox",
     "meyo-serve",
+]
+
+[project.optional-dependencies]
+base = [
+    "meyo[cli,client,framework,runtime,simple_framework,tool]",
+]
+siliconflow = [
+    "meyo[proxy_openai]",
+]
+pg_milvus_neo4j = [
+    "meyo-ext[storage_postgres,storage_milvus,storage_neo4j]",
 ]
 ```
 
@@ -199,9 +210,9 @@ dependencies = [
 
 - `FastAPI / Uvicorn` 不直接写在 `app`，而是从 `meyo[simple_framework]` 打开
 - `LangGraph` 从 `meyo[runtime]` 打开
-- `OpenAI / tiktoken` 从 `meyo[proxy_openai]` 打开
+- `OpenAI / tiktoken` 从 `meyo[proxy_openai]` 打开，SiliconFlow LLM 也复用这一组
 - `MCP` 从 `meyo[tool]` 打开
-- `PostgreSQL / Redis / Milvus / Neo4j / S3` 从 `meyo-ext[...]` 打开
+- `PostgreSQL / Milvus / Neo4j` 从 `meyo-ext[...]` 按需打开
 
 ## 5. 只保留一个 CLI 入口
 
@@ -268,7 +279,9 @@ uv run meyo start webserver --config /meyo.toml
 因为根项目本身不承载业务依赖，统一用：
 
 ```shell
-uv sync --all-packages
+uv sync --all-packages \
+  --extra "base" \
+  --extra "siliconflow"
 ```
 
 先看 CLI 有没有挂上：

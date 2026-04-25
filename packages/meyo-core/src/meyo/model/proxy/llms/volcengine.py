@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union, cast
 
 from meyo.core import ModelMetadata
 from meyo.model.proxy.llms.proxy_model import ProxyModel, parse_model_request
@@ -24,54 +24,50 @@ if TYPE_CHECKING:
 
     ClientType = Union[AsyncAzureOpenAI, AsyncOpenAI]
 
-
-_SILICONFLOW_DEFAULT_MODEL = "Qwen/Qwen2.5-Coder-32B-Instruct"
+_DEFAULT_MODEL = "deepseek-v3-241226"
 
 
 @auto_register_resource(
-    label=_("SiliconFlow Proxy LLM"),
+    label=_("Volcengine Proxy LLM"),
     category=ResourceCategory.LLM_CLIENT,
     tags={"order": TAGS_ORDER_HIGH},
-    description=_("SiliconFlow proxy LLM configuration."),
-    documentation_url="https://docs.siliconflow.cn/en/api-reference/chat-completions/chat-completions",  # noqa
+    description=_("Volcengine proxy LLM configuration."),
+    documentation_url="https://www.volcengine.com/docs/82379/1298454",
     show_in_ui=False,
 )
 @dataclass
-class SiliconFlowDeployModelParameters(OpenAICompatibleDeployModelParameters):
-    """硅基流动模型部署参数。"""
+class VolcengineDeployModelParameters(OpenAICompatibleDeployModelParameters):
+    """火山引擎模型部署参数。"""
 
-    provider: str = "proxy/siliconflow"
+    provider: str = "proxy/volcengine"
 
     api_base: Optional[str] = field(
-        default="${env:SILICONFLOW_API_BASE:-https://api.siliconflow.cn/v1}",
+        default="${env:ARK_API_BASE:-https://ark.cn-beijing.volces.com/api/coding/v3}",
         metadata={
-            "help": _("The base url of the SiliconFlow API."),
+            "help": _("The base url of the Volcengine API."),
         },
     )
 
     api_key: Optional[str] = field(
-        default="${env:SILICONFLOW_API_KEY}",
+        default="${env:ARK_API_KEY}",
         metadata={
-            "help": _("The API key of the SiliconFlow API."),
+            "help": _("The API key of the Volcengine API."),
             "tags": "privacy",
         },
     )
 
 
-async def siliconflow_generate_stream(
+async def volcengine_generate_stream(
     model: ProxyModel, tokenizer, params, device, context_len=2048
 ):
-    client: SiliconFlowLLMClient = model.proxy_llm_client
+    client: VolcengineLLMClient = cast(VolcengineLLMClient, model.proxy_llm_client)
     request = parse_model_request(params, client.default_model, stream=True)
     async for r in client.generate_stream(request):
         yield r
 
 
-class SiliconFlowLLMClient(OpenAILLMClient):
-    """硅基流动大模型客户端。
-
-    硅基流动 API 兼容 OpenAI API，因此直接继承 OpenAILLMClient。
-    """
+class VolcengineLLMClient(OpenAILLMClient):
+    """火山引擎大模型客户端。"""
 
     def __init__(
         self,
@@ -79,10 +75,10 @@ class SiliconFlowLLMClient(OpenAILLMClient):
         api_base: Optional[str] = None,
         api_type: Optional[str] = None,
         api_version: Optional[str] = None,
-        model: Optional[str] = _SILICONFLOW_DEFAULT_MODEL,
+        model: Optional[str] = _DEFAULT_MODEL,
         proxies: Optional["ProxiesTypes"] = None,
         timeout: Optional[int] = 240,
-        model_alias: Optional[str] = _SILICONFLOW_DEFAULT_MODEL,
+        model_alias: Optional[str] = _DEFAULT_MODEL,
         context_length: Optional[int] = None,
         openai_client: Optional["ClientType"] = None,
         openai_kwargs: Optional[Dict[str, Any]] = None,
@@ -90,23 +86,16 @@ class SiliconFlowLLMClient(OpenAILLMClient):
     ):
         api_base = (
             api_base
-            or os.getenv("SILICONFLOW_API_BASE")
-            or "https://api.siliconflow.cn/v1"
+            or os.getenv("ARK_API_BASE")
+            or "https://ark.cn-beijing.volces.com/api/v3"
         )
-        api_key = api_key or os.getenv("SILICONFLOW_API_KEY")
-        model = model or _SILICONFLOW_DEFAULT_MODEL
-        if not context_length:
-            if "200k" in model:
-                context_length = 200 * 1024
-            else:
-                context_length = 4096
-
+        api_key = api_key or os.getenv("ARK_API_KEY")
+        model = model or _DEFAULT_MODEL
         if not api_key:
             raise ValueError(
-                "SiliconFlow API key is required, please set 'SILICONFLOW_API_KEY' in "
-                "environment or pass it as an argument."
+                "Volceing API key is required, please set 'ARK_API_KEY' in "
+                "environment variable or pass it to the client."
             )
-
         super().__init__(
             api_key=api_key,
             api_base=api_base,
@@ -122,57 +111,59 @@ class SiliconFlowLLMClient(OpenAILLMClient):
             **kwargs,
         )
 
+    def check_sdk_version(self, version: str) -> None:
+        if not version >= "1.0":
+            raise ValueError(
+                "Volcengine API requires openai>=1.0, please upgrade it by "
+                "`pip install --upgrade 'openai>=1.0'`"
+            )
+
     @property
     def default_model(self) -> str:
         model = self._model
         if not model:
-            model = _SILICONFLOW_DEFAULT_MODEL
+            model = _DEFAULT_MODEL
         return model
 
     @classmethod
-    def param_class(cls) -> Type[SiliconFlowDeployModelParameters]:
-        return SiliconFlowDeployModelParameters
+    def param_class(cls) -> Type[VolcengineDeployModelParameters]:
+        """获取模型部署参数类。"""
+        return VolcengineDeployModelParameters
 
     @classmethod
     def generate_stream_function(
         cls,
     ) -> Optional[Union[GenerateStreamFunction, AsyncGenerateStreamFunction]]:
-        return siliconflow_generate_stream
+        """获取流式生成函数。"""
+        return volcengine_generate_stream
 
 
 register_proxy_model_adapter(
-    SiliconFlowLLMClient,
+    VolcengineLLMClient,
     supported_models=[
         ModelMetadata(
-            model=["deepseek-ai/DeepSeek-V3", "Pro/deepseek-ai/DeepSeek-V3"],
+            model="deepseek-v3-241226",
             context_length=64 * 1024,
             max_output_length=8 * 1024,
-            description="DeepSeek-V3 by DeepSeek(DeepSeek-V3-0324)",
-            link="https://siliconflow.cn/zh-cn/models",
+            description="DeepSeek-V3 by DeepSeek",
+            link="https://api-docs.deepseek.com/news/news1226",
             function_calling=True,
         ),
         ModelMetadata(
-            model=["deepseek-ai/DeepSeek-R1", "Pro/deepseek-ai/DeepSeek-R1"],
+            model="deepseek-r1-250120",
             context_length=64 * 1024,
             max_output_length=8 * 1024,
-            description="DeepSeek-R1 by DeepSeek(DeepSeek-R1-0528)",
-            link="https://siliconflow.cn/zh-cn/models",
+            description="DeepSeek-R1 by DeepSeek",
+            link="https://api-docs.deepseek.com/news/news250120",
             function_calling=True,
         ),
         ModelMetadata(
-            model=[
-                "Qwen/Qwen2.5-Coder-32B-Instruct",
-                "Qwen/Qwen2.5-72B-Instruct",
-                "Qwen/Qwen2.5-32B-Instruct",
-                "Qwen/Qwen2.5-14B-Instruct",
-                "Qwen/Qwen2.5-7B-Instruct",
-                "Qwen/Qwen2.5-Coder-7B-Instruct",
-            ],
-            context_length=32 * 1024,
-            description="Qwen 2.5 By Qwen",
-            link="https://siliconflow.cn/zh-cn/models",
+            model="glm-4-7-251222",
+            context_length=128 * 1024,
+            max_output_length=4 * 1024,
+            description="GLM-4-7 by Zhipu AI (via Volcengine ARK)",
+            link="https://www.volcengine.com/docs/82379/1298454",
             function_calling=True,
         ),
-        # 更多模型请参考：https://cloud.siliconflow.cn/models
     ],
 )

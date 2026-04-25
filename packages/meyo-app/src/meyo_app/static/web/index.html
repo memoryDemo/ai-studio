@@ -1,13 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Meyo</title>
+    <title>Meyo Model Test</title>
     <style>
       :root {
         color-scheme: light;
-        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #f7f8fb;
+        color: #151922;
       }
 
       * {
@@ -17,46 +21,594 @@
       body {
         margin: 0;
         min-height: 100vh;
+        background: #f7f8fb;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      .app {
+        min-height: 100vh;
         display: grid;
-        place-items: center;
-        background: linear-gradient(135deg, #f8fafc 0%, #dbeafe 100%);
-        color: #0f172a;
+        grid-template-rows: auto 1fr auto;
       }
 
-      main {
-        width: min(640px, calc(100vw - 32px));
-        padding: 32px;
-        border-radius: 24px;
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #dde1ea;
+        background: #ffffff;
       }
 
-      h1 {
-        margin: 0 0 12px;
-        font-size: clamp(2rem, 4vw, 3rem);
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
       }
 
-      p {
+      .brand h1 {
         margin: 0;
-        font-size: 1.05rem;
-        line-height: 1.6;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0;
       }
 
-      code {
-        padding: 2px 8px;
-        border-radius: 999px;
-        background: #e2e8f0;
-        font-size: 0.95rem;
+      .status {
+        min-height: 20px;
+        color: #667085;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns:
+          minmax(120px, 160px) minmax(180px, 280px) minmax(160px, 220px)
+          auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field label {
+        color: #667085;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        height: 38px;
+        border: 1px solid #cfd6e3;
+        border-radius: 6px;
+        padding: 0 10px;
+        background: #ffffff;
+        color: #151922;
+        outline: none;
+      }
+
+      .field input:focus,
+      .field select:focus,
+      textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      .icon-button,
+      .send-button {
+        height: 38px;
+        border: 1px solid #1f56d2;
+        border-radius: 6px;
+        padding: 0 14px;
+        background: #2563eb;
+        color: #ffffff;
+        cursor: pointer;
+        font-weight: 650;
+      }
+
+      .icon-button {
+        align-self: end;
+      }
+
+      .icon-button:disabled,
+      .send-button:disabled {
+        border-color: #b8c0cc;
+        background: #d0d5dd;
+        color: #667085;
+        cursor: not-allowed;
+      }
+
+      .chat {
+        display: grid;
+        grid-template-rows: 1fr;
+        min-height: 0;
+      }
+
+      .messages {
+        min-height: 0;
+        overflow: auto;
+        padding: 24px;
+      }
+
+      .message-list {
+        width: min(920px, 100%);
+        margin: 0 auto;
+        display: grid;
+        gap: 14px;
+      }
+
+      .empty {
+        margin: 14vh auto 0;
+        width: min(680px, 100%);
+        display: grid;
+        gap: 14px;
+        color: #475467;
+      }
+
+      .empty h2 {
+        margin: 0;
+        color: #151922;
+        font-size: 24px;
+        letter-spacing: 0;
+      }
+
+      .empty p {
+        margin: 0;
+        line-height: 1.7;
+      }
+
+      .bubble {
+        display: grid;
+        gap: 8px;
+        width: min(760px, 92%);
+      }
+
+      .bubble.user {
+        justify-self: end;
+      }
+
+      .bubble.assistant {
+        justify-self: start;
+      }
+
+      .role {
+        color: #667085;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .content {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.65;
+        border: 1px solid #dde1ea;
+        border-radius: 8px;
+        padding: 12px 14px;
+        background: #ffffff;
+      }
+
+      .user .content {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+      }
+
+      .composer {
+        padding: 16px 24px 20px;
+        border-top: 1px solid #dde1ea;
+        background: #ffffff;
+      }
+
+      .composer-inner {
+        width: min(920px, 100%);
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: end;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 48px;
+        max-height: 160px;
+        resize: vertical;
+        border: 1px solid #cfd6e3;
+        border-radius: 8px;
+        padding: 12px;
+        background: #ffffff;
+        color: #151922;
+        line-height: 1.5;
+        outline: none;
+      }
+
+      .send-button {
+        min-width: 92px;
+        height: 48px;
+      }
+
+      @media (max-width: 820px) {
+        .topbar {
+          grid-template-columns: 1fr;
+          padding: 14px;
+        }
+
+        .controls {
+          grid-template-columns: 1fr;
+        }
+
+        .icon-button {
+          align-self: auto;
+        }
+
+        .messages {
+          padding: 16px 14px;
+        }
+
+        .composer {
+          padding: 12px 14px 16px;
+        }
+
+        .composer-inner {
+          grid-template-columns: 1fr;
+        }
+
+        .send-button {
+          width: 100%;
+        }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Hello World</h1>
-      <p>
-        Meyo minimal web shell is running.
-        API health check: <code>/api/healthz</code>
-      </p>
-    </main>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <h1>Meyo Model Test</h1>
+          <div class="status" id="status">正在读取模型列表...</div>
+        </div>
+        <div class="controls">
+          <div class="field">
+            <label for="mode">能力</label>
+            <select id="mode">
+              <option value="chat">聊天</option>
+              <option value="embeddings">向量</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="model">模型</label>
+            <select id="model"></select>
+          </div>
+          <div class="field">
+            <label for="apiKey">API Key</label>
+            <input id="apiKey" type="password" placeholder="未配置 api_keys 时可留空" />
+          </div>
+          <button class="icon-button" id="reload" type="button">刷新模型</button>
+        </div>
+      </header>
+
+      <main class="chat">
+        <section class="messages" id="messages">
+          <div class="empty" id="empty">
+            <h2>后端启动后，可以直接在这里测试模型能力。</h2>
+            <p>
+              聊天模式调用 <strong>/api/v1/chat/completions</strong>，向量模式调用
+              <strong>/api/v1/embeddings</strong>。如果配置了 <strong>api_keys</strong>，
+              在右上角填入同一个 token。
+            </p>
+          </div>
+          <div class="message-list" id="messageList"></div>
+        </section>
+      </main>
+
+      <footer class="composer">
+        <form class="composer-inner" id="chatForm">
+          <textarea
+            id="prompt"
+            rows="2"
+            placeholder="输入问题，例如：用一句话介绍 Meyo 当前模型服务能力"
+          ></textarea>
+          <button class="send-button" id="send" type="submit">发送</button>
+        </form>
+      </footer>
+    </div>
+
+    <script>
+      const state = {
+        chatMessages: [],
+        models: [],
+        loading: false,
+      };
+
+      const modeSelect = document.getElementById("mode");
+      const modelSelect = document.getElementById("model");
+      const apiKeyInput = document.getElementById("apiKey");
+      const reloadButton = document.getElementById("reload");
+      const statusEl = document.getElementById("status");
+      const messagesEl = document.getElementById("messages");
+      const messageListEl = document.getElementById("messageList");
+      const emptyEl = document.getElementById("empty");
+      const formEl = document.getElementById("chatForm");
+      const promptEl = document.getElementById("prompt");
+      const sendButton = document.getElementById("send");
+
+      function headers() {
+        const result = { "Content-Type": "application/json" };
+        const token = apiKeyInput.value.trim();
+        if (token) {
+          result.Authorization = `Bearer ${token}`;
+        }
+        return result;
+      }
+
+      function setStatus(message) {
+        statusEl.textContent = message;
+      }
+
+      function setLoading(loading) {
+        state.loading = loading;
+        sendButton.disabled = loading;
+        reloadButton.disabled = loading;
+      }
+
+      function appendMessage(role, content) {
+        emptyEl.style.display = "none";
+
+        const item = document.createElement("article");
+        item.className = `bubble ${role}`;
+
+        const roleEl = document.createElement("div");
+        roleEl.className = "role";
+        roleEl.textContent =
+          role === "user" ? "你" : role === "assistant" ? "助手" : "结果";
+
+        const contentEl = document.createElement("div");
+        contentEl.className = "content";
+        contentEl.textContent = content;
+
+        item.append(roleEl, contentEl);
+        messageListEl.appendChild(item);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      function replaceLastAssistantMessage(content) {
+        const last = messageListEl.lastElementChild;
+        if (!last || !last.classList.contains("assistant")) {
+          appendMessage("assistant", content);
+          return;
+        }
+        last.querySelector(".content").textContent = content;
+      }
+
+      function parseWorkerModelName(modelName) {
+        const index = modelName.lastIndexOf("@");
+        if (index === -1) {
+          return { name: modelName, workerType: "llm" };
+        }
+        return {
+          name: modelName.slice(0, index),
+          workerType: modelName.slice(index + 1),
+        };
+      }
+
+      function uniqueModels(models) {
+        const seen = new Set();
+        const result = [];
+        for (const item of models) {
+          const key = `${item.workerType}:${item.name}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            result.push(item);
+          }
+        }
+        return result.sort((a, b) => a.name.localeCompare(b.name));
+      }
+
+      function activeWorkerType() {
+        return modeSelect.value === "embeddings" ? "text2vec" : "llm";
+      }
+
+      function refreshModelSelect() {
+        const workerType = activeWorkerType();
+        const models = state.models.filter((item) => item.workerType === workerType);
+        modelSelect.innerHTML = "";
+        for (const item of models) {
+          const option = document.createElement("option");
+          option.value = item.name;
+          option.textContent = item.name;
+          modelSelect.appendChild(option);
+        }
+
+        promptEl.placeholder =
+          modeSelect.value === "embeddings"
+            ? "输入要生成向量的文本，例如：Meyo 是一个模型服务后端"
+            : "输入问题，例如：用一句话介绍 Meyo 当前模型服务能力";
+
+        if (models.length === 0) {
+          setStatus(
+            modeSelect.value === "embeddings"
+              ? "没有读取到向量模型，请检查配置里的 [[models.embeddings]]。"
+              : "没有读取到聊天模型，请检查配置里的 [[models.llms]]。",
+          );
+        } else {
+          setStatus(
+            `当前模式可用 ${models.length} 个${modeSelect.value === "embeddings" ? "向量" : "聊天"}模型。`,
+          );
+        }
+      }
+
+      async function loadControllerModels() {
+        const response = await fetch("/api/controller/models?healthy_only=true", {
+          method: "GET",
+          headers: headers(),
+        });
+        const payload = await response.json();
+        if (!response.ok || payload.error) {
+          throw new Error(payload?.error?.message || response.statusText);
+        }
+        return Array.isArray(payload)
+          ? payload.map((item) => parseWorkerModelName(item.model_name || item.model))
+          : [];
+      }
+
+      async function loadOpenAIModelsAsFallback() {
+        const response = await fetch("/api/v1/models", {
+          method: "GET",
+          headers: headers(),
+        });
+        const payload = await response.json();
+        if (!response.ok || payload.error) {
+          throw new Error(payload?.error?.message || response.statusText);
+        }
+        const models = Array.isArray(payload.data) ? payload.data : [];
+        return models.map((item) => ({
+          name: item.id || item.model || item.name,
+          workerType: "llm",
+        }));
+      }
+
+      async function loadModels() {
+        setLoading(true);
+        setStatus("正在读取模型列表...");
+        try {
+          state.models = uniqueModels(await loadControllerModels());
+          if (state.models.length === 0) {
+            state.models = uniqueModels(await loadOpenAIModelsAsFallback());
+          }
+          refreshModelSelect();
+        } catch (error) {
+          modelSelect.innerHTML = "";
+          setStatus(`模型列表读取失败：${error.message}`);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      async function sendChatMessage(content, model) {
+        state.chatMessages.push({ role: "user", content });
+        appendMessage("user", content);
+        appendMessage("assistant", "正在生成...");
+        setLoading(true);
+        setStatus("正在请求聊天接口...");
+
+        try {
+          const response = await fetch("/api/v1/chat/completions", {
+            method: "POST",
+            headers: headers(),
+            body: JSON.stringify({
+              model,
+              messages: state.chatMessages,
+              temperature: 0.7,
+              stream: false,
+            }),
+          });
+          const payload = await response.json();
+          if (!response.ok || payload.error) {
+            throw new Error(payload?.error?.message || response.statusText);
+          }
+
+          const answer =
+            payload?.choices?.[0]?.message?.content ||
+            payload?.choices?.[0]?.text ||
+            JSON.stringify(payload, null, 2);
+          state.chatMessages.push({ role: "assistant", content: answer });
+          replaceLastAssistantMessage(answer);
+          setStatus("完成。");
+        } catch (error) {
+          replaceLastAssistantMessage(`请求失败：${error.message}`);
+          setStatus("聊天接口请求失败，请查看后端日志。");
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      async function sendEmbeddingText(content, model) {
+        appendMessage("user", content);
+        appendMessage("assistant", "正在生成向量...");
+        setLoading(true);
+        setStatus("正在请求向量接口...");
+
+        try {
+          const response = await fetch("/api/v1/embeddings", {
+            method: "POST",
+            headers: headers(),
+            body: JSON.stringify({
+              model,
+              input: content,
+            }),
+          });
+          const payload = await response.json();
+          if (!response.ok || payload.error) {
+            throw new Error(payload?.error?.message || response.statusText);
+          }
+
+          const embedding = payload?.data?.[0]?.embedding || [];
+          const preview = embedding
+            .slice(0, 12)
+            .map((value) =>
+              typeof value === "number" ? Number(value).toFixed(6) : String(value),
+            );
+          const result = [
+            `模型：${payload.model || model}`,
+            `维度：${embedding.length}`,
+            `前 12 个值：`,
+            `[${preview.join(", ")}${embedding.length > 12 ? ", ..." : ""}]`,
+          ].join("\n");
+          replaceLastAssistantMessage(result);
+          setStatus("向量生成完成。");
+        } catch (error) {
+          replaceLastAssistantMessage(`请求失败：${error.message}`);
+          setStatus("向量接口请求失败，请查看后端日志。");
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      async function sendMessage(content) {
+        const model = modelSelect.value.trim();
+        if (!model) {
+          setStatus("请先选择模型。");
+          return;
+        }
+
+        if (modeSelect.value === "embeddings") {
+          await sendEmbeddingText(content, model);
+        } else {
+          await sendChatMessage(content, model);
+        }
+      }
+
+      reloadButton.addEventListener("click", loadModels);
+      modeSelect.addEventListener("change", refreshModelSelect);
+
+      formEl.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const content = promptEl.value.trim();
+        if (!content || state.loading) {
+          return;
+        }
+        promptEl.value = "";
+        sendMessage(content);
+      });
+
+      promptEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+          formEl.requestSubmit();
+        }
+      });
+
+      loadModels();
+    </script>
   </body>
 </html>

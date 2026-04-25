@@ -53,10 +53,13 @@ meyo <- meyo-ext / meyo-client / meyo-serve <- meyo-app
 
 ## 最小启动
 
-先同步 workspace：
+先按当前后端组合同步 workspace。默认配置使用 SiliconFlow，如果本地要跑 PostgreSQL + Milvus + Neo4j：
 
 ```bash
-uv sync --all-packages
+uv sync --all-packages \
+  --extra "base" \
+  --extra "siliconflow" \
+  --extra "pg_milvus_neo4j"
 ```
 
 查看 CLI：

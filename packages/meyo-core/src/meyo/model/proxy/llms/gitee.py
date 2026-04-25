@@ -25,52 +25,52 @@ if TYPE_CHECKING:
     ClientType = Union[AsyncAzureOpenAI, AsyncOpenAI]
 
 
-_SILICONFLOW_DEFAULT_MODEL = "Qwen/Qwen2.5-Coder-32B-Instruct"
+_GITEE_DEFAULT_MODEL = "Qwen2.5-72B-Instruct"
 
 
 @auto_register_resource(
-    label=_("SiliconFlow Proxy LLM"),
+    label=_("Gitee Proxy LLM"),
     category=ResourceCategory.LLM_CLIENT,
     tags={"order": TAGS_ORDER_HIGH},
-    description=_("SiliconFlow proxy LLM configuration."),
-    documentation_url="https://docs.siliconflow.cn/en/api-reference/chat-completions/chat-completions",  # noqa
+    description=_("Gitee proxy LLM configuration."),
+    documentation_url="https://ai.gitee.com/docs/getting-started/intro",
     show_in_ui=False,
 )
 @dataclass
-class SiliconFlowDeployModelParameters(OpenAICompatibleDeployModelParameters):
-    """硅基流动模型部署参数。"""
+class GiteeDeployModelParameters(OpenAICompatibleDeployModelParameters):
+    """Gitee 模型部署参数。"""
 
-    provider: str = "proxy/siliconflow"
+    provider: str = "proxy/gitee"
 
     api_base: Optional[str] = field(
-        default="${env:SILICONFLOW_API_BASE:-https://api.siliconflow.cn/v1}",
+        default="${env:GITEE_API_BASE:-https://ai.gitee.com/v1}",
         metadata={
-            "help": _("The base url of the SiliconFlow API."),
+            "help": _("The base url of the Gitee API."),
         },
     )
 
     api_key: Optional[str] = field(
-        default="${env:SILICONFLOW_API_KEY}",
+        default="${env:GITEE_API_KEY}",
         metadata={
-            "help": _("The API key of the SiliconFlow API."),
+            "help": _("The API key of the Gitee API."),
             "tags": "privacy",
         },
     )
 
 
-async def siliconflow_generate_stream(
+async def gitee_generate_stream(
     model: ProxyModel, tokenizer, params, device, context_len=2048
 ):
-    client: SiliconFlowLLMClient = model.proxy_llm_client
+    client: GiteeLLMClient = model.proxy_llm_client
     request = parse_model_request(params, client.default_model, stream=True)
     async for r in client.generate_stream(request):
         yield r
 
 
-class SiliconFlowLLMClient(OpenAILLMClient):
-    """硅基流动大模型客户端。
+class GiteeLLMClient(OpenAILLMClient):
+    """Gitee 大模型客户端。
 
-    硅基流动 API 兼容 OpenAI API，因此直接继承 OpenAILLMClient。
+    Gitee API 兼容 OpenAI API，因此直接继承 OpenAILLMClient。
     """
 
     def __init__(
@@ -79,22 +79,18 @@ class SiliconFlowLLMClient(OpenAILLMClient):
         api_base: Optional[str] = None,
         api_type: Optional[str] = None,
         api_version: Optional[str] = None,
-        model: Optional[str] = _SILICONFLOW_DEFAULT_MODEL,
+        model: Optional[str] = _GITEE_DEFAULT_MODEL,
         proxies: Optional["ProxiesTypes"] = None,
         timeout: Optional[int] = 240,
-        model_alias: Optional[str] = _SILICONFLOW_DEFAULT_MODEL,
+        model_alias: Optional[str] = _GITEE_DEFAULT_MODEL,
         context_length: Optional[int] = None,
         openai_client: Optional["ClientType"] = None,
         openai_kwargs: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
-        api_base = (
-            api_base
-            or os.getenv("SILICONFLOW_API_BASE")
-            or "https://api.siliconflow.cn/v1"
-        )
-        api_key = api_key or os.getenv("SILICONFLOW_API_KEY")
-        model = model or _SILICONFLOW_DEFAULT_MODEL
+        api_base = api_base or os.getenv("GITEE_API_BASE") or "https://ai.gitee.com/v1"
+        api_key = api_key or os.getenv("GITEE_API_KEY")
+        model = model or _GITEE_DEFAULT_MODEL
         if not context_length:
             if "200k" in model:
                 context_length = 200 * 1024
@@ -103,8 +99,8 @@ class SiliconFlowLLMClient(OpenAILLMClient):
 
         if not api_key:
             raise ValueError(
-                "SiliconFlow API key is required, please set 'SILICONFLOW_API_KEY' in "
-                "environment or pass it as an argument."
+                "Gitee API key is required, please set 'GITEE_API_KEY' in environment "
+                "or pass it as an argument."
             )
 
         super().__init__(
@@ -126,53 +122,40 @@ class SiliconFlowLLMClient(OpenAILLMClient):
     def default_model(self) -> str:
         model = self._model
         if not model:
-            model = _SILICONFLOW_DEFAULT_MODEL
+            model = _GITEE_DEFAULT_MODEL
         return model
 
     @classmethod
-    def param_class(cls) -> Type[SiliconFlowDeployModelParameters]:
-        return SiliconFlowDeployModelParameters
+    def param_class(cls) -> Type[GiteeDeployModelParameters]:
+        return GiteeDeployModelParameters
 
     @classmethod
     def generate_stream_function(
         cls,
     ) -> Optional[Union[GenerateStreamFunction, AsyncGenerateStreamFunction]]:
-        return siliconflow_generate_stream
+        """获取流式生成函数。"""
+        return gitee_generate_stream
 
 
 register_proxy_model_adapter(
-    SiliconFlowLLMClient,
+    GiteeLLMClient,
     supported_models=[
         ModelMetadata(
-            model=["deepseek-ai/DeepSeek-V3", "Pro/deepseek-ai/DeepSeek-V3"],
+            model="DeepSeek-V3",
             context_length=64 * 1024,
             max_output_length=8 * 1024,
-            description="DeepSeek-V3 by DeepSeek(DeepSeek-V3-0324)",
-            link="https://siliconflow.cn/zh-cn/models",
+            description="DeepSeek-V3 by DeepSeek",
+            link="https://ai.gitee.com/hf-models/deepseek-ai/DeepSeek-V3/api",
             function_calling=True,
         ),
         ModelMetadata(
-            model=["deepseek-ai/DeepSeek-R1", "Pro/deepseek-ai/DeepSeek-R1"],
+            model="DeepSeek-R1",
             context_length=64 * 1024,
             max_output_length=8 * 1024,
-            description="DeepSeek-R1 by DeepSeek(DeepSeek-R1-0528)",
-            link="https://siliconflow.cn/zh-cn/models",
+            description="DeepSeek-R1 by DeepSeek",
+            link="https://ai.gitee.com/hf-models/deepseek-ai/DeepSeek-R1/api",
             function_calling=True,
         ),
-        ModelMetadata(
-            model=[
-                "Qwen/Qwen2.5-Coder-32B-Instruct",
-                "Qwen/Qwen2.5-72B-Instruct",
-                "Qwen/Qwen2.5-32B-Instruct",
-                "Qwen/Qwen2.5-14B-Instruct",
-                "Qwen/Qwen2.5-7B-Instruct",
-                "Qwen/Qwen2.5-Coder-7B-Instruct",
-            ],
-            context_length=32 * 1024,
-            description="Qwen 2.5 By Qwen",
-            link="https://siliconflow.cn/zh-cn/models",
-            function_calling=True,
-        ),
-        # 更多模型请参考：https://cloud.siliconflow.cn/models
+        # 更多模型请参考：https://ai.gitee.com/models
     ],
 )

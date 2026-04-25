@@ -19,7 +19,9 @@ title: 从零开始上手：uv、Workspace 与包加载链路
 当前最短启动命令：
 
 ```shell
-uv sync --all-packages
+uv sync --all-packages \
+  --extra "base" \
+  --extra "siliconflow"
 uv run meyo start webserver --config meyo.toml
 ```
 
@@ -122,10 +124,10 @@ meyo-accelerator = { workspace = true }
 用：
 
 ```shell
-uv sync --all-packages
+uv sync --all-packages --extra "base"
 ```
 
-就能把 workspace 里的包重新装进 `.venv`。
+就能把 workspace 里的包和基础后端依赖重新装进 `.venv`。
 
 ## 6. 当前包依赖关系
 
@@ -189,17 +191,29 @@ flowchart LR
 | `storage_milvus` | `pymilvus` | Milvus |
 | `storage_neo4j` | `neo4j` | Neo4j |
 | `file_s3` | `boto3` / `minio` | S3 / MinIO |
+| `model_tongyi` | `dashscope` | 通义 embedding |
 
-最终 `meyo-app` 这样装配：
+最终 `meyo-app` 只声明 workspace 包关系，具体能力通过 optional extras 按需打开：
 
 ```toml
 dependencies = [
-    "meyo[cli,client,framework,observability,proxy_openai,runtime,simple_framework,tool]",
+    "meyo",
     "meyo-accelerator",
     "meyo-client",
-    "meyo-ext[file_s3,storage_milvus,storage_neo4j,storage_postgres,storage_redis]",
+    "meyo-ext",
     "meyo-sandbox",
     "meyo-serve",
+]
+
+[project.optional-dependencies]
+base = [
+    "meyo[cli,client,framework,runtime,simple_framework,tool]",
+]
+siliconflow = [
+    "meyo[proxy_openai]",
+]
+pg_milvus_neo4j = [
+    "meyo-ext[storage_postgres,storage_milvus,storage_neo4j]",
 ]
 ```
 
@@ -207,9 +221,9 @@ dependencies = [
 
 - `FastAPI / Uvicorn` 来自 `meyo[simple_framework]`
 - `LangGraph` 来自 `meyo[runtime]`
-- `OpenAI / tiktoken` 来自 `meyo[proxy_openai]`
+- `OpenAI / tiktoken` 来自 `meyo[proxy_openai]`，SiliconFlow LLM 也复用这一组
 - `MCP` 来自 `meyo[tool]`
-- `PostgreSQL / Redis / Milvus / Neo4j / S3` 来自 `meyo-ext[...]`
+- `PostgreSQL / Milvus / Neo4j` 来自 `meyo-ext[...]`
 
 ## 8. CLI 是怎么注册的
 

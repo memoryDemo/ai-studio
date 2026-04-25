@@ -12,6 +12,7 @@ port = 5670
 [service.web.database]
 type = "sqlite"
 path = "pilot/meta_data/meyo.db"
+
 [service.model.worker]
 host = "127.0.0.1"
 
@@ -23,15 +24,18 @@ persist_path = "pilot/data"
 # 模型配置
 [models]
 [[models.llms]]
-name = "deepseek-reasoner"
-# name = "deepseek-chat"
-provider = "proxy/deepseek"
-api_key = "${env:DEEPSEEK_API_KEY}"
+name = "${env:ARK_MODEL_NAME:-deepseek-v3-241226}"
+provider = "proxy/volcengine"
+api_base = "${env:ARK_API_BASE:-https://ark.cn-beijing.volces.com/api/v3}"
+api_key = "${env:ARK_API_KEY}"
 
 [[models.embeddings]]
 name = "BAAI/bge-large-zh-v1.5"
-provider = "hf"
-# 未配置时会从 Hugging Face 模型仓库下载。
-# 如需使用本地模型路径，取消下面配置的注释。
-# path = "本地模型路径"
-path = "models/bge-large-zh-v1.5"
+provider = "proxy/siliconflow"
+backend = "BAAI/bge-large-zh-v1.5"
+api_key = "${env:SILICONFLOW_API_KEY}"
+
+[[models.rerankers]]
+name = "BAAI/bge-reranker-v2-m3"
+provider = "proxy/siliconflow"
+api_key = "${env:SILICONFLOW_API_KEY}"

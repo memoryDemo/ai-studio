@@ -8,18 +8,40 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    # core 主包，同时打开 CLI、Web、Runtime、OpenAI 代理、MCP 和观测能力。
-    "meyo[cli,client,framework,observability,proxy_openai,runtime,simple_framework,tool]",
-    # 可选加速能力包，后续放性能优化或硬件相关依赖。
+    # 默认只声明 workspace 包关系，具体能力依赖放到 optional extras 里按需打开。
+    "meyo",
     "meyo-accelerator",
-    # SDK / client 侧封装，app 可复用对外调用能力。
     "meyo-client",
-    # 外部系统适配层，同时打开 PG、Redis、Milvus、Neo4j、S3/MinIO 驱动。
-    "meyo-ext[file_s3,storage_milvus,storage_neo4j,storage_postgres,storage_redis]",
-    # 隔离执行能力，后续承接工具运行、代码执行、受控环境。
+    "meyo-ext",
     "meyo-sandbox",
-    # 服务编排层，后续把 core 协议和 ext 实现组织成业务服务。
     "meyo-serve",
+]
+
+[project.optional-dependencies]
+base = [
+    # 后端基础启动能力：CLI、HTTP API、配置、数据库、Runtime、MCP，不绑定具体模型供应商。
+    "meyo[cli,client,framework,runtime,simple_framework,tool]",
+]
+observability = [
+    # 观测能力单独打开，避免本地最小开发环境默认安装链路追踪依赖。
+    "meyo[observability]",
+]
+siliconflow = [
+    # 硅基流动 LLM 使用 OpenAI-compatible 协议，embedding/rerank 当前是直接 HTTP 调用。
+    "meyo[proxy_openai]",
+]
+multi_proxy = [
+    # 当前已迁移的非 OpenAI-compatible LLM provider SDK。
+    "meyo[proxy_anthropic,proxy_google,proxy_ollama,proxy_openai]",
+    "meyo-ext[model_tongyi]",
+]
+pg_milvus_neo4j = [
+    # PostgreSQL 元数据、Milvus 向量库、Neo4j 图数据库组合。
+    "meyo-ext[storage_postgres,storage_milvus,storage_neo4j]",
+]
+storage_common = [
+    # 常用存储扩展：PostgreSQL、Redis、Milvus、Neo4j、S3/MinIO。
+    "meyo-ext[file_s3,storage_milvus,storage_neo4j,storage_postgres,storage_redis]",
 ]
 
 [build-system]

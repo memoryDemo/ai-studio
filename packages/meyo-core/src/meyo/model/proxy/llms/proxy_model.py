@@ -1,5 +1,3 @@
-"""代理模型请求解析和通用调用逻辑，供具体大语言模型供应商复用。"""
-
 from __future__ import annotations
 
 import logging
@@ -34,5 +32,14 @@ class ProxyModel:
         messages: Union[str, BaseMessage, ModelMessage, List[ModelMessage]],
         model_name: Optional[int] = None,
     ) -> int:
-        """执行当前函数对应的业务逻辑。"""
+        """统计给定消息的 token 数。
+
+        参数：
+            messages (Union[str, BaseMessage, ModelMessage, List[ModelMessage]])：
+                需要统计 token 数的消息。
+            model_name (Optional[int], optional)：模型名称，默认为 None。
+
+        返回：
+            int：token 数，失败时返回 -1。
+        """
         return self._tokenizer.count_token(messages, model_name)

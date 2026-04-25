@@ -350,16 +350,33 @@ dependencies = []
 
 ## 9. app 做最终装配
 
-`meyo-app` 是最终启动和装配层，所以这里一次性选择完整运行时需要的 extras：
+`meyo-app` 是最终启动和装配层，但不应该把所有 provider 和存储依赖写死进默认依赖。
+
+默认依赖只保留 workspace 包关系：
 
 ```toml
 dependencies = [
-    "meyo[cli,client,framework,observability,proxy_openai,runtime,simple_framework,tool]",
+    "meyo",
     "meyo-accelerator",
     "meyo-client",
-    "meyo-ext[file_s3,storage_milvus,storage_neo4j,storage_postgres,storage_redis]",
+    "meyo-ext",
     "meyo-sandbox",
     "meyo-serve",
+]
+```
+
+具体能力放到 optional extras：
+
+```toml
+[project.optional-dependencies]
+base = [
+    "meyo[cli,client,framework,runtime,simple_framework,tool]",
+]
+siliconflow = [
+    "meyo[proxy_openai]",
+]
+pg_milvus_neo4j = [
+    "meyo-ext[storage_postgres,storage_milvus,storage_neo4j]",
 ]
 ```
 
@@ -367,19 +384,22 @@ dependencies = [
 
 - FastAPI / Uvicorn 从 `meyo[simple_framework]` 打开
 - LangGraph 从 `meyo[runtime]` 打开
-- OpenAI / tiktoken 从 `meyo[proxy_openai]` 打开
+- OpenAI / tiktoken 从 `meyo[proxy_openai]` 打开，SiliconFlow LLM 也复用这一组
 - MCP 从 `meyo[tool]` 打开
-- LangFuse / OpenTelemetry / Prometheus 从 `meyo[observability]` 打开
-- PostgreSQL / Redis / Milvus / Neo4j / S3 从 `meyo-ext[...]` 打开
+- LangFuse / OpenTelemetry / Prometheus 从 `meyo[observability]` 按需打开
+- PostgreSQL / Redis / Milvus / Neo4j / S3 从 `meyo-ext[...]` 按需打开
 
-这样 `app` 可以完整启动，但 `core`、`client`、`serve` 仍然可以保持自己的轻量安装边界。
+这样 `app` 可以按配置组合安装依赖，`core`、`client`、`serve` 也仍然保持自己的轻量安装边界。
 
 ## 10. 同步依赖
 
 改完各 package 的 `pyproject.toml` 后，在根目录执行：
 
 ```shell
-uv sync --all-packages
+uv sync --all-packages \
+  --extra "base" \
+  --extra "siliconflow" \
+  --extra "pg_milvus_neo4j"
 ```
 
 这一步会：
@@ -387,7 +407,7 @@ uv sync --all-packages
 - 解析 workspace 内所有 package
 - 把本地 package 按 workspace source 关联起来
 - 更新 `uv.lock`
-- 安装 app 打开的所有 extras
+- 安装本次运行组合需要的 extras
 
 如果只跑 `uv sync`，可能不会覆盖所有 workspace package。
 

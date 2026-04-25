@@ -75,6 +75,18 @@ proxy_openai = [
     # Token 计数工具，用于预算、上下文截断、成本统计。
     "tiktoken>=0.8,<1.0",
 ]
+proxy_anthropic = [
+    # Anthropic 官方 SDK，用于 Claude provider。
+    "anthropic>=0.40,<1.0",
+]
+proxy_google = [
+    # Google Gemini SDK，用于 Gemini provider。
+    "google-generativeai>=0.8,<1.0",
+]
+proxy_ollama = [
+    # Ollama Python SDK，用于本地 Ollama provider。
+    "ollama>=0.4,<1.0",
+]
 tool = [
     # Model Context Protocol SDK，用于接 MCP 工具生态。
     "mcp>=1.0,<2.0",

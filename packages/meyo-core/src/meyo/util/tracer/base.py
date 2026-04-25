@@ -14,7 +14,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from meyo.component import BaseComponent, ComponentType, SystemApp
 
 MEYO_TRACER_SPAN_ID = "Meyo-Trace-Span-Id"
-MEYO_TRACER_SPAN_ID_COMPAT = "Umber-Studio-Trace-Span-Id"
+MEYO_TRACER_SPAN_ID_COMPAT = "Meyo-Trace-Span-Id-Compat"
 
 # 代码说明。
 _TRACE_ID_MAX_VALUE = 2**128 - 1

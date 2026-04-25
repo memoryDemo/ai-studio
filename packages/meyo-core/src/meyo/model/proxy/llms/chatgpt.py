@@ -1,18 +1,9 @@
-"""兼容协议的大语言模型客户端实现，为远程供应商提供基础调用能力。"""
-
 import logging
 from concurrent.futures import Executor
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, AsyncIterator, Dict, List, Optional, Type, Union
 
 from meyo.core import MessageConverter, ModelMetadata, ModelOutput, ModelRequest
-from meyo.model.resource import (
-    TAGS_ORDER_HIGH,
-    Parameter,
-    ResourceCategory,
-    auto_register_resource,
-    register_resource,
-)
 from meyo.core.interface.parameter import LLMDeployModelParameters
 from meyo.model.proxy.base import (
     AsyncGenerateStreamFunction,
@@ -21,6 +12,13 @@ from meyo.model.proxy.base import (
     register_proxy_model_adapter,
 )
 from meyo.model.proxy.llms.proxy_model import ProxyModel, parse_model_request
+from meyo.model.resource import (
+    TAGS_ORDER_HIGH,
+    Parameter,
+    ResourceCategory,
+    auto_register_resource,
+    register_resource,
+)
 from meyo.model.utils.chatgpt_utils import OpenAIParameters
 from meyo.util.i18n_utils import _
 
@@ -43,7 +41,7 @@ logger = logging.getLogger(__name__)
 )
 @dataclass
 class OpenAICompatibleDeployModelParameters(LLMDeployModelParameters):
-    """配置参数定义。"""
+    """OpenAI 兼容模型部署参数。"""
 
     provider: str = "proxy/openai"
 
@@ -177,13 +175,20 @@ class OpenAILLMClient(ProxyLLMClient):
         self._openai_kwargs = openai_kwargs or {}
         super().__init__(model_names=[model_alias], context_length=context_length)
 
-        # 默认配置说明。
-        # 代码说明。
+        # 初始化 OpenAI 客户端并缓存默认请求头。
+        # 某些情况下这里会阻塞主线程。
         _ = self.client.default_headers
 
     @classmethod
     def param_class(cls) -> Type[OpenAICompatibleDeployModelParameters]:
-        """执行当前函数对应的业务逻辑。"""
+        """获取模型参数类。
+
+        工厂方法会调用当前方法来拿到模型参数类。
+
+        返回：
+            Type[OpenAICompatibleDeployModelParameters]：模型参数类。
+
+        """
         return OpenAICompatibleDeployModelParameters
 
     @classmethod
@@ -192,7 +197,7 @@ class OpenAILLMClient(ProxyLLMClient):
         model_params: OpenAICompatibleDeployModelParameters,
         default_executor: Optional[Executor] = None,
     ) -> "OpenAILLMClient":
-        """创建对象实例。"""
+        """根据模型参数创建新的客户端。"""
         return cls(
             api_key=model_params.api_key,
             api_base=model_params.api_base,
@@ -202,14 +207,18 @@ class OpenAILLMClient(ProxyLLMClient):
             proxy=model_params.http_proxy,
             model_alias=model_params.real_provider_model_name,
             context_length=max(model_params.context_length or 8192, 8192),
-            # 代码说明。
         )
 
     @classmethod
     def generate_stream_function(
         cls,
     ) -> Optional[Union[GenerateStreamFunction, AsyncGenerateStreamFunction]]:
-        """生成模型输出。"""
+        """获取流式生成函数。
+
+        返回：
+            Optional[Union[GenerateStreamFunction, AsyncGenerateStreamFunction]]：
+                流式生成函数。
+        """
         return chatgpt_generate_stream
 
     @property
@@ -235,7 +244,7 @@ class OpenAILLMClient(ProxyLLMClient):
         payload = {"stream": stream}
         model = request.model or self.default_model
         payload["model"] = model
-        # 代码说明。
+        # 应用 OpenAI 额外参数。
         for k, v in self._openai_kwargs.items():
             payload[k] = v
         if request.temperature:
@@ -307,7 +316,7 @@ class OpenAILLMClient(ProxyLLMClient):
         async for r in chat_completion:
             if len(r.choices) == 0:
                 continue
-            # 检查条件是否满足。
+            # 处理 Azure GPT-4o 响应中 choices 为空的问题。
             if r.choices[0] is not None and r.choices[0].delta is None:
                 continue
             delta_obj = r.choices[0].delta
@@ -328,7 +337,13 @@ class OpenAILLMClient(ProxyLLMClient):
         return [model_metadata]
 
     async def get_context_length(self) -> int:
-        """获取对应数据。"""
+        """获取模型上下文长度。
+
+        返回：
+            int：上下文长度。
+        TODO：这是临时方案，后续应该提供更好的上下文长度获取方式，
+            例如从 OpenAI API 获取真实上下文长度。
+        """
         return self._context_length
 
 

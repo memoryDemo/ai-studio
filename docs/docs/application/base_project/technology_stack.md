@@ -218,8 +218,17 @@ title: Meyo 技术栈
 | `storage_milvus` | Milvus |
 | `storage_neo4j` | Neo4j |
 | `file_s3` | MinIO / S3 |
+| `model_tongyi` | DashScope |
 
-最终由 `meyo-app` 选择这些 extras，组成当前可运行应用。
+最终由 `meyo-app` 组合这些 extras，组成当前可运行应用：
+
+| extra | 对应组合 |
+|---|---|
+| `base` | CLI / Web / Runtime / Framework / MCP |
+| `siliconflow` | SiliconFlow LLM 所需 OpenAI-compatible SDK |
+| `multi_proxy` | 多远程 LLM provider SDK |
+| `pg_milvus_neo4j` | PostgreSQL / Milvus / Neo4j |
+| `storage_common` | PostgreSQL / Redis / Milvus / Neo4j / S3 |
 
 ## 八、最终结论
 

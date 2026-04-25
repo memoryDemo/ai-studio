@@ -1,10 +1,9 @@
 [system]
 # 从环境变量读取默认语言，未设置时使用默认值。
-language = "${env:MEYO_LANG:-en}"
+language = "${env:MEYO_LANG:-zh}"
 api_keys = []
 encrypt_key = "${env:MEYO_ENCRYPT_KEY:-your_secret_key}"
 
-# 服务配置
 [service.web]
 host = "0.0.0.0"
 port = 5670
@@ -13,15 +12,12 @@ port = 5670
 type = "sqlite"
 path = "pilot/meta_data/meyo.db"
 
-[rag.storage]
-[rag.storage.vector]
-type = "chroma"
-persist_path = "pilot/data"
+[service.model.worker]
+host = "127.0.0.1"
 
-# 模型配置
 [models]
 [[models.llms]]
-name = "deepseek-r1:1.5b"
-provider = "proxy/ollama"
-api_base = "http://localhost:11434"
-api_key = ""
+name = "${env:MOONSHOT_MODEL_NAME:-moonshot-v1-8k}"
+provider = "proxy/moonshot"
+api_base = "${env:MOONSHOT_API_BASE:-https://api.moonshot.cn/v1}"
+api_key = "${env:MOONSHOT_API_KEY}"

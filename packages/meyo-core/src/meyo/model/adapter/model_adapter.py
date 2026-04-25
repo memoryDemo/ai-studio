@@ -16,7 +16,8 @@ from meyo.model.base import ModelType
 logger = logging.getLogger(__name__)
 
 thread_local = threading.local()
-_IS_BENCHMARK = os.getenv("DB_GPT_MODEL_BENCHMARK", "False").lower() == "true"
+# 是否开启模型基准测试模式，只读取 meyo 自己的环境变量命名。
+_IS_BENCHMARK = os.getenv("MEYO_MODEL_BENCHMARK", "False").lower() == "true"
 
 
 @cache
