@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "@/controllers/API/api";
 import { getURL } from "@/controllers/API/helpers/constants";
 import {
@@ -23,9 +24,31 @@ import {
   processFlows,
   removeApiKeys,
 } from "@/utils/reactflowUtils";
+import type { AllNodeType, EdgeType, FlowType } from "@/types/flow";
 import { CURRENT_DRAFT_ID } from "./constants";
 
+type ApiErrorLike = {
+  message?: string;
+  response?: { data?: { detail?: string } };
+};
+type AutoSaveFlow = NonNullable<
+  ReturnType<typeof useFlowStore.getState>["autoSaveFlow"]
+> & {
+  flush?: () => void;
+};
+
+function getApiErrorDetail(err: unknown): string | undefined {
+  if (!err || typeof err !== "object") return undefined;
+  return (err as ApiErrorLike).response?.data?.detail;
+}
+
+function getApiErrorMessage(err: unknown): string {
+  if (!err || typeof err !== "object") return "Unknown error";
+  return getApiErrorDetail(err) ?? (err as ApiErrorLike).message ?? "Unknown error";
+}
+
 export function useFlowVersionSidebar(flowId: string) {
+  const { t } = useTranslation();
   const setSuccessData = useAlertStore((state) => state.setSuccessData);
   const setErrorData = useAlertStore((state) => state.setErrorData);
   const setPreview = useVersionPreviewStore((s) => s.setPreview);
@@ -55,8 +78,8 @@ export function useFlowVersionSidebar(flowId: string) {
   // in an effect) so the values are available before the preview layoutEffect.
   // Falls back to empty arrays if the store is not yet initialized to prevent
   // setting `undefined` into the store on cleanup.
-  const originalDraftNodesRef = useRef<any[] | null>(null);
-  const originalDraftEdgesRef = useRef<any[] | null>(null);
+  const originalDraftNodesRef = useRef<AllNodeType[] | null>(null);
+  const originalDraftEdgesRef = useRef<EdgeType[] | null>(null);
   if (originalDraftNodesRef.current === null) {
     originalDraftNodesRef.current =
       cloneDeep(useFlowStore.getState().nodes) ?? [];
@@ -99,8 +122,8 @@ export function useFlowVersionSidebar(flowId: string) {
   }, [isLoadingEntry, setPreviewLoading]);
 
   const processedPreview = useMemo<{
-    nodes: any[];
-    edges: any[];
+    nodes: AllNodeType[];
+    edges: EdgeType[];
     error?: boolean;
     errorMessage?: string;
   } | null>(() => {
@@ -109,9 +132,15 @@ export function useFlowVersionSidebar(flowId: string) {
 
     try {
       const clonedData = cloneDeep(selectedEntryFull.data);
-      const flow = { data: clonedData, is_component: false } as any;
+      const flow: FlowType = {
+        id: selectedEntryFull.id,
+        name: selectedEntryFull.version_tag,
+        data: clonedData as FlowType["data"],
+        description: selectedEntryFull.description ?? "",
+        is_component: false,
+      };
       processFlows([flow]);
-      return { nodes: flow.data.nodes, edges: flow.data.edges };
+      return { nodes: flow.data?.nodes ?? [], edges: flow.data?.edges ?? [] };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       console.error("Failed to process version flow data for preview:", err);
@@ -127,8 +156,8 @@ export function useFlowVersionSidebar(flowId: string) {
       });
     } else if (selectedId === CURRENT_DRAFT_ID || processedPreview?.error) {
       useFlowStore.setState({
-        nodes: cloneDeep(originalDraftNodesRef.current),
-        edges: cloneDeep(originalDraftEdgesRef.current),
+        nodes: cloneDeep(originalDraftNodesRef.current ?? []),
+        edges: cloneDeep(originalDraftEdgesRef.current ?? []),
       });
     }
     // Fit the canvas to the new nodes after ReactFlow processes the state update.
@@ -140,13 +169,13 @@ export function useFlowVersionSidebar(flowId: string) {
   useEffect(() => {
     if (processedPreview?.error) {
       setErrorData({
-        title: "This version's data could not be rendered for preview",
+        title: t("flowVersion.previewRenderFailed"),
         ...(processedPreview.errorMessage
           ? { list: [processedPreview.errorMessage] }
           : {}),
       });
     }
-  }, [processedPreview?.error, processedPreview?.errorMessage, setErrorData]);
+  }, [processedPreview?.error, processedPreview?.errorMessage, setErrorData, t]);
 
   useEffect(() => {
     if (
@@ -163,8 +192,8 @@ export function useFlowVersionSidebar(flowId: string) {
       );
     } else if (selectedId === CURRENT_DRAFT_ID || processedPreview?.error) {
       setPreview(
-        cloneDeep(originalDraftNodesRef.current),
-        cloneDeep(originalDraftEdgesRef.current),
+        cloneDeep(originalDraftNodesRef.current ?? []),
+        cloneDeep(originalDraftEdgesRef.current ?? []),
         "Current Draft",
         null,
       );
@@ -176,10 +205,12 @@ export function useFlowVersionSidebar(flowId: string) {
     setPreview,
   ]);
 
-  const autoSaveFnRef = useRef<any>(null);
+  const autoSaveFnRef = useRef<AutoSaveFlow | undefined>(undefined);
   const inspectionPanelWasVisible = useRef(false);
   useLayoutEffect(() => {
-    const currentAutoSave = useFlowStore.getState().autoSaveFlow as any;
+    const currentAutoSave = useFlowStore.getState().autoSaveFlow as
+      | AutoSaveFlow
+      | undefined;
     if (currentAutoSave) {
       if (typeof currentAutoSave.flush === "function") {
         currentAutoSave.flush();
@@ -203,8 +234,8 @@ export function useFlowVersionSidebar(flowId: string) {
         const wasRestored = useVersionPreviewStore.getState().didRestore;
         if (!wasRestored) {
           useFlowStore.setState({
-            nodes: cloneDeep(originalDraftNodesRef.current),
-            edges: cloneDeep(originalDraftEdgesRef.current),
+            nodes: cloneDeep(originalDraftNodesRef.current ?? []),
+            edges: cloneDeep(originalDraftEdgesRef.current ?? []),
           });
         }
       } catch (err) {
@@ -229,7 +260,7 @@ export function useFlowVersionSidebar(flowId: string) {
       try {
         if (autoSaveFnRef.current) {
           useFlowStore.setState({ autoSaveFlow: autoSaveFnRef.current });
-          autoSaveFnRef.current = null;
+          autoSaveFnRef.current = undefined;
         }
       } catch (err) {
         console.error(
@@ -265,7 +296,7 @@ export function useFlowVersionSidebar(flowId: string) {
         const data = response.data?.data;
         const tag = response.data?.version_tag ?? "version";
         if (!data) {
-          setErrorData({ title: "No data available to export" });
+          setErrorData({ title: t("flowVersion.noExportData") });
           return;
         }
         const flowName = `${currentFlow?.name || "flow"}_${tag}`;
@@ -275,18 +306,16 @@ export function useFlowVersionSidebar(flowId: string) {
           name: flowName,
           description: currentFlow?.description ?? "",
           is_component: false,
-        } as any);
+        } as FlowType);
         downloadFlow(flowToExport, flowName, currentFlow?.description ?? "");
-      } catch (err: any) {
-        const detail = err?.response?.data?.detail;
-        const message = detail ?? err?.message ?? "Unknown error";
+      } catch (err: unknown) {
         setErrorData({
-          title: "Failed to export version",
-          list: [message],
+          title: t("flowVersion.exportFailed"),
+          list: [getApiErrorMessage(err)],
         });
       }
     },
-    [flowId, currentFlow, setErrorData],
+    [flowId, currentFlow, setErrorData, t],
   );
 
   const handleDelete = useCallback(
@@ -302,7 +331,7 @@ export function useFlowVersionSidebar(flowId: string) {
         { flowId, versionId: entry.id },
         {
           onSuccess: () => {
-            setSuccessData({ title: "Version deleted" });
+            setSuccessData({ title: t("flowVersion.versionDeleted") });
             // Select the next entry (triggers fetch + preview via existing
             // effects) instead of setting empty arrays into the store which
             // would cause a blank canvas flash.
@@ -313,17 +342,25 @@ export function useFlowVersionSidebar(flowId: string) {
               clearPreview();
             }
           },
-          onError: (err: any) => {
-            const detail = err?.response?.data?.detail;
+          onError: (err: unknown) => {
+            const detail = getApiErrorDetail(err);
             setErrorData({
-              title: "Failed to delete version",
+              title: t("flowVersion.deleteFailed"),
               ...(detail ? { list: [detail] } : {}),
             });
           },
         },
       );
     },
-    [flowId, versions, deleteEntry, setSuccessData, setErrorData, clearPreview],
+    [
+      flowId,
+      versions,
+      deleteEntry,
+      setSuccessData,
+      setErrorData,
+      clearPreview,
+      t,
+    ],
   );
 
   const isViewingDraft = selectedId === CURRENT_DRAFT_ID;
