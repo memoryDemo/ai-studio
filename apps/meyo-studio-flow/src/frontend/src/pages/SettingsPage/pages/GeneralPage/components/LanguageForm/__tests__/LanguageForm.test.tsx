@@ -96,50 +96,50 @@ describe("LanguageFormComponent", () => {
   it("calls i18n.changeLanguage with the selected language code", async () => {
     const user = userEvent.setup();
     render(<LanguageFormComponent />);
-    await user.selectOptions(screen.getByRole("combobox"), "fr");
-    expect(mockChangeLanguage).toHaveBeenCalledWith("fr");
+    await user.selectOptions(screen.getByRole("combobox"), "zh-Hans");
+    expect(mockChangeLanguage).toHaveBeenCalledWith("zh-Hans");
   });
 
   it("saves selected language to localStorage", async () => {
     const user = userEvent.setup();
     render(<LanguageFormComponent />);
-    await user.selectOptions(screen.getByRole("combobox"), "ja");
-    expect(localStorage.getItem("languagePreference")).toBe("ja");
+    await user.selectOptions(screen.getByRole("combobox"), "zh-Hans");
+    expect(localStorage.getItem("languagePreference")).toBe("zh-Hans");
   });
 
   it("calls setTypes with empty object on language change", async () => {
     const user = userEvent.setup();
     render(<LanguageFormComponent />);
-    await user.selectOptions(screen.getByRole("combobox"), "de");
+    await user.selectOptions(screen.getByRole("combobox"), "zh-Hans");
     expect(mockSetTypes).toHaveBeenCalledWith({});
   });
 
   it("invalidates useGetTypes query on language change", async () => {
     const user = userEvent.setup();
     render(<LanguageFormComponent />);
-    await user.selectOptions(screen.getByRole("combobox"), "es");
+    await user.selectOptions(screen.getByRole("combobox"), "zh-Hans");
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
       queryKey: ["useGetTypes"],
     });
   });
 
-  it("shows recommended label for English option", () => {
+  it("shows recommended label for Chinese option", () => {
     render(<LanguageFormComponent />);
-    const enOption = screen.getByRole("option", { name: /English/i });
-    expect(enOption.textContent).toContain("settings.languageRecommended");
+    const zhOption = screen.getByRole("option", { name: /中文/i });
+    expect(zhOption.textContent).toContain("settings.languageRecommended");
   });
 
-  it("does not show recommended label for non-English options", () => {
+  it("does not show recommended label for English option", () => {
     render(<LanguageFormComponent />);
-    const frOption = screen.getByRole("option", { name: /Français/i });
-    expect(frOption.textContent).not.toContain("settings.languageRecommended");
+    const enOption = screen.getByRole("option", { name: /English/i });
+    expect(enOption.textContent).not.toContain("settings.languageRecommended");
   });
 
   it("calls loadLanguage before changeLanguage when switching languages", async () => {
     const user = userEvent.setup();
     render(<LanguageFormComponent />);
-    await user.selectOptions(screen.getByRole("combobox"), "fr");
-    expect(mockLoadLanguage).toHaveBeenCalledWith("fr");
-    expect(mockChangeLanguage).toHaveBeenCalledWith("fr");
+    await user.selectOptions(screen.getByRole("combobox"), "zh-Hans");
+    expect(mockLoadLanguage).toHaveBeenCalledWith("zh-Hans");
+    expect(mockChangeLanguage).toHaveBeenCalledWith("zh-Hans");
   });
 });

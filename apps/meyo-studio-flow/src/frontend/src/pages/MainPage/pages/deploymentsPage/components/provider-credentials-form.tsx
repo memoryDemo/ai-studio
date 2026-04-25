@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Input } from "@/components/ui/input";
 import type { ProviderCredentials } from "../types";
@@ -14,13 +15,15 @@ export default function ProviderCredentialsForm({
   onCredentialsChange,
   layout = "single-column",
 }: ProviderCredentialsFormProps) {
+  const { t } = useTranslation();
   const [showApiKey, setShowApiKey] = useState(false);
 
   const urlAndApiKeyFields = (
     <>
       <div className="flex flex-col">
         <span className="pb-2 text-sm font-medium">
-          Service Instance URL <span className="text-destructive">*</span>
+          {t("deployments.providers.serviceInstanceUrl")}{" "}
+          <span className="text-destructive">*</span>
         </span>
         <Input
           type="url"
@@ -37,12 +40,13 @@ export default function ProviderCredentialsForm({
       </div>
       <div className="flex flex-col">
         <span className="pb-2 text-sm font-medium">
-          API Key <span className="text-destructive">*</span>
+          {t("deployments.providers.apiKey")}{" "}
+          <span className="text-destructive">*</span>
         </span>
         <div className="relative">
           <Input
             type={showApiKey ? "text" : "password"}
-            placeholder="Enter your API key"
+            placeholder={t("deployments.providers.apiKeyPlaceholder")}
             className="bg-muted pr-10"
             value={credentials.api_key}
             onChange={(e) =>
@@ -72,11 +76,12 @@ export default function ProviderCredentialsForm({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col">
         <span className="pb-2 text-sm font-medium">
-          Name <span className="text-destructive">*</span>
+          {t("deployments.providers.name")}{" "}
+          <span className="text-destructive">*</span>
         </span>
         <Input
           type="text"
-          placeholder="e.g. Production"
+          placeholder={t("deployments.providers.namePlaceholder")}
           className="bg-muted"
           value={credentials.name}
           onChange={(e) =>

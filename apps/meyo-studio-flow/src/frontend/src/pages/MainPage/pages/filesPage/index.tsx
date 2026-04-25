@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import type { FileType } from "@/types/file_management";
 import FilesTab from "./components/FilesTab";
 
 export const FilesPage = () => {
-  const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
+  const { t } = useTranslation();
+  const [selectedFiles, setSelectedFiles] = useState<FileType[]>([]);
   const [quantitySelected, setQuantitySelected] = useState(0);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
   const [quickFilterText, setQuickFilterText] = useState("");
@@ -64,7 +67,7 @@ export const FilesPage = () => {
                   </SidebarTrigger>
                 </div>
               </div>
-              Files
+              {t("files.title")}
             </div>
             <div className="flex h-full flex-col">
               <FilesTab {...tabProps} />

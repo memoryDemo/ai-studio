@@ -1,10 +1,12 @@
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { convertTestName } from "@/components/common/storeCardComponent/utils/convert-test-name";
 import { useCustomNavigate } from "@/customization/hooks/use-custom-navigate";
 import { track } from "@/customization/utils/analytics";
 import useAddFlow from "@/hooks/flows/use-add-flow";
 import { useFolderStore } from "@/stores/foldersStore";
+import { getLocalizedTemplateText } from "@/utils/templateTranslations";
 import { updateIds } from "@/utils/reactflowUtils";
 import { cn } from "@/utils/utils";
 import type { CardData } from "../../../../types/templates/types";
@@ -23,6 +25,7 @@ export default function TemplateGetStartedCardComponent({
   loading,
   onFlowCreating,
 }: TemplateGetStartedCardComponentProps) {
+  const { i18n } = useTranslation();
   const addFlow = useAddFlow();
   const navigate = useCustomNavigate();
   const { folderId } = useParams();
@@ -56,6 +59,10 @@ export default function TemplateGetStartedCardComponent({
       handleClick();
     }
   };
+
+  const displayText = flow
+    ? getLocalizedTemplateText(flow.name, flow.description ?? "", i18n.language)
+    : undefined;
 
   return flow ? (
     <div
@@ -93,7 +100,7 @@ export default function TemplateGetStartedCardComponent({
             )}`}
             className="line-clamp-3 text-lg font-bold lg:text-xl"
           >
-            {flow.name}
+            {displayText?.name}
           </h3>
           <ForwardedIconComponent
             name="ArrowRight"
@@ -102,7 +109,7 @@ export default function TemplateGetStartedCardComponent({
         </div>
 
         <p className="line-clamp-3 w-full overflow-hidden text-sm font-medium opacity-90">
-          {flow.description}
+          {displayText?.description}
         </p>
       </div>
     </div>

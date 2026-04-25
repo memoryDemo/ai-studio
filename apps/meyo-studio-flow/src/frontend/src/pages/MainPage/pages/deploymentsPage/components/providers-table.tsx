@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,14 +45,16 @@ export default function ProvidersTable({
   deletingId,
   onDeleteProvider,
 }: ProvidersTableProps) {
+  const { t } = useTranslation();
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>URL</TableHead>
-          <TableHead>Provider Key</TableHead>
-          <TableHead>Created</TableHead>
+          <TableHead>{t("deployments.providers.columns.name")}</TableHead>
+          <TableHead>{t("deployments.providers.columns.url")}</TableHead>
+          <TableHead>{t("deployments.providers.columns.providerKey")}</TableHead>
+          <TableHead>{t("deployments.providers.columns.created")}</TableHead>
           <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
@@ -95,7 +98,9 @@ export default function ProvidersTable({
                         size="icon"
                         className="h-8 w-8"
                         data-testid={`actions-provider-${provider.id}`}
-                        aria-label={`Actions for ${provider.name}`}
+                        aria-label={t("deployments.actionsFor", {
+                          name: provider.name,
+                        })}
                       >
                         <ForwardedIconComponent
                           name="EllipsisVertical"
@@ -112,7 +117,7 @@ export default function ProvidersTable({
                           name="Trash2"
                           className="mr-2 h-4 w-4"
                         />
-                        Delete
+                        {t("deployments.actions.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

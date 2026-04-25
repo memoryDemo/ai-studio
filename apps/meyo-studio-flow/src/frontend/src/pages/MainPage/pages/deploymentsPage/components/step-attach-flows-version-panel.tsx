@@ -1,18 +1,9 @@
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import type { FlowType } from "@/types/flow";
 import type { FlowVersionEntry } from "@/types/flow/version";
 import { cn } from "@/utils/utils";
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
 
 export const VersionPanel = memo(function VersionPanel({
   selectedFlow,
@@ -27,10 +18,12 @@ export const VersionPanel = memo(function VersionPanel({
   selectedVersionByFlow: Map<string, { versionId: string; versionTag: string }>;
   onAttach: (versionId: string) => void;
 }) {
+  const { i18n, t } = useTranslation();
+
   if (!selectedFlow) {
     return (
       <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-        Select a flow to see versions
+        {t("deployments.attach.selectFlowToSeeVersions")}
       </div>
     );
   }
@@ -40,7 +33,7 @@ export const VersionPanel = memo(function VersionPanel({
   return (
     <>
       <div className="border-b border-border p-4 text-sm text-muted-foreground">
-        Select a version to attach to this deployment
+        {t("deployments.attach.selectVersion")}
       </div>
       <div className="flex flex-1 flex-col overflow-hidden px-4 py-2">
         <h3 className="py-2 text-lg font-semibold">{selectedFlow.name}</h3>
@@ -78,12 +71,21 @@ export const VersionPanel = memo(function VersionPanel({
                           size="tag"
                           className="bg-accent-blue-muted text-accent-blue-muted-foreground"
                         >
-                          ATTACHED
+                          {t("deployments.attach.attachedBadge")}
                         </Badge>
                       )}
                     </span>
                     <span className="text-xxs leading-tight text-muted-foreground">
-                      Created: {formatDate(version.created_at)}
+                      {t("deployments.attach.created", {
+                        date: new Date(version.created_at).toLocaleDateString(
+                          i18n.language,
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          },
+                        ),
+                      })}
                     </span>
                   </span>
                 </button>

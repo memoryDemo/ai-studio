@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useGetDeploymentConfigs } from "@/controllers/API/queries/deployments/use-get-deployment-configs";
 import { useGetFlowVersions } from "@/controllers/API/queries/flow-version/use-get-flow-versions";
@@ -17,6 +18,7 @@ import { VersionPanel } from "./step-attach-flows-version-panel";
 type RightPanelView = "versions" | "connections";
 
 export default function StepAttachFlows() {
+  const { t } = useTranslation();
   const {
     isEditMode,
     initialFlowId,
@@ -180,8 +182,8 @@ export default function StepAttachFlows() {
         updateDetectedEnvVars(result.variables ?? []);
       } catch {
         setErrorData({
-          title: "Could not auto-detect environment variables",
-          list: ["Add them manually in the connection form."],
+          title: t("deployments.attach.autoDetectFailed"),
+          list: [t("deployments.attach.autoDetectManualHint")],
         });
       }
     };
@@ -219,8 +221,8 @@ export default function StepAttachFlows() {
       } catch {
         updateDetectedEnvVars([]);
         setErrorData({
-          title: "Could not auto-detect environment variables",
-          list: ["Add them manually in the connection form."],
+          title: t("deployments.attach.autoDetectFailed"),
+          list: [t("deployments.attach.autoDetectManualHint")],
         });
       }
     },
@@ -259,7 +261,9 @@ export default function StepAttachFlows() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 py-3">
-      <h2 className="text-lg font-semibold">Attach Flows</h2>
+      <h2 className="text-lg font-semibold">
+        {t("deployments.steps.attachFlows")}
+      </h2>
 
       <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-border">
         <FlowListPanel

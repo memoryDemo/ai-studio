@@ -113,6 +113,18 @@ const HeaderComponent = ({
   };
 
   const hasSelection = selectedFlows.length > 0;
+  const getFolderDisplayName = (name: string) => {
+    if (name === "Starter Project") return t("folder.starterProject");
+    if (name === "Starter Projects") return t("folder.starterProjects");
+    return name;
+  };
+
+  const getTabLabel = (type: string) => {
+    if (type === "mcp") return t("mainPage.mcpServer");
+    if (type === "deployments") return t("mainPage.deployments");
+    if (type === "components") return t("mainPage.components");
+    return t("mainPage.flows");
+  };
 
   return (
     <>
@@ -131,7 +143,7 @@ const HeaderComponent = ({
             </SidebarTrigger>
           </div>
         </div>
-        {folderName}
+        {getFolderDisplayName(folderName)}
       </div>
       {!isEmptyFolder && (
         <>
@@ -158,16 +170,14 @@ const HeaderComponent = ({
                     flowType === type && "-mb-px",
                   )}
                 >
-                  {type === "mcp"
-                    ? t("mainPage.mcpServer")
-                    : type.charAt(0).toUpperCase() + type.slice(1)}
+                  {getTabLabel(type)}
                   {type === "deployments" && (
                     <Badge
                       variant="purpleStatic"
                       size="xq"
                       className="h-auto shrink-0 rounded px-1 py-px text-[11px] leading-none text-accent-purple-foreground"
                     >
-                      Beta
+                      {t("sidebar.betaLabel")}
                     </Badge>
                   )}
                 </div>
@@ -182,7 +192,9 @@ const HeaderComponent = ({
                   icon="Search"
                   data-testid="search-store-input"
                   type="text"
-                  placeholder={t("mainPage.searchPlaceholder", { flowType })}
+                  placeholder={t("mainPage.searchPlaceholder", {
+                    flowType: getTabLabel(flowType),
+                  })}
                   className="mr-2 !text-mmd"
                   inputClassName="!text-mmd"
                   value={debouncedSearch}
@@ -241,11 +253,13 @@ const HeaderComponent = ({
                   <DeleteConfirmationModal
                     asChild
                     onConfirm={handleDelete}
-                    description={"flow" + (selectedFlows.length > 1 ? "s" : "")}
+                    description={t("mainPage.deleteFlowTarget", {
+                      count: selectedFlows.length,
+                    })}
                     note={
-                      "and " +
-                      (selectedFlows.length > 1 ? "their" : "its") +
-                      " message history"
+                      selectedFlows.length > 1
+                        ? t("mainPage.deleteFlowsMessageHistory")
+                        : t("mainPage.deleteFlowMessageHistory")
                     }
                   >
                     <Button

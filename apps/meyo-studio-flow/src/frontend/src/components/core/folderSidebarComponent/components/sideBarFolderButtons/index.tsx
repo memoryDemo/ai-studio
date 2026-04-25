@@ -55,6 +55,13 @@ type SideBarFoldersButtonsComponentProps = {
   handleDeleteFolder?: (item: FolderType) => void;
   handleFilesClick?: () => void;
 };
+
+type UploadedFlowObject = {
+  data?: {
+    nodes?: unknown[];
+  };
+};
+
 const SideBarFoldersButtonsComponent = ({
   handleChangeFolder,
   handleDeleteFolder,
@@ -81,6 +88,11 @@ const SideBarFoldersButtonsComponent = ({
   };
 
   const { t } = useTranslation();
+  const getFolderDisplayName = (name: string) => {
+    if (name === "Starter Project") return t("folder.starterProject");
+    if (name === "Starter Projects") return t("folder.starterProjects");
+    return name;
+  };
   const setErrorData = useAlertStore((state) => state.setErrorData);
   const setSuccessData = useAlertStore((state) => state.setSuccessData);
   const isMobile = useIsMobile({ maxWidth: 1024 });
@@ -135,7 +147,7 @@ const SideBarFoldersButtonsComponent = ({
         return;
       }
 
-      getObjectsFromFilelist<any>(files)
+      getObjectsFromFilelist<UploadedFlowObject>(files)
         .then((objects) => {
           if (objects.every((flow) => flow.data?.nodes)) {
             uploadFlow({ files })
@@ -448,7 +460,7 @@ const SideBarFoldersButtonsComponent = ({
                                   />
                                 ) : (
                                   <span className="block w-0 grow truncate text-sm opacity-100">
-                                    {item.name}
+                                    {getFolderDisplayName(item.name)}
                                   </span>
                                 )}
                               </div>

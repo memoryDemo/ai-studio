@@ -254,7 +254,7 @@ export function FlowSidebarComponent({ isLoading }: FlowSidebarComponentProps) {
   }, [search, debouncedSetSearch]);
 
   // State
-  const [fuse, setFuse] = useState<Fuse<any> | null>(null);
+  const [fuse, setFuse] = useState<Fuse<APIClassType> | null>(null);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
   const [showConfig, setShowConfig] = useState(false);
   const [showBeta, setShowBeta] = useState(showBetaStorage);
@@ -270,7 +270,7 @@ export function FlowSidebarComponent({ isLoading }: FlowSidebarComponentProps) {
     setShowLegacy(value);
     setLocalStorage("showLegacy", value.toString());
   }, []);
-  const [mcpSearchData, setMcpSearchData] = useState<any[]>([]);
+  const [mcpSearchData, setMcpSearchData] = useState<APIClassType[]>([]);
 
   // Create base data that includes MCP category when available
   const baseData = useMemo(() => {
@@ -283,7 +283,9 @@ export function FlowSidebarComponent({ isLoading }: FlowSidebarComponentProps) {
       const newMcpSearchData = mcpServers.map((mcpServer) => ({
         ...mcpComponent,
         display_name: mcpServer.name,
-        description: `MCP Server: ${mcpServer.name}`,
+        description: t("mcp.serverDescriptionWithName", {
+          name: mcpServer.name,
+        }),
         category: "MCP",
         key: `mcp_${mcpServer.name}`,
         template: {
@@ -295,7 +297,7 @@ export function FlowSidebarComponent({ isLoading }: FlowSidebarComponentProps) {
         },
       }));
 
-      const mcpCategoryData: Record<string, any> = {};
+      const mcpCategoryData: Record<string, APIClassType> = {};
       newMcpSearchData.forEach((mcp) => {
         mcpCategoryData[mcp.display_name] = mcp;
       });
@@ -543,7 +545,7 @@ export function FlowSidebarComponent({ isLoading }: FlowSidebarComponentProps) {
 
   const onDragStart = useCallback(
     (
-      event: React.DragEvent<any>,
+      event: React.DragEvent<HTMLDivElement>,
       data: { type: string; node?: APIClassType },
     ) => {
       var crt = event.currentTarget.cloneNode(true);

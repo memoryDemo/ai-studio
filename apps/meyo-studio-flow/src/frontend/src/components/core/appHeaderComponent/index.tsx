@@ -14,6 +14,7 @@ import { useCustomNavigate } from "@/customization/hooks/use-custom-navigate";
 import useTheme from "@/customization/hooks/use-custom-theme";
 import useAlertStore from "@/stores/alertStore";
 import FlowMenu from "./components/FlowMenu";
+import LanguageSelector from "./components/LanguageSelector";
 
 export default function AppHeader(): JSX.Element {
   const { t } = useTranslation();
@@ -83,6 +84,9 @@ export default function AppHeader(): JSX.Element {
         {false && <ModelProviderCount />}
         <div className="hidden pr-2 whitespace-nowrap lg:inline-flex lg:items-center">
           <CustomLangflowCounts />
+        </div>
+        <div className="hidden sm:block">
+          <LanguageSelector />
         </div>
         <AlertDropdown
           notificationRef={notificationContentRef}

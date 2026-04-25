@@ -1,4 +1,6 @@
 import { convertTestName } from "@/components/common/storeCardComponent/utils/convert-test-name";
+import { useTranslation } from "react-i18next";
+import { getLocalizedTemplateText } from "@/utils/templateTranslations";
 import { swatchColors } from "@/utils/styleUtils";
 import { cn, getNumberFromString } from "@/utils/utils";
 import IconComponent, {
@@ -16,6 +18,12 @@ export default function TemplateCardComponent({
   onClick,
   disabled = false,
 }: TemplateCardComponentExtendedProps) {
+  const { i18n } = useTranslation();
+  const displayText = getLocalizedTemplateText(
+    example.name,
+    example.description,
+    i18n.language,
+  );
   const swatchIndex =
     (example.gradient && !isNaN(parseInt(example.gradient))
       ? parseInt(example.gradient)
@@ -62,7 +70,7 @@ export default function TemplateCardComponent({
               className="line-clamp-3 font-semibold"
               data-testid={`template_${convertTestName(example.name)}`}
             >
-              {example.name}
+              {displayText.name}
             </h3>
             <ForwardedIconComponent
               name="ArrowRight"
@@ -70,7 +78,7 @@ export default function TemplateCardComponent({
             />
           </div>
           <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-            {example.description}
+            {displayText.description}
           </p>
         </div>
       </div>

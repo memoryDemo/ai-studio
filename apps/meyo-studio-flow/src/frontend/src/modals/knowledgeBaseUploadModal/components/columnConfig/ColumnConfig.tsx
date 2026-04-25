@@ -1,5 +1,6 @@
 import type { AgGridReact } from "ag-grid-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import TableModal from "@/modals/tableModal";
@@ -7,38 +8,6 @@ import type { ColumnField } from "@/types/utils/functions";
 import { FormatterType } from "@/types/utils/functions";
 import { FormatColumns } from "@/utils/utils";
 import type { ColumnConfigRow } from "../../types";
-
-const COLUMN_CONFIG_COLUMNS: ColumnField[] = [
-  {
-    name: "column_name",
-    display_name: "Column Name",
-    sortable: true,
-    filterable: true,
-    formatter: FormatterType.text,
-    description: "Name of the column in the source DataFrame",
-    edit_mode: "inline",
-  },
-  {
-    name: "vectorize",
-    display_name: "Vectorize",
-    sortable: false,
-    filterable: false,
-    formatter: FormatterType.boolean,
-    description: "Create embeddings for this column",
-    default: false,
-    edit_mode: "inline",
-  },
-  {
-    name: "identifier",
-    display_name: "Identifier",
-    sortable: false,
-    filterable: false,
-    formatter: FormatterType.boolean,
-    description: "Use this column as unique identifier",
-    default: false,
-    edit_mode: "inline",
-  },
-];
 
 interface ColumnConfigProps {
   columnConfig: ColumnConfigRow[];
@@ -49,7 +18,42 @@ export function ColumnConfig({
   columnConfig,
   onColumnConfigChange,
 }: ColumnConfigProps) {
-  const AgColumns = FormatColumns(COLUMN_CONFIG_COLUMNS);
+  const { t } = useTranslation();
+  const columnConfigColumns: ColumnField[] = useMemo(
+    () => [
+      {
+        name: "column_name",
+        display_name: t("knowledgeUpload.columnConfig.columnName"),
+        sortable: true,
+        filterable: true,
+        formatter: FormatterType.text,
+        description: t("knowledgeUpload.columnConfig.columnNameDescription"),
+        edit_mode: "inline",
+      },
+      {
+        name: "vectorize",
+        display_name: t("knowledgeUpload.columnConfig.vectorize"),
+        sortable: false,
+        filterable: false,
+        formatter: FormatterType.boolean,
+        description: t("knowledgeUpload.columnConfig.vectorizeDescription"),
+        default: false,
+        edit_mode: "inline",
+      },
+      {
+        name: "identifier",
+        display_name: t("knowledgeUpload.columnConfig.identifier"),
+        sortable: false,
+        filterable: false,
+        formatter: FormatterType.boolean,
+        description: t("knowledgeUpload.columnConfig.identifierDescription"),
+        default: false,
+        edit_mode: "inline",
+      },
+    ],
+    [t],
+  );
+  const AgColumns = FormatColumns(columnConfigColumns);
   const agGrid = useRef<AgGridReact>(null);
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
   const nextRowId = useRef(0);
@@ -135,7 +139,7 @@ export function ColumnConfig({
     setIsTableModalOpen(false);
   }
 
-  const editable = COLUMN_CONFIG_COLUMNS.map((column) => ({
+  const editable = columnConfigColumns.map((column) => ({
     field: column.name,
     onUpdate: () => syncFromGrid(),
     editableCell: true,
@@ -150,8 +154,8 @@ export function ColumnConfig({
         }
         setIsTableModalOpen(open);
       }}
-      tableTitle="Column Configuration"
-      description="Configure column behavior for the knowledge base."
+      tableTitle={t("knowledgeUpload.columnConfig.title")}
+      description={t("knowledgeUpload.columnConfig.description")}
       ref={agGrid}
       onSelectionChanged={() => {}}
       rowSelection="multiple"
@@ -177,7 +181,7 @@ export function ColumnConfig({
       <Button variant="outline" className="w-full justify-center">
         <span className="flex items-center gap-2">
           <ForwardedIconComponent name="Columns" className="h-4 w-4" />
-          Open Table
+          {t("knowledgeUpload.columnConfig.openTable")}
         </span>
       </Button>
     </TableModal>

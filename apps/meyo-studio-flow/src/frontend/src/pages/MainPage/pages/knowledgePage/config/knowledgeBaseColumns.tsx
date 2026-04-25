@@ -1,4 +1,5 @@
 import type { ColDef } from "ag-grid-community";
+import type { TFunction } from "i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import LoadingTextComponent from "@/components/common/loadingTextComponent";
 import { Button } from "@/components/ui/button";
@@ -25,9 +26,35 @@ export interface KnowledgeBaseColumnsCallbacks {
   onStopIngestion?: (knowledgeBase: KnowledgeBaseInfo) => void;
 }
 
+const DEFAULT_LABELS: Record<string, string> = {
+  "knowledge.columns.name": "Name",
+  "knowledge.columns.size": "Size",
+  "knowledge.columns.embeddingModel": "Embedding Model",
+  "knowledge.columns.chunks": "Chunks",
+  "knowledge.columns.avgChunkSize": "Avg Chunk Size",
+  "knowledge.columns.status": "Status",
+  "knowledge.unknown": "Unknown",
+  "knowledge.status.ready": "Ready",
+  "knowledge.status.ingesting": "Ingesting",
+  "knowledge.status.failed": "Failed",
+  "knowledge.status.cancelling": "Cancelling",
+  "knowledge.status.empty": "Empty",
+  "knowledge.actions.updateKnowledge": "Update Knowledge",
+  "knowledge.actions.viewChunks": "View Chunks",
+  "knowledge.actions.stopIngestion": "Stop Ingestion",
+  "knowledge.actions.delete": "Delete",
+};
+
+const fallbackTranslate = (
+  key: string,
+  options?: { defaultValue?: string },
+): string => DEFAULT_LABELS[key] ?? options?.defaultValue ?? key;
+
 export const createKnowledgeBaseColumns = (
   callbacks?: KnowledgeBaseColumnsCallbacks,
+  t?: TFunction,
 ): ColDef[] => {
+  const translate: TFunction = t ?? (fallbackTranslate as TFunction);
   const baseCellClass =
     "text-muted-foreground cursor-pointer select-text group-[.no-select-cells]:cursor-default group-[.no-select-cells]:select-none";
 
@@ -35,7 +62,7 @@ export const createKnowledgeBaseColumns = (
 
   return [
     {
-      headerName: "Name",
+      headerName: translate("knowledge.columns.name"),
       field: "name",
       flex: 2,
       sortable: true,
@@ -77,7 +104,7 @@ export const createKnowledgeBaseColumns = (
       },
     },
     {
-      headerName: "Size",
+      headerName: translate("knowledge.columns.size"),
       field: "size",
       flex: 1,
       sortable: false,
@@ -86,15 +113,16 @@ export const createKnowledgeBaseColumns = (
       cellClass: baseCellClass,
     },
     {
-      headerName: "Embedding Model",
+      headerName: translate("knowledge.columns.embeddingModel"),
       field: "embedding_model",
       flex: 1.5,
       sortable: false,
       editable: false,
       cellClass: baseCellClass,
       cellRenderer: (params: { data: KnowledgeBaseInfo }) => {
-        const model = params.data.embedding_model || "Unknown";
-        const provider = params.data.embedding_provider || "Unknown";
+        const model = params.data.embedding_model || translate("knowledge.unknown");
+        const provider =
+          params.data.embedding_provider || translate("knowledge.unknown");
 
         const providerIconMap: Record<string, string> = {
           OpenAI: "OpenAI",
@@ -119,7 +147,7 @@ export const createKnowledgeBaseColumns = (
       },
     },
     {
-      headerName: "Chunks",
+      headerName: translate("knowledge.columns.chunks"),
       field: "chunks",
       flex: 1,
       sortable: false,
@@ -128,7 +156,7 @@ export const createKnowledgeBaseColumns = (
       valueFormatter: (params) => formatNumber(params.value),
     },
     {
-      headerName: "Avg Chunk Size",
+      headerName: translate("knowledge.columns.avgChunkSize"),
       field: "avg_chunk_size",
       flex: 1,
       sortable: false,
@@ -137,7 +165,7 @@ export const createKnowledgeBaseColumns = (
       valueFormatter: (params) => formatAverageChunkSize(params.value),
     },
     {
-      headerName: "Status",
+      headerName: translate("knowledge.columns.status"),
       field: "status",
       flex: 1,
       sortable: false,
@@ -147,14 +175,17 @@ export const createKnowledgeBaseColumns = (
       cellRenderer: (params: { data: KnowledgeBaseInfo }) => {
         const status = params.data?.status || "empty";
         const c = STATUS_CONFIG[status] || STATUS_CONFIG.empty;
+        const statusLabel = translate(`knowledge.status.${status}`, {
+          defaultValue: c.label,
+        });
 
         return (
           <div className="flex items-center h-full">
             <span className={cn("text-xs font-medium", c.textClass)}>
               {isBusyStatus(status) ? (
-                <LoadingTextComponent text={c.label} />
+                <LoadingTextComponent text={statusLabel} />
               ) : (
-                c.label
+                statusLabel
               )}
             </span>
           </div>
@@ -201,7 +232,7 @@ export const createKnowledgeBaseColumns = (
                   name="RefreshCw"
                   className="mr-2 h-4 w-4"
                 />
-                Update Knowledge
+                {translate("knowledge.actions.updateKnowledge")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={(e) => {
@@ -213,7 +244,7 @@ export const createKnowledgeBaseColumns = (
                   name="Layers"
                   className="mr-2 h-4 w-4"
                 />
-                View Chunks
+                {translate("knowledge.actions.viewChunks")}
               </DropdownMenuItem>
               {isBusy ? (
                 <DropdownMenuItem
@@ -228,7 +259,7 @@ export const createKnowledgeBaseColumns = (
                     name="Square"
                     className="mr-2 h-4 w-4"
                   />
-                  Stop Ingestion
+                  {translate("knowledge.actions.stopIngestion")}
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
@@ -242,7 +273,7 @@ export const createKnowledgeBaseColumns = (
                     name="Trash2"
                     className="mr-2 h-4 w-4"
                   />
-                  Delete
+                  {translate("knowledge.actions.delete")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>

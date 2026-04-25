@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { loadLanguage } from "@/i18n";
 import { SUPPORTED_LANGUAGES } from "@/constants/languages";
 import { useTypesStore } from "@/stores/typesStore";
+import { safeSetLocalStorage } from "@/utils/browser";
 import {
   Card,
   CardContent,
@@ -26,7 +27,7 @@ const LanguageFormComponent = () => {
   const handleChange = async (code: string) => {
     await loadLanguage(code);
     i18n.changeLanguage(code);
-    localStorage.setItem("languagePreference", code);
+    safeSetLocalStorage("languagePreference", code);
     setTypes({});
     queryClient.invalidateQueries({ queryKey: ["useGetTypes"] });
   };
@@ -46,7 +47,7 @@ const LanguageFormComponent = () => {
             {SUPPORTED_LANGUAGES.map((lang) => (
               <SelectItem key={lang.code} value={lang.code}>
                 {lang.label}
-                {lang.code === "en"
+                {lang.code === "zh-Hans"
                   ? ` (${t("settings.languageRecommended")})`
                   : ""}
               </SelectItem>

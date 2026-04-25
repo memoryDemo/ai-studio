@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -20,6 +21,7 @@ export default function TemplatesModal({
 }: newFlowModalPropsType): JSX.Element {
   const [currentTab, setCurrentTab] = useState("get-started");
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
   const addFlow = useAddFlow();
   const navigate = useCustomNavigate();
   const { folderId } = useParams();
@@ -46,34 +48,58 @@ export default function TemplatesModal({
   // Define categories and their items
   const categories: Category[] = [
     {
-      title: "Templates",
+      title: t("templates.nav.templates"),
       items: [
-        { title: "Get started", icon: "SquarePlay", id: "get-started" },
-        { title: "All templates", icon: "LayoutPanelTop", id: "all-templates" },
+        {
+          title: t("templates.nav.getStarted"),
+          icon: "SquarePlay",
+          id: "get-started",
+        },
+        {
+          title: t("templates.nav.allTemplates"),
+          icon: "LayoutPanelTop",
+          id: "all-templates",
+        },
       ],
     },
     {
-      title: "Use Cases",
+      title: t("templates.nav.useCases"),
       items: [
-        { title: "Assistants", icon: "BotMessageSquare", id: "assistants" },
-        { title: "Classification", icon: "Tags", id: "classification" },
-        { title: "Coding", icon: "TerminalIcon", id: "coding" },
         {
-          title: "Content Generation",
+          title: t("templates.nav.assistants"),
+          icon: "BotMessageSquare",
+          id: "assistants",
+        },
+        {
+          title: t("templates.nav.classification"),
+          icon: "Tags",
+          id: "classification",
+        },
+        {
+          title: t("templates.nav.coding"),
+          icon: "TerminalIcon",
+          id: "coding",
+        },
+        {
+          title: t("templates.nav.contentGeneration"),
           icon: "Newspaper",
           id: "content-generation",
         },
-        { title: "Q&A", icon: "Database", id: "q-a" },
+        { title: t("templates.nav.qAndA"), icon: "Database", id: "q-a" },
         // { title: "Summarization", icon: "Bot", id: "summarization" },
         // { title: "Web Scraping", icon: "CodeXml", id: "web-scraping" },
       ],
     },
     {
-      title: "Methodology",
+      title: t("templates.nav.methodology"),
       items: [
-        { title: "Prompting", icon: "MessagesSquare", id: "chatbots" },
-        { title: "RAG", icon: "Database", id: "rag" },
-        { title: "Agents", icon: "Bot", id: "agents" },
+        {
+          title: t("templates.nav.prompting"),
+          icon: "MessagesSquare",
+          id: "chatbots",
+        },
+        { title: t("templates.nav.rag"), icon: "Database", id: "rag" },
+        { title: t("templates.nav.agents"), icon: "Bot", id: "agents" },
       ],
     },
   ];
@@ -105,9 +131,11 @@ export default function TemplatesModal({
               <BaseModal.Footer>
                 <div className="flex w-full flex-col justify-between gap-4 pb-4 sm:flex-row sm:items-center">
                   <div className="flex flex-col items-start justify-center">
-                    <div className="font-semibold">Start from scratch</div>
+                    <div className="font-semibold">
+                      {t("templates.startFromScratch")}
+                    </div>
                     <div className="text-sm text-muted-foreground">
-                      Begin with a fresh flow to build from scratch.
+                      {t("templates.startFromScratchDescription")}
                     </div>
                   </div>
                   <Button
@@ -123,7 +151,7 @@ export default function TemplatesModal({
                       name="Plus"
                       className="h-4 w-4 shrink-0"
                     />
-                    Blank Flow
+                    {t("templates.blankFlow")}
                   </Button>
                 </div>
               </BaseModal.Footer>

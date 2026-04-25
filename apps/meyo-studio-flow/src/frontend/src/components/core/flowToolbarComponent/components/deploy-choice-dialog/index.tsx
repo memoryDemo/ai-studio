@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { usePatchSnapshot } from "@/controllers/API/queries/deployments";
 import { useGetDeploymentAttachments } from "@/controllers/API/queries/deployments/use-get-deployment-attachments";
@@ -56,6 +57,7 @@ export default function DeployChoiceDialog({
   onUpdateComplete,
   onTestDeployment,
 }: DeployChoiceDialogProps) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("provider");
   const [selectedProviderId, setSelectedProviderId] =
     useState<string>(NEW_DEPLOYMENT_VALUE);
@@ -295,7 +297,7 @@ export default function DeployChoiceDialog({
         ) : phase === "review" && isLoadingReviewAttachment ? (
           <div className="flex min-h-52 items-center justify-center">
             <div className="text-sm text-muted-foreground">
-              Loading deployment attachment details...
+              {t("deployments.choice.loadingAttachmentDetails")}
             </div>
           </div>
         ) : (

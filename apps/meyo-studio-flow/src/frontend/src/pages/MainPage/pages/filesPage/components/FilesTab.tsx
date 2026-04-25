@@ -4,7 +4,8 @@ import type {
   SelectionChangedEvent,
 } from "ag-grid-community";
 import type { AgGridReact } from "ag-grid-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type DragEvent, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import ShadTooltip from "@/components/common/shadTooltipComponent";
 import CardsWrapComponent from "@/components/core/cardsWrapComponent";
@@ -20,6 +21,7 @@ import useUploadFile from "@/hooks/files/use-upload-file";
 import DeleteConfirmationModal from "@/modals/deleteConfirmationModal";
 import FilesContextMenuComponent from "@/modals/fileManagerModal/components/filesContextMenuComponent";
 import useAlertStore from "@/stores/alertStore";
+import type { FileType } from "@/types/file_management";
 import { formatFileSize } from "@/utils/stringManipulation";
 import { FILE_ICONS } from "@/utils/styleUtils";
 import { cn } from "@/utils/utils";
@@ -29,8 +31,8 @@ import DragWrapComponent from "./dragWrapComponent";
 interface FilesTabProps {
   quickFilterText: string;
   setQuickFilterText: (text: string) => void;
-  selectedFiles: any[];
-  setSelectedFiles: (files: any[]) => void;
+  selectedFiles: FileType[];
+  setSelectedFiles: (files: FileType[]) => void;
   quantitySelected: number;
   setQuantitySelected: (quantity: number) => void;
   isShiftPressed: boolean;
@@ -45,14 +47,15 @@ const FilesTab = ({
   setQuantitySelected,
   isShiftPressed,
 }: FilesTabProps) => {
-  const tableRef = useRef<AgGridReact<any>>(null);
+  const { t } = useTranslation();
+  const tableRef = useRef<AgGridReact<FileType>>(null);
   const { data: files } = useGetFilesV2();
   const setErrorData = useAlertStore((state) => state.setErrorData);
   const setSuccessData = useAlertStore((state) => state.setSuccessData);
 
   const { mutate: rename } = usePostRenameFileV2();
   const { mutate: deleteFiles, isPending: isDeleting } = useDeleteFilesV2();
-  const handleRename = (params: NewValueParams<any, any>) => {
+  const handleRename = (params: NewValueParams<FileType, string>) => {
     rename({
       id: params.data.id,
       name: params.newValue,
@@ -76,12 +79,16 @@ const FilesTab = ({
         files: files,
       });
       setSuccessData({
-        title: `File${filesIds.length > 1 ? "s" : ""} uploaded successfully`,
+        title: t("files.uploadSuccess", { count: filesIds.length }),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorData({
-        title: "Error uploading file",
-        list: [error.message || "An error occurred while uploading the file"],
+        title: t("files.uploadErrorTitle"),
+        list: [
+          error instanceof Error
+            ? error.message
+            : t("files.uploadErrorDescription"),
+        ],
       });
     }
   };
@@ -109,7 +116,7 @@ const FilesTab = ({
 
   const colDefs: ColDef[] = [
     {
-      headerName: "Name",
+      headerName: t("files.columnName"),
       field: "name",
       flex: 2,
       headerCheckboxSelection: true,
@@ -153,7 +160,7 @@ const FilesTab = ({
             {params.data.progress !== undefined &&
             params.data.progress === -1 ? (
               <span className="text-xs text-primary">
-                Upload failed,{" "}
+                {t("files.uploadFailed")}{" "}
                 <span
                   className="cursor-pointer text-accent-pink-foreground underline"
                   onClick={(e) => {
@@ -163,7 +170,7 @@ const FilesTab = ({
                     }
                   }}
                 >
-                  try again?
+                  {t("files.tryAgain")}
                 </span>
               </span>
             ) : (
@@ -174,7 +181,7 @@ const FilesTab = ({
       },
     },
     {
-      headerName: "Type",
+      headerName: t("files.columnType"),
       field: "path",
       flex: 1,
       filter: "agTextColumnFilter",
@@ -186,7 +193,7 @@ const FilesTab = ({
         "text-muted-foreground cursor-text select-text group-[.no-select-cells]:cursor-default group-[.no-select-cells]:select-none",
     },
     {
-      headerName: "Size",
+      headerName: t("files.columnSize"),
       field: "size",
       flex: 1,
       valueFormatter: (params) => {
@@ -197,7 +204,7 @@ const FilesTab = ({
         "text-muted-foreground cursor-text select-text group-[.no-select-cells]:cursor-default group-[.no-select-cells]:select-none",
     },
     {
-      headerName: "Modified",
+      headerName: t("files.columnModified"),
       field: "updated_at",
       valueFormatter: (params) => {
         return params.data.progress
@@ -234,7 +241,7 @@ const FilesTab = ({
     },
   ];
 
-  const onFileDrop = async (e: React.DragEvent) => {
+  const onFileDrop = async (e: DragEvent) => {
     e.preventDefault;
     e.stopPropagation();
     const droppedFiles = Array.from(e.dataTransfer.files);
@@ -249,46 +256,44 @@ const FilesTab = ({
         ids: selectedFiles.map((file) => file.id),
       },
       {
-        onSuccess: (data) => {
-          setSuccessData({ title: data.message });
+        onSuccess: () => {
+          setSuccessData({
+            title: t("files.deleteSuccess", { count: quantitySelected }),
+          });
           setQuantitySelected(0);
           setSelectedFiles([]);
         },
         onError: (error) => {
           setErrorData({
-            title: "Error deleting files",
-            list: [
-              error.message || "An error occurred while deleting the files",
-            ],
+            title: t("files.deleteErrorTitle"),
+            list: [error.message || t("files.deleteErrorDescription")],
           });
         },
       },
     );
   };
 
-  const UploadButtonComponent = useMemo(() => {
-    return (
-      <ShadTooltip content="Upload File" side="bottom">
-        <Button
-          className="!px-3 md:!px-4 md:!pl-3.5"
-          onClick={async () => {
-            await handleUpload();
-          }}
-          id="upload-file-btn"
-          data-testid="upload-file-btn"
-        >
-          <ForwardedIconComponent
-            name="Plus"
-            aria-hidden="true"
-            className="h-4 w-4"
-          />
-          <span className="hidden whitespace-nowrap font-semibold md:inline">
-            Upload Files
-          </span>
-        </Button>
-      </ShadTooltip>
-    );
-  }, []);
+  const UploadButtonComponent = (
+    <ShadTooltip content={t("files.uploadFile")} side="bottom">
+      <Button
+        className="!px-3 md:!px-4 md:!pl-3.5"
+        onClick={async () => {
+          await handleUpload();
+        }}
+        id="upload-file-btn"
+        data-testid="upload-file-btn"
+      >
+        <ForwardedIconComponent
+          name="Plus"
+          aria-hidden="true"
+          className="h-4 w-4"
+        />
+        <span className="hidden whitespace-nowrap font-semibold md:inline">
+          {t("files.uploadFiles")}
+        </span>
+      </Button>
+    </ShadTooltip>
+  );
 
   return (
     <div className="flex h-full flex-col">
@@ -299,7 +304,7 @@ const FilesTab = ({
               icon="Search"
               data-testid="search-store-input"
               type="text"
-              placeholder={`Search files...`}
+              placeholder={t("files.searchPlaceholder")}
               className="mr-2 w-full"
               value={quickFilterText || ""}
               onChange={(event) => {
@@ -311,7 +316,9 @@ const FilesTab = ({
             {quantitySelected > 0 ? (
               <DeleteConfirmationModal
                 onConfirm={handleDelete}
-                description={"file" + (quantitySelected > 1 ? "s" : "")}
+                description={t("files.deleteTarget", {
+                  count: quantitySelected,
+                })}
               >
                 <Button
                   variant="destructive"
@@ -321,7 +328,7 @@ const FilesTab = ({
                 >
                   <ForwardedIconComponent name="Trash2" className="h-4 w-4" />
                   <span className="hidden whitespace-nowrap md:inline">
-                    Delete ({quantitySelected})
+                    {t("files.deleteButton", { count: quantitySelected })}
                   </span>
                 </Button>
               </DeleteConfirmationModal>
@@ -384,13 +391,13 @@ const FilesTab = ({
         ) : (
           <CardsWrapComponent
             onFileDrop={onFileDrop}
-            dragMessage="Drop files to upload"
+            dragMessage={t("files.dropFilesToUpload")}
           >
             <div className="flex h-full w-full flex-col items-center justify-center gap-8 pb-8">
               <div className="flex flex-col items-center gap-2">
-                <h3 className="text-2xl font-semibold">No files</h3>
+                <h3 className="text-2xl font-semibold">{t("files.emptyTitle")}</h3>
                 <p className="text-lg text-secondary-foreground">
-                  Upload files or import from your preferred cloud.
+                  {t("files.emptyDescription")}
                 </p>
               </div>
               <div className="flex items-center gap-2">

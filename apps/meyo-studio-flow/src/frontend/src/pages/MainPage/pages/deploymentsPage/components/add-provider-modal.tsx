@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ export default function AddProviderModal({
   open,
   setOpen,
 }: AddProviderModalProps) {
+  const { t } = useTranslation();
   const [credentials, setCredentials] =
     useState<ProviderCredentials>(EMPTY_CREDENTIALS);
   const [isSaving, setIsSaving] = useState(false);
@@ -62,7 +64,7 @@ export default function AddProviderModal({
       setCredentials(EMPTY_CREDENTIALS);
       setOpen(false);
     } catch (err: unknown) {
-      showError("Failed to create environment", err);
+      showError(t("deployments.providers.createFailed"), err);
     } finally {
       setIsSaving(false);
     }
@@ -72,10 +74,10 @@ export default function AddProviderModal({
     <Dialog open={open} onOpenChange={(value) => !value && handleClose()}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogTitle data-testid="add-provider-modal-title">
-          Add Environment
+          {t("deployments.providers.addEnvironment")}
         </DialogTitle>
         <DialogDescription className="sr-only">
-          Add a new watsonx Orchestrate environment.
+          {t("deployments.providers.addDescription")}
         </DialogDescription>
 
         <div className="flex flex-col gap-4 pt-2">
@@ -87,27 +89,27 @@ export default function AddProviderModal({
               />
               <span className="text-sm font-medium">watsonx Orchestrate</span>
               <Badge variant="purpleStatic" size="xq" className="shrink-0">
-                Beta
+                {t("sidebar.betaLabel")}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              Configure your watsonx Orchestrate credentials below. New to wxO?{" "}
+              {t("deployments.providers.configureCredentials")}{" "}
               <a
                 href="https://www.ibm.com/products/watsonx-orchestrate#pricing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-primary hover:underline"
               >
-                Sign up for watsonx Orchestrate
+                {t("deployments.providers.signUp")}
               </a>
-              . Already have an account?{" "}
+              . {t("deployments.providers.haveAccount")}{" "}
               <a
                 href="https://www.ibm.com/docs/en/watsonx/watson-orchestrate/base?topic=api-getting-started"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-primary hover:underline"
               >
-                Find your credentials
+                {t("deployments.providers.findCredentials")}
               </a>
               .
             </p>
@@ -126,14 +128,14 @@ export default function AddProviderModal({
             disabled={isSaving}
             data-testid="add-provider-cancel"
           >
-            Cancel
+            {t("deleteModal.cancel")}
           </Button>
           <Button
             onClick={handleSave}
             disabled={!canSave || isSaving}
             data-testid="add-provider-save"
           >
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? t("deployments.saving") : t("settings.saveButton")}
           </Button>
         </div>
       </DialogContent>

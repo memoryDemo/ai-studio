@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { type DragEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import useFlowsManagerStore from "@/stores/flowsManagerStore";
 import { cn } from "@/utils/utils";
 
@@ -6,9 +7,10 @@ export default function DragWrapComponent({
   onFileDrop,
   children,
 }: {
-  onFileDrop?: (e: any) => void;
+  onFileDrop?: (e: DragEvent) => void;
   children: JSX.Element | JSX.Element[];
 }) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const isIOModalOpen = useFlowsManagerStore((state) => state.IOModalOpen);
@@ -31,7 +33,7 @@ export default function DragWrapComponent({
     };
   }, []);
 
-  const dragOver = (e) => {
+  const dragOver = (e: DragEvent) => {
     e.preventDefault();
     setMousePosition({ x: e.clientX, y: e.clientY });
     if (
@@ -44,7 +46,7 @@ export default function DragWrapComponent({
     }
   };
 
-  const dragEnter = (e) => {
+  const dragEnter = (e: DragEvent) => {
     if (
       e.dataTransfer.types.some((types) => types === "Files") &&
       onFileDrop &&
@@ -56,14 +58,14 @@ export default function DragWrapComponent({
     e.preventDefault();
   };
 
-  const dragLeave = (e) => {
+  const dragLeave = (e: DragEvent) => {
     e.preventDefault();
     if (onFileDrop && !isIOModalOpen) {
       setIsDragging(false);
     }
   };
 
-  const onDrop = (e) => {
+  const onDrop = (e: DragEvent) => {
     e.preventDefault();
     if (onFileDrop && !isIOModalOpen) onFileDrop(e);
     setIsDragging(false);
@@ -110,7 +112,7 @@ export default function DragWrapComponent({
         >
           <div className="w-44 rounded-2xl bg-accent-indigo-foreground px-2.5 py-0.5 text-center backdrop-blur-sm">
             <span className="font-mono text-xs text-primary-foreground">
-              Drop file{filesCount > 1 ? "s" : ""} to upload
+              {t("files.dropFilesCountToUpload", { count: filesCount })}
             </span>
           </div>
         </div>

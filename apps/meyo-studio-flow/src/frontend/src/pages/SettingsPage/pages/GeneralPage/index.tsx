@@ -21,8 +21,20 @@ import type {
 } from "../../../../types/components";
 import useScrollToElement from "../hooks/use-scroll-to-element";
 import GeneralPageHeaderComponent from "./components/GeneralPageHeader";
+import LanguageFormComponent from "./components/LanguageForm";
 import PasswordFormComponent from "./components/PasswordForm";
 import ProfilePictureFormComponent from "./components/ProfilePictureForm";
+
+type ApiError = {
+  response?: {
+    data?: {
+      detail?: string;
+    };
+  };
+};
+
+const getApiErrorDetail = (error: unknown) =>
+  (error as ApiError).response?.data?.detail;
 
 export const GeneralPage = () => {
   const { scrollId } = useParams();
@@ -67,7 +79,7 @@ export const GeneralPage = () => {
           onError: (error) => {
             setErrorData({
               title: t("errors.saveChanges"),
-              list: [(error as any)?.response?.data?.detail],
+              list: [getApiErrorDetail(error) ?? t("errors.generic")],
             });
           },
         },
@@ -91,7 +103,7 @@ export const GeneralPage = () => {
           onError: (error) => {
             setErrorData({
               title: t("errors.saveChanges"),
-              list: [(error as any)?.response?.data?.detail],
+              list: [getApiErrorDetail(error) ?? t("errors.generic")],
             });
           },
         },
@@ -112,7 +124,7 @@ export const GeneralPage = () => {
     onError: (error) => {
       setErrorData({
         title: t("errors.saveApiKey"),
-        list: [(error as any)?.response?.data?.detail],
+        list: [getApiErrorDetail(error) ?? t("errors.generic")],
       });
       setHasApiKey(false);
       setValidApiKey(false);
@@ -138,6 +150,8 @@ export const GeneralPage = () => {
       <GeneralPageHeaderComponent />
 
       <div className="flex w-full flex-col gap-6">
+        <LanguageFormComponent />
+
         {ENABLE_PROFILE_ICONS && (
           <ProfilePictureFormComponent
             profilePicture={profilePicture}

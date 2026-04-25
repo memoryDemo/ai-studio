@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from "react";
+import { type DragEvent, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import ShadTooltip from "@/components/common/shadTooltipComponent";
 import { createFileUpload } from "@/helpers/create-file-upload";
@@ -30,6 +31,7 @@ export default function DragFilesComponent({
   allowFolderSelection?: boolean;
   existingFiles?: FileType[];
 }) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
 
   const sessionUsedFolderRootsRef = useRef<Set<string>>(new Set());
@@ -71,26 +73,29 @@ export default function DragFilesComponent({
     );
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const getErrorMessage = (error: unknown) =>
+    error instanceof Error ? error.message : t("files.uploadErrorDescription");
+
+  const handleDragOver = (e: DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer.types.some((type) => type === "Files")) {
       setIsDragging(true);
     }
   };
 
-  const handleDragEnter = (e: React.DragEvent) => {
+  const handleDragEnter = (e: DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer.types.some((type) => type === "Files")) {
       setIsDragging(true);
     }
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = (e: DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
   };
 
-  const handleDrop = async (e: React.DragEvent) => {
+  const handleDrop = async (e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -139,7 +144,7 @@ export default function DragFilesComponent({
 
         if (shouldTreatAsFolder && droppedFiles.length > 1000) {
           throw new Error(
-            `Too many files detected (${droppedFiles.length}). This likely includes large/hidden directories. Please drop a smaller folder or exclude folders like node_modules.`,
+            t("files.tooManyDroppedFiles", { count: droppedFiles.length }),
           );
         }
 
@@ -149,15 +154,13 @@ export default function DragFilesComponent({
         if (filesIds.length > 0) {
           onUpload(filesIds);
           setSuccessData({
-            title: `File${
-              filesIds.length > 1 ? "s" : ""
-            } uploaded successfully`,
+            title: t("files.uploadSuccess", { count: filesIds.length }),
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         setErrorData({
-          title: "Error uploading file",
-          list: [error.message || "An error occurred while uploading the file"],
+          title: t("files.uploadErrorTitle"),
+          list: [getErrorMessage(error)],
         });
       }
     }
@@ -173,7 +176,7 @@ export default function DragFilesComponent({
 
       if (selected.length > 1000) {
         throw new Error(
-          `Too many files detected (${selected.length}). This likely includes large/hidden directories. Please select a smaller folder or exclude folders like node_modules.`,
+          t("files.tooManySelectedFiles", { count: selected.length }),
         );
       }
 
@@ -199,13 +202,13 @@ export default function DragFilesComponent({
       if (filesIds.length > 0) {
         onUpload(filesIds);
         setSuccessData({
-          title: `File${filesIds.length > 1 ? "s" : ""} uploaded successfully`,
+          title: t("files.uploadSuccess", { count: filesIds.length }),
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorData({
-        title: "Error uploading file",
-        list: [error.message || "An error occurred while uploading the file"],
+        title: t("files.uploadErrorTitle"),
+        list: [getErrorMessage(error)],
       });
     }
   };
@@ -216,13 +219,13 @@ export default function DragFilesComponent({
       if (filesIds.length > 0) {
         onUpload(filesIds);
         setSuccessData({
-          title: `File${filesIds.length > 1 ? "s" : ""} uploaded successfully`,
+          title: t("files.uploadSuccess", { count: filesIds.length }),
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorData({
-        title: "Error uploading file",
-        list: [error.message || "An error occurred while uploading the file"],
+        title: t("files.uploadErrorTitle"),
+        list: [getErrorMessage(error)],
       });
     }
   };
@@ -245,18 +248,17 @@ export default function DragFilesComponent({
         <h3 className="text-sm font-semibold">
           {isDragging
             ? allowFolderSelection
-              ? "Drop files or folders here"
-              : "Drop files here"
+              ? t("files.dropFilesOrFoldersHere")
+              : t("files.dropFilesHere")
             : allowFolderSelection
-              ? "Click to select files (or drop a folder)"
-              : "Click or drag files here"}
+              ? t("files.clickSelectFilesOrDropFolder")
+              : t("files.clickOrDragFilesHere")}
         </h3>
         {allowFolderSelection && (
           <div className="text-xs text-muted-foreground text-center max-w-md space-y-2">
-            <p>Drag-and-drop supports both individual files and folders.</p>
+            <p>{t("files.dragDropFilesAndFolders")}</p>
             <p className="text-accent-amber-foreground font-medium">
-              ⚠️ Avoid folders with large hidden directories (.mypy_cache, .git,
-              node_modules, etc.)
+              {t("files.avoidLargeHiddenFolders")}
             </p>
             <button
               type="button"
@@ -267,7 +269,7 @@ export default function DragFilesComponent({
                 handleSelectFolder();
               }}
             >
-              Select a folder instead
+              {t("files.selectFolderInstead")}
             </button>
           </div>
         )}
@@ -280,14 +282,16 @@ export default function DragFilesComponent({
                   className="text-muted-foreground flex items-center gap-1"
                   data-testid="info-types"
                 >
-                  +{types.length - 3} more
+                  {t("files.moreTypes", { count: types.length - 3 })}
                   <ForwardedIconComponent name="info" className="w-3 h-3" />
                 </span>
               </ShadTooltip>
             )}
           </span>
           <span className="font-semibold">
-            {formatFileSize(maxFileSizeUpload)} max
+            {t("files.maxFileSize", {
+              size: formatFileSize(maxFileSizeUpload),
+            })}
           </span>
         </div>
         <div className="pointer-events-none absolute inset-0 h-full w-full">

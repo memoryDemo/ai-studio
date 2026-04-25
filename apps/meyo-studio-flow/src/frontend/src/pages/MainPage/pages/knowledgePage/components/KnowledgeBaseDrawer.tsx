@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -14,6 +15,8 @@ const KnowledgeBaseDrawer = ({
   onClose,
   knowledgeBase,
 }: KnowledgeBaseDrawerProps) => {
+  const { t } = useTranslation();
+
   if (!isOpen || !knowledgeBase) {
     return null;
   }
@@ -31,32 +34,38 @@ const KnowledgeBaseDrawer = ({
         <div className="flex flex-col gap-4">
           <div className="px-4">
             <div className="text-sm text-muted-foreground">
-              No description available.
+              {t("knowledge.drawer.noDescription")}
             </div>
           </div>
 
           <Separator />
 
           <div className="space-y-2 px-4">
-            <label className="text-sm font-medium">Embedding Provider</label>
+            <label className="text-sm font-medium">
+              {t("knowledge.drawer.embeddingProvider")}
+            </label>
             <div className="flex items-center gap-2">
               <div className="text-sm font-medium text-muted-foreground">
-                {knowledgeBase.embedding_model || "Unknown"}
+                {knowledgeBase.embedding_model || t("knowledge.unknown")}
               </div>
             </div>
           </div>
 
           <div className="space-y-3 px-4">
-            <h4 className="text-sm font-medium">Source Files</h4>
+            <h4 className="text-sm font-medium">
+              {t("knowledge.drawer.sourceFiles")}
+            </h4>
             <div className="text-sm text-muted-foreground">
-              No source files available.
+              {t("knowledge.drawer.noSourceFiles")}
             </div>
           </div>
 
           <div className="space-y-3 px-4">
-            <h4 className="text-sm font-medium">Linked Flows</h4>
+            <h4 className="text-sm font-medium">
+              {t("knowledge.drawer.linkedFlows")}
+            </h4>
             <div className="text-sm text-muted-foreground">
-              No linked flows available.
+              {t("knowledge.drawer.noLinkedFlows")}
             </div>
           </div>
         </div>

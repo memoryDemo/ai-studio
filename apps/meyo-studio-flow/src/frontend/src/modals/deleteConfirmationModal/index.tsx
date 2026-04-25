@@ -1,5 +1,6 @@
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import {
   Dialog,
@@ -27,6 +28,10 @@ export default function DeleteConfirmationModal({
   setOpen?: (open: boolean) => void;
   note?: string;
 }) {
+  const { t } = useTranslation();
+  const target = description ?? t("deleteModal.defaultTarget");
+  const noteText = note ? ` ${note}` : "";
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild={!children ? true : asChild} tabIndex={-1}>
@@ -40,15 +45,15 @@ export default function DeleteConfirmationModal({
                 className="h-6 w-6 pr-1 text-foreground"
                 strokeWidth={1.5}
               />
-              <span className="pl-2">Delete</span>
+              <span className="pl-2">{t("deleteModal.title")}</span>
             </div>
           </DialogTitle>
         </DialogHeader>
         <span className="pb-3 text-sm">
-          This will permanently delete the {description ?? "flow"}
-          {note ? " " + note : ""}.<br />
+          {t("deleteModal.confirmPermanent", { target, note: noteText })}
           <br />
-          This can't be undone.
+          <br />
+          {t("deleteModal.cannotBeUndone")}
         </span>
         <DialogFooter>
           <DialogClose asChild>
@@ -58,7 +63,7 @@ export default function DeleteConfirmationModal({
               variant="outline"
               data-testid="btn_cancel_delete_confirmation_modal"
             >
-              Cancel
+              {t("deleteModal.cancel")}
             </Button>
           </DialogClose>
           <DialogClose asChild>
@@ -70,7 +75,7 @@ export default function DeleteConfirmationModal({
               }}
               data-testid="btn_delete_delete_confirmation_modal"
             >
-              Delete
+              {t("deleteModal.confirm")}
             </Button>
           </DialogClose>
         </DialogFooter>

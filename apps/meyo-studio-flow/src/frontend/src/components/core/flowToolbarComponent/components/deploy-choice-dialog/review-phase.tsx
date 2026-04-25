@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export default function ReviewPhaseContent({
   onConfirm,
   onCancel,
 }: ReviewPhaseContentProps) {
+  const { t } = useTranslation();
   const { data: currentVersion, isLoading: isLoadingVersion } =
     useGetFlowVersionEntry(
       { flowId, versionId: attachment.flow_version_id },
@@ -39,9 +41,9 @@ export default function ReviewPhaseContent({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Review Update</DialogTitle>
+        <DialogTitle>{t("deployments.choice.reviewUpdate")}</DialogTitle>
         <DialogDescription>
-          Review the version change before updating the deployment.
+          {t("deployments.choice.reviewUpdateDescription")}
         </DialogDescription>
       </DialogHeader>
 
@@ -49,13 +51,17 @@ export default function ReviewPhaseContent({
         <div className="rounded-lg border p-4">
           <p className="text-sm font-medium">{attachment.deployment_name}</p>
           <p className="text-xs text-muted-foreground">
-            {attachment.deployment_type} deployment
+            {t("deployments.choice.deploymentType", {
+              type: t(`deployments.type.${attachment.deployment_type}`),
+            })}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="flex flex-1 flex-col items-center gap-1.5 rounded-lg border p-3">
-            <span className="text-xs text-muted-foreground">Current</span>
+            <span className="text-xs text-muted-foreground">
+              {t("deployments.choice.current")}
+            </span>
             {isLoadingVersion ? (
               <ForwardedIconComponent
                 name="Loader2"
@@ -72,7 +78,9 @@ export default function ReviewPhaseContent({
           />
 
           <div className="flex flex-1 flex-col items-center gap-1.5 rounded-lg border p-3">
-            <span className="text-xs text-muted-foreground">New</span>
+            <span className="text-xs text-muted-foreground">
+              {t("deployments.choice.new")}
+            </span>
             <Badge variant="default">{newVersionTag}</Badge>
           </div>
         </div>
@@ -80,14 +88,14 @@ export default function ReviewPhaseContent({
 
       <div className="flex items-center justify-between pt-4">
         <Button variant="ghost" onClick={onCancel} disabled={isBusy}>
-          Cancel
+          {t("deleteModal.cancel")}
         </Button>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={onBack} disabled={isBusy}>
-            Back
+            {t("deployments.back")}
           </Button>
           <Button onClick={onConfirm} disabled={isBusy || isLoadingVersion}>
-            Update
+            {t("deployments.action.update")}
           </Button>
         </div>
       </div>

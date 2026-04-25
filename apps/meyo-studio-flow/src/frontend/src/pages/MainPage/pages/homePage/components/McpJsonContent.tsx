@@ -1,4 +1,5 @@
 import { memo, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import { ForwardedIconComponent } from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ interface MemoizedApiKeyButtonProps {
   apiKey: string;
   isGeneratingApiKey: boolean;
   generateApiKey: () => void;
+  generateLabel: string;
+  generatedLabel: string;
 }
 
 interface MemoizedCodeTagProps {
@@ -25,6 +28,8 @@ interface MemoizedCodeTagProps {
   apiKey: string;
   isGeneratingApiKey: boolean;
   generateApiKey: () => void;
+  generateApiKeyLabel: string;
+  apiKeyGeneratedLabel: string;
 }
 
 interface McpJsonContentProps {
@@ -48,6 +53,8 @@ const MemoizedApiKeyButton = memo(
     apiKey,
     isGeneratingApiKey,
     generateApiKey,
+    generateLabel,
+    generatedLabel,
   }: MemoizedApiKeyButtonProps) => (
     <Button
       unstyled
@@ -61,7 +68,7 @@ const MemoizedApiKeyButton = memo(
         className="h-4 w-4"
         aria-hidden="true"
       />
-      <span>{apiKey === "" ? "Generate API key" : "API key generated"}</span>
+      <span>{apiKey === "" ? generateLabel : generatedLabel}</span>
     </Button>
   ),
 );
@@ -76,6 +83,8 @@ const MemoizedCodeTag = memo(
     apiKey,
     isGeneratingApiKey,
     generateApiKey,
+    generateApiKeyLabel,
+    apiKeyGeneratedLabel,
   }: MemoizedCodeTagProps) => (
     <code className="relative block bg-background text-[13px]">
       <div className="absolute right-4 top-4 flex items-center gap-6">
@@ -84,6 +93,8 @@ const MemoizedCodeTag = memo(
             apiKey={apiKey}
             isGeneratingApiKey={isGeneratingApiKey}
             generateApiKey={generateApiKey}
+            generateLabel={generateApiKeyLabel}
+            generatedLabel={apiKeyGeneratedLabel}
           />
         )}
         <Button
@@ -122,8 +133,11 @@ export const McpJsonContent = ({
   apiKey,
   isGeneratingApiKey,
   generateApiKey,
-}: McpJsonContentProps) => (
-  <>
+}: McpJsonContentProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex-1">
         <Tabs value={selectedPlatform} onValueChange={setSelectedPlatform}>
@@ -143,7 +157,7 @@ export const McpJsonContent = ({
       </div>
       <div className="flex flex-col gap-2">
         <span className="text-[13px] font-medium text-muted-foreground">
-          Transport
+          {t("mcp.transport")}
         </span>
         <Tabs
           value={selectedTransport}
@@ -167,6 +181,8 @@ export const McpJsonContent = ({
             apiKey={apiKey}
             isGeneratingApiKey={isGeneratingApiKey}
             generateApiKey={generateApiKey}
+            generateApiKeyLabel={t("mcp.generateApiKey")}
+            apiKeyGeneratedLabel={t("mcp.apiKeyGenerated")}
           >
             {children}
           </MemoizedCodeTag>
@@ -177,16 +193,17 @@ export const McpJsonContent = ({
       </SyntaxHighlighter>
     </div>
     <div className="px-2 text-mmd text-muted-foreground">
-      Add this config to your client of choice. Need help? See the{" "}
+      {t("mcp.jsonHelp")}{" "}
       <a
         href="https://docs.langflow.org/mcp-server#connect-clients-to-use-the-servers-actions"
         target="_blank"
         rel="noreferrer"
         className="text-accent-pink-foreground"
       >
-        setup guide
+        {t("mcp.setupGuide")}
       </a>
       .
     </div>
-  </>
-);
+    </>
+  );
+};

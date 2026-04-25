@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,14 +27,16 @@ interface ProvidersContentProps {
 }
 
 function ProvidersLoadingSkeleton() {
+  const { t } = useTranslation();
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>URL</TableHead>
-          <TableHead>Provider Key</TableHead>
-          <TableHead>Created</TableHead>
+          <TableHead>{t("deployments.providers.columns.name")}</TableHead>
+          <TableHead>{t("deployments.providers.columns.url")}</TableHead>
+          <TableHead>{t("deployments.providers.columns.providerKey")}</TableHead>
+          <TableHead>{t("deployments.providers.columns.created")}</TableHead>
           <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
@@ -63,11 +66,15 @@ function ProvidersLoadingSkeleton() {
 }
 
 function ProvidersEmptyState({ onAddProvider }: { onAddProvider: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col items-center justify-center py-24">
-      <h3 className="text-lg font-semibold">No Environments</h3>
+      <h3 className="text-lg font-semibold">
+        {t("deployments.providers.emptyTitle")}
+      </h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Add your first environment to start deploying your flows.
+        {t("deployments.providers.emptyDescription")}
       </p>
       <Button
         variant="outline"
@@ -76,7 +83,7 @@ function ProvidersEmptyState({ onAddProvider }: { onAddProvider: () => void }) {
         onClick={onAddProvider}
       >
         <ForwardedIconComponent name="Plus" className="h-4 w-4" />
-        Add Environment
+        {t("deployments.providers.addEnvironment")}
       </Button>
     </div>
   );
@@ -88,12 +95,13 @@ export default function ProvidersContent({
   addProviderOpen,
   setAddProviderOpen,
 }: ProvidersContentProps) {
+  const { t } = useTranslation();
   const { mutate: deleteProviderAccount } = useDeleteProviderAccount();
 
   const providerDelete = useDeleteWithConfirmation(
     deleteProviderAccount,
     buildProviderDeleteParams,
-    "Error deleting environment",
+    t("deployments.providers.errorDeleting"),
   );
 
   const content = (() => {
@@ -120,7 +128,9 @@ export default function ProvidersContent({
       <DeleteConfirmationModal
         open={!!providerDelete.target}
         setOpen={providerDelete.setModalOpen}
-        description={`environment "${providerDelete.target?.name}"`}
+        description={t("deployments.providers.deleteDescription", {
+          name: providerDelete.target?.name,
+        })}
         onConfirm={providerDelete.confirmDelete}
       />
     </>

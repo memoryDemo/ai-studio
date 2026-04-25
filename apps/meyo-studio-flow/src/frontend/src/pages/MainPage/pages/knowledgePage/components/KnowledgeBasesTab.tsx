@@ -1,6 +1,7 @@
 import type { RowClickedEvent, SelectionChangedEvent } from "ag-grid-community";
 import type { AgGridReact } from "ag-grid-react";
 import { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import TableComponent from "@/components/core/parameterRenderComponent/components/tableComponent";
@@ -25,7 +26,6 @@ import { useKnowledgeBasePolling } from "../hooks/useKnowledgeBasePolling";
 import { useOptimisticKnowledgeBase } from "../hooks/useOptimisticKnowledgeBase";
 import type { KnowledgeBasesTabProps } from "../types";
 import KnowledgeBaseEmptyState from "./KnowledgeBaseEmptyState";
-import KnowledgeBaseSelectionOverlay from "./KnowledgeBaseSelectionOverlay";
 
 const KnowledgeBasesTab = ({
   quickFilterText,
@@ -37,6 +37,7 @@ const KnowledgeBasesTab = ({
   isShiftPressed,
   onRowClick,
 }: KnowledgeBasesTabProps) => {
+  const { t } = useTranslation();
   const tableRef = useRef<AgGridReact<unknown>>(null);
   const { setErrorData, setSuccessData } = useAlertStore((state) => ({
     setErrorData: state.setErrorData,
@@ -68,12 +69,15 @@ const KnowledgeBasesTab = ({
       for (const { kb, previousStatus } of transitions) {
         if (kb.status === "failed" && previousStatus !== "failed") {
           setErrorData({
-            title: `Ingestion failed for "${kb.name}"`,
+            title: t("knowledge.ingestionFailed", { name: kb.name }),
             list: kb.failure_reason ? [kb.failure_reason] : undefined,
           });
         } else if (kb.status === "ready" && previousStatus === "ingesting") {
           setSuccessData({
-            title: `"${kb.name}" ingestion complete — ${kb.chunks} chunks ready`,
+            title: t("knowledge.ingestionComplete", {
+              name: kb.name,
+              count: kb.chunks,
+            }),
           });
         }
       }
@@ -165,14 +169,14 @@ const KnowledgeBasesTab = ({
     onDelete: actions.handleDelete,
     onAddSources: handleAddSources,
     onStopIngestion: actions.handleStopIngestion,
-  });
+  }, t);
 
   // --- Error handling ---
 
   if (error) {
     setErrorData({
-      title: "Failed to load knowledge bases",
-      list: [error?.message || "An unknown error occurred"],
+      title: t("knowledge.loadFailed"),
+      list: [error?.message || t("knowledge.unknownError")],
     });
   }
 
@@ -183,7 +187,7 @@ const KnowledgeBasesTab = ({
       <div className="flex flex-1 w-full flex-col items-center justify-center gap-3">
         <Loading size={36} />
         <span className="text-sm text-muted-foreground pt-3">
-          Loading Knowledge Bases...
+          {t("knowledge.loading")}
         </span>
       </div>
     );
@@ -203,7 +207,7 @@ const KnowledgeBasesTab = ({
             icon="Search"
             data-testid="search-kb-input"
             type="text"
-            placeholder="Search knowledge bases..."
+            placeholder={t("knowledge.searchPlaceholder")}
             className="w-full"
             value={quickFilterText || ""}
             onChange={(event) => setQuickFilterText(event.target.value)}
@@ -216,7 +220,7 @@ const KnowledgeBasesTab = ({
             onClick={() => actions.setIsBulkDeleteModalOpen(true)}
           >
             <ForwardedIconComponent name="Trash2" className="h-4 w-4" />
-            Delete ({quantitySelected})
+            {t("knowledge.deleteButton", { count: quantitySelected })}
           </Button>
         ) : (
           <Button
@@ -224,7 +228,7 @@ const KnowledgeBasesTab = ({
             onClick={() => setIsUploadModalOpen(true)}
           >
             <ForwardedIconComponent name="Plus" className="h-4 w-4" />
-            Add Knowledge
+            {t("knowledge.addKnowledge")}
           </Button>
         )}
       </div>
@@ -265,8 +269,10 @@ const KnowledgeBasesTab = ({
         open={actions.isDeleteModalOpen}
         setOpen={actions.setIsDeleteModalOpen}
         onConfirm={actions.confirmDelete}
-        description={`knowledge base "${actions.knowledgeBaseToDelete?.name || ""}"`}
-        note="This action cannot be undone"
+        description={t("knowledge.deleteTarget", {
+          name: actions.knowledgeBaseToDelete?.name || "",
+        })}
+        note={t("knowledge.thisActionCannotBeUndone")}
       >
         <></>
       </DeleteConfirmationModal>
@@ -275,11 +281,15 @@ const KnowledgeBasesTab = ({
         open={actions.isBulkDeleteModalOpen}
         setOpen={actions.setIsBulkDeleteModalOpen}
         onConfirm={actions.confirmBulkDelete}
-        description={`${actions.deletableSelected.length} knowledge base(s)`}
+        description={t("knowledge.bulkDeleteTarget", {
+          count: actions.deletableSelected.length,
+        })}
         note={
           actions.deletableSelected.length < selectedFiles.length
-            ? `${selectedFiles.length - actions.deletableSelected.length} ingesting knowledge base(s) will be skipped. This action cannot be undone.`
-            : "This action cannot be undone"
+            ? t("knowledge.bulkDeleteSkippedNote", {
+                count: selectedFiles.length - actions.deletableSelected.length,
+              })
+            : t("knowledge.thisActionCannotBeUndone")
         }
       >
         <></>

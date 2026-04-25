@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,7 @@ export default function DeploymentStepperModal({
   initialInstance,
   editingDeployment,
 }: DeploymentStepperModalProps) {
+  const { t } = useTranslation();
   const [isDeploying, setIsDeploying] = useState(false);
   const isEditMode = !!editingDeployment;
   const { folderId } = useParams();
@@ -141,7 +143,7 @@ export default function DeploymentStepperModal({
         {isLoadingEditData ? (
           <div className="flex flex-1 items-center justify-center">
             <span className="text-sm text-muted-foreground">
-              Loading deployment data...
+              {t("deployments.loadingData")}
             </span>
           </div>
         ) : (
@@ -191,6 +193,7 @@ function DeploymentStepperModalContent({
   ) => void;
   onDeployingChange: (isDeploying: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const [deploymentPhase, setDeploymentPhase] =
     useState<DeploymentPhase>("idle");
   const [createdDeployment, setCreatedDeployment] = useState<{
@@ -240,7 +243,7 @@ function DeploymentStepperModalContent({
         const newAccount = await createProviderAccount(accountPayload);
         setSelectedInstance(newAccount);
       } catch (err: unknown) {
-        showError("Failed to create provider account", err);
+        showError(t("deployments.providers.createAccountFailed"), err);
         return;
       } finally {
         setIsCreatingAccount(false);
@@ -286,8 +289,12 @@ function DeploymentStepperModalContent({
     } catch (err: unknown) {
       setDeploymentPhase("idle");
       onDeployingChange(false);
-      const action = isEditMode ? "update" : "create";
-      showError(`Failed to ${action} deployment`, err);
+      showError(
+        isEditMode
+          ? t("deployments.updateFailed")
+          : t("deployments.createFailed"),
+        err,
+      );
     }
   };
 
@@ -297,17 +304,23 @@ function DeploymentStepperModalContent({
     setOpen(false);
   };
 
-  const actionLabel = isEditMode ? "Update" : "Deploy";
+  const actionLabel = isEditMode
+    ? t("deployments.action.update")
+    : t("deployments.action.deploy");
   const actionIcon = isEditMode ? "Save" : "Rocket";
-  const progressLabel = isEditMode ? "Updating..." : "Deploying...";
+  const progressLabel = isEditMode
+    ? t("deployments.updating")
+    : t("deployments.deploying");
 
   return (
     <>
       <DialogTitle className="sr-only">
-        {isEditMode ? "Update Deployment" : "Create New Deployment"}
+        {isEditMode
+          ? t("deployments.updateDeployment")
+          : t("deployments.createNewDeployment")}
       </DialogTitle>
       <DialogDescription className="sr-only">
-        Step {currentStep} of {totalSteps}
+        {t("deployments.stepOfTotal", { currentStep, totalSteps })}
       </DialogDescription>
 
       {/* Title + Stepper */}
@@ -316,7 +329,9 @@ function DeploymentStepperModalContent({
           className="text-center text-2xl font-semibold"
           data-testid="stepper-modal-title"
         >
-          {isEditMode ? "Update Deployment" : "Create New Deployment"}
+          {isEditMode
+            ? t("deployments.updateDeployment")
+            : t("deployments.createNewDeployment")}
         </h2>
         <DeploymentStepper />
       </div>
@@ -342,7 +357,7 @@ function DeploymentStepperModalContent({
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-border px-6 py-4">
           <Button variant="ghost" onClick={() => setOpen(false)}>
-            {isDeployed ? "Close" : "Cancel"}
+            {isDeployed ? t("deployments.close") : t("deleteModal.cancel")}
           </Button>
           <div className="flex items-center gap-3">
             {!isDeployed && (
@@ -351,7 +366,7 @@ function DeploymentStepperModalContent({
                 onClick={handleBack}
                 disabled={currentStep === minStep || isDeploying}
               >
-                Back
+                {t("deployments.back")}
               </Button>
             )}
             {!isInDeployPhase && (
@@ -369,9 +384,9 @@ function DeploymentStepperModalContent({
                     {actionLabel}
                   </>
                 ) : isCreatingAccount ? (
-                  "Connecting..."
+                  t("deployments.connecting")
                 ) : (
-                  "Next"
+                  t("deployments.next")
                 )}
               </Button>
             )}
@@ -389,7 +404,7 @@ function DeploymentStepperModalContent({
                 data-testid="deployment-stepper-test"
                 onClick={handleTest}
               >
-                Test
+                {t("deployments.columns.test")}
               </Button>
             )}
           </div>

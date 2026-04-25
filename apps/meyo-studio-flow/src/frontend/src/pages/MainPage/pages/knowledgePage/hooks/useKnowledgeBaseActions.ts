@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useCancelIngestion } from "@/controllers/API/queries/knowledge-bases/use-cancel-ingestion";
 import { useDeleteKnowledgeBase } from "@/controllers/API/queries/knowledge-bases/use-delete-knowledge-base";
 import type { KnowledgeBaseInfo } from "@/controllers/API/queries/knowledge-bases/use-get-knowledge-bases";
@@ -18,6 +19,7 @@ export const useKnowledgeBaseActions = ({
   selectedFiles,
   clearSelection,
 }: UseKnowledgeBaseActionsOptions) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { setErrorData, setSuccessData } = useAlertStore((state) => ({
     setErrorData: state.setErrorData,
@@ -35,16 +37,16 @@ export const useKnowledgeBaseActions = ({
 
   const cancelIngestionMutation = useCancelIngestion({
     onSuccess: () => {
-      setSuccessData({ title: "Ingestion cancelled" });
+      setSuccessData({ title: t("knowledge.alert.ingestionCancelled") });
       refetch();
     },
     onError: (error: AxiosError<{ detail?: string }>) => {
       setErrorData({
-        title: "Failed to cancel ingestion",
+        title: t("knowledge.alert.cancelFailed"),
         list: [
           error?.response?.data?.detail ||
             error?.message ||
-            "An unknown error occurred",
+            t("knowledge.unknownError"),
         ],
       });
     },
@@ -54,15 +56,15 @@ export const useKnowledgeBaseActions = ({
 
   const deleteKnowledgeBaseMutation = useDeleteKnowledgeBase({
     onSuccess: () => {
-      setSuccessData({ title: "Knowledge base deleted" });
+      setSuccessData({ title: t("knowledge.alert.deleteSuccess") });
     },
     onError: (error: AxiosError<{ detail?: string }>) => {
       setErrorData({
-        title: "Failed to delete knowledge base",
+        title: t("knowledge.alert.deleteFailed"),
         list: [
           error?.response?.data?.detail ||
             error?.message ||
-            "An unknown error occurred",
+            t("knowledge.unknownError"),
         ],
       });
       refetch();
@@ -73,15 +75,15 @@ export const useKnowledgeBaseActions = ({
 
   const deleteKnowledgeBasesMutation = useDeleteKnowledgeBase({
     onSuccess: () => {
-      setSuccessData({ title: "Knowledge base(s) deleted" });
+      setSuccessData({ title: t("knowledge.alert.bulkDeleteSuccess") });
     },
     onError: (error: AxiosError<{ detail?: string }>) => {
       setErrorData({
-        title: "Failed to delete knowledge bases",
+        title: t("knowledge.alert.bulkDeleteFailed"),
         list: [
           error?.response?.data?.detail ||
             error?.message ||
-            "An unknown error occurred",
+            t("knowledge.unknownError"),
         ],
       });
       refetch();

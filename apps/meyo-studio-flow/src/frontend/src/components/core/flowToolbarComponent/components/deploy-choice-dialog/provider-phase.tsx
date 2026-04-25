@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   DialogDescription,
@@ -23,13 +24,14 @@ export default function ProviderPhaseContent({
   onContinue,
   onCancel,
 }: ProviderPhaseContentProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Select Provider</DialogTitle>
+        <DialogTitle>{t("deployments.choice.selectProvider")}</DialogTitle>
         <DialogDescription>
-          Choose a provider environment to deploy to, or create a new deployment
-          from scratch.
+          {t("deployments.choice.selectProviderDescription")}
         </DialogDescription>
       </DialogHeader>
 
@@ -60,9 +62,9 @@ export default function ProviderPhaseContent({
 
       <div className="flex items-center justify-between pt-4">
         <Button variant="ghost" onClick={onCancel}>
-          Cancel
+          {t("deleteModal.cancel")}
         </Button>
-        <Button onClick={onContinue}>Continue</Button>
+        <Button onClick={onContinue}>{t("deployments.choice.continue")}</Button>
       </div>
     </>
   );

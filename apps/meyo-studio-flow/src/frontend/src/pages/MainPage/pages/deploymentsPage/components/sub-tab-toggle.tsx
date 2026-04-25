@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
 
@@ -8,15 +9,17 @@ interface SubTabToggleProps {
   onTabChange: (tab: DeploymentSubTab) => void;
 }
 
-const tabs: { value: DeploymentSubTab; label: string }[] = [
-  { value: "deployments", label: "Deployments" },
-  { value: "providers", label: "Deployment Environments" },
+const tabs: { value: DeploymentSubTab; labelKey: string }[] = [
+  { value: "deployments", labelKey: "deployments.tabs.deployments" },
+  { value: "providers", labelKey: "deployments.tabs.environments" },
 ];
 
 export default function SubTabToggle({
   activeTab,
   onTabChange,
 }: SubTabToggleProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex gap-0.5 rounded-lg border border-border p-0.5">
       {tabs.map((tab) => (
@@ -32,7 +35,7 @@ export default function SubTabToggle({
               : "text-muted-foreground hover:text-foreground",
           )}
         >
-          {tab.label}
+          {t(tab.labelKey)}
         </Button>
       ))}
     </div>

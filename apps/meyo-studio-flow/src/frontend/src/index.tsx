@@ -1,5 +1,4 @@
-import "./i18n";
-import { loadLanguage } from "./i18n";
+import i18n, { loadLanguage, normalizeLanguage } from "./i18n";
 import ReactDOM from "react-dom/client";
 import reportWebVitals from "./reportWebVitals";
 
@@ -12,12 +11,13 @@ import "./style/applies.css";
 
 // @ts-ignore
 import App from "./customization/custom-App";
-import { safeGetLocalStorage, safeNavigatorLanguage } from "./utils/browser";
+import { safeGetLocalStorage } from "./utils/browser";
 
-const detectedLang =
-  safeGetLocalStorage("languagePreference") || safeNavigatorLanguage() || "en";
+const detectedLang = safeGetLocalStorage("languagePreference") || "zh-Hans";
+const appLanguage = normalizeLanguage(detectedLang);
 
-loadLanguage(detectedLang).then(() => {
+loadLanguage(appLanguage).then(async () => {
+  await i18n.changeLanguage(appLanguage);
   const root = ReactDOM.createRoot(
     document.getElementById("root") as HTMLElement,
   );

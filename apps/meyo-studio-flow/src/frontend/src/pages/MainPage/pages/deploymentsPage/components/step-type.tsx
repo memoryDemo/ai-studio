@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,14 +19,15 @@ import { useErrorAlert } from "../hooks/use-error-alert";
 const TYPE_OPTIONS = [
   {
     type: "agent" as const,
-    label: "Agent",
-    description: "Conversational agent with chat interface and tool calling",
+    labelKey: "deployments.type.agent",
+    descriptionKey: "deployments.type.agentDescription",
     icon: "MessageSquare",
     iconBg: "border-accent-pink-foreground/20 bg-accent-pink-foreground/20",
   },
 ];
 
 export default function StepType() {
+  const { t } = useTranslation();
   const {
     isEditMode,
     deploymentType,
@@ -63,9 +65,9 @@ export default function StepType() {
 
   useEffect(() => {
     if (llmsError) {
-      showErrorAlert("Failed to load models", llmsError);
+      showErrorAlert(t("deployments.type.loadModelsFailed"), llmsError);
     }
-  }, [llmsError, showErrorAlert]);
+  }, [llmsError, showErrorAlert, t]);
 
   const [showScrollHint, setShowScrollHint] = useState(true);
   const contentRef = useCallback((node: HTMLDivElement | null) => {
@@ -84,16 +86,19 @@ export default function StepType() {
 
   return (
     <div className="flex w-full flex-col gap-6 overflow-y-auto py-3">
-      <h2 className="text-lg font-semibold">Deployment Type</h2>
+      <h2 className="text-lg font-semibold">
+        {t("deployments.type.title")}
+      </h2>
 
       <div className="flex flex-col gap-3">
         <span className="text-sm font-medium">
-          Choose Type <span className="text-destructive">*</span>
+          {t("deployments.type.chooseType")}{" "}
+          <span className="text-destructive">*</span>
         </span>
         <div
           className="grid grid-cols-2 gap-3"
           role="radiogroup"
-          aria-label="Deployment type"
+          aria-label={t("deployments.type.ariaLabel")}
         >
           {TYPE_OPTIONS.map((option) => (
             <label
@@ -126,9 +131,11 @@ export default function StepType() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{option.label}</span>
+                <span className="text-sm font-medium">
+                  {t(option.labelKey)}
+                </span>
                 <p className="text-xs text-muted-foreground">
-                  {option.description}
+                  {t(option.descriptionKey)}
                 </p>
               </div>
             </label>
@@ -138,10 +145,11 @@ export default function StepType() {
 
       <div className="flex flex-col">
         <span className="pb-2 text-sm font-medium">
-          Agent Name <span className="text-destructive">*</span>
+          {t("deployments.type.agentName")}{" "}
+          <span className="text-destructive">*</span>
         </span>
         <Input
-          placeholder="e.g., Sales Bot"
+          placeholder={t("deployments.type.agentNamePlaceholder")}
           className="bg-muted"
           value={deploymentName}
           onChange={(e) => setDeploymentName(e.target.value)}
@@ -149,14 +157,15 @@ export default function StepType() {
         />
         {isEditMode && (
           <span className="mt-1 text-xs text-muted-foreground">
-            Name cannot be changed after creation.
+            {t("deployments.type.nameImmutable")}
           </span>
         )}
       </div>
 
       <div className="flex flex-col">
         <span className="pb-2 text-sm font-medium">
-          Model <span className="text-destructive">*</span>
+          {t("deployments.type.model")}{" "}
+          <span className="text-destructive">*</span>
         </span>
         <Select
           value={selectedLlm}
@@ -165,7 +174,11 @@ export default function StepType() {
         >
           <SelectTrigger className="bg-muted focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground">
             <SelectValue
-              placeholder={llmsLoading ? "Loading models..." : "Select a model"}
+              placeholder={
+                llmsLoading
+                  ? t("deployments.type.loadingModels")
+                  : t("deployments.type.selectModel")
+              }
             />
           </SelectTrigger>
           <SelectContent
@@ -175,7 +188,7 @@ export default function StepType() {
           >
             {!llmsLoading && llmModels.length === 0 && (
               <SelectItem value="__empty__" disabled>
-                No models available for selected environment
+                {t("deployments.type.noModels")}
               </SelectItem>
             )}
             {llmModels.map((model) => (
@@ -198,9 +211,11 @@ export default function StepType() {
       </div>
 
       <div className="flex flex-col">
-        <span className="pb-2 text-sm font-medium">Description</span>
+        <span className="pb-2 text-sm font-medium">
+          {t("deployments.type.description")}
+        </span>
         <Textarea
-          placeholder="Describe the agent's purpose..."
+          placeholder={t("deployments.type.descriptionPlaceholder")}
           rows={3}
           className="resize-none bg-muted placeholder:text-placeholder-foreground"
           value={deploymentDescription}

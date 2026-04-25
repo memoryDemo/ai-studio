@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import { formatFileSize } from "../utils";
@@ -8,6 +9,8 @@ interface FilesPanelProps {
 }
 
 export function FilesPanel({ files, onRemoveFile }: FilesPanelProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex h-full flex-col">
       {/* Sticky header */}
@@ -15,11 +18,14 @@ export function FilesPanel({ files, onRemoveFile }: FilesPanelProps) {
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
           <ForwardedIconComponent name="FileStack" className="h-4 w-4" />
         </div>
-        Sources
+        {t("knowledgeUpload.sources")}
         {files.length > 0 && (
           <span className="text-xs font-normal text-muted-foreground">
-            ({files.length} {files.length === 1 ? "file" : "files"},{" "}
-            {formatFileSize(files)})
+            (
+            {t("knowledgeUpload.fileCount", {
+              count: files.length,
+            })}
+            , {formatFileSize(files)})
           </span>
         )}
       </div>

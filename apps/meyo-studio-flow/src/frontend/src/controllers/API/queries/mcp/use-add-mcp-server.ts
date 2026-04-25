@@ -1,4 +1,5 @@
 import type { UseMutationResult } from "@tanstack/react-query";
+import i18n from "@/i18n";
 import type { useMutationFunctionType } from "@/types/api";
 import type { MCPServerType } from "@/types/mcp";
 import { api } from "../../api";
@@ -44,18 +45,18 @@ export const useAddMCPServer: useMutationFunctionType<
         payload,
       );
 
-      return { message: res.data?.message || "MCP Server added successfully" };
+      return { message: res.data?.message || i18n.t("mcp.addSuccess") };
     } catch (error: unknown) {
       throw new Error(
         extractApiErrorMessage(
           error as Parameters<typeof extractApiErrorMessage>[0],
-          "Failed to install MCP",
+          i18n.t("mcp.installFailedGeneric"),
         ),
       );
     }
   }
 
-  const mutation: UseMutationResult<AddMCPServerResponse, any, MCPServerType> =
+  const mutation: UseMutationResult<AddMCPServerResponse, Error, MCPServerType> =
     mutate(["useAddMCPServer"], addMCPServer, {
       ...options,
       retry: 0,

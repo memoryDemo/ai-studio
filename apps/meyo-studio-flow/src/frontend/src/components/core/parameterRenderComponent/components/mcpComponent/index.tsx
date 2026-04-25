@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAddMCPServer } from "@/controllers/API/queries/mcp/use-add-mcp-server";
 import { useGetMCPServers } from "@/controllers/API/queries/mcp/use-get-mcp-servers";
 import AddMcpServerModal from "@/modals/addMcpServerModal";
@@ -9,6 +10,16 @@ import { default as ForwardedIconComponent } from "../../../../common/genericIco
 import { Button } from "../../../../ui/button";
 import type { InputProps } from "../../types";
 
+type McpValue = {
+  name?: string;
+  config?: Record<string, unknown>;
+};
+
+type McpOption = {
+  name?: string | null;
+  description?: string | null;
+};
+
 export default function McpComponent({
   value,
   disabled,
@@ -16,7 +27,8 @@ export default function McpComponent({
   editNode = false,
   id = "",
   showParameter = true,
-}: InputProps<string, any>): JSX.Element | null {
+}: InputProps<string, McpValue>): JSX.Element | null {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { data: mcpServers } = useGetMCPServers({ withCounts: true });
   const { mutate: addMcpServer } = useAddMCPServer();
@@ -31,15 +43,15 @@ export default function McpComponent({
               ? server.error.startsWith("Timeout")
                 ? "Timeout"
                 : "Error"
-              : "Loading..."
+              : t("mcp.loading")
             : !server.toolsCount
-              ? "No tools found"
-              : `${server.toolsCount} tool${server.toolsCount === 1 ? "" : "s"}`,
+              ? t("mcp.settings.noTools")
+              : t("mcp.settings.toolCount", { count: server.toolsCount }),
       })),
-    [mcpServers],
+    [mcpServers, t],
   );
   const [addOpen, setAddOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any[]>([]);
+  const [selectedItem, setSelectedItem] = useState<McpOption[]>([]);
   const { name, config } = useMemo(
     () => value ?? { name: "", config: {} },
     [value],
@@ -77,10 +89,11 @@ export default function McpComponent({
   }, [name, options]);
 
   // Handle selection from dialog
-  const handleSelection = (item: any) => {
+  const handleSelection = (item: McpOption) => {
+    const selectedName = item.name ?? "";
     setSelectedItem([{ name: item.name }]);
     handleOnNewValue(
-      { value: { name: item.name, config: {} } },
+      { value: { name: selectedName, config: {} } },
       { skipSnapshot: true },
     );
     setOpen(false);
@@ -102,7 +115,7 @@ export default function McpComponent({
         },
         onError: (error) => {
           setErrorData({
-            title: "Error adding MCP server",
+            title: t("mcp.addModal.validation.addFailed"),
             list: [error.message],
           });
         },
@@ -165,10 +178,10 @@ export default function McpComponent({
             >
               <span className="truncate">
                 {!options
-                  ? "Loading servers..."
+                  ? t("mcp.loadingServers")
                   : selectedItem[0]?.name
                     ? selectedItem[0]?.name
-                    : "Select a server..."}
+                    : t("mcp.selectServer")}
               </span>
               <ForwardedIconComponent
                 name={!showSaveButton ? "ChevronsUpDown" : "X"}
@@ -197,7 +210,7 @@ export default function McpComponent({
           onClick={handleAddButtonClick}
           data-testid="add-mcp-server-simple-button"
         >
-          <span>Add MCP Server</span>
+          <span>{t("sidebar.mcp.add")}</span>
         </Button>
       )}
       {options && (
@@ -213,10 +226,10 @@ export default function McpComponent({
             id={id}
             value={name}
             editNode={editNode}
-            headerSearchPlaceholder="Search MCP Servers..."
+            headerSearchPlaceholder={t("mcp.searchServers")}
             handleOnNewValue={handleOnNewValue}
             disabled={disabled}
-            addButtonText="Add MCP Server"
+            addButtonText={t("sidebar.mcp.add")}
             onAddButtonClick={handleAddButtonClick}
           />
           <AddMcpServerModal

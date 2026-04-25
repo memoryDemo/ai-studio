@@ -2,9 +2,22 @@
 
 // Mock react-i18next globally so t(key) returns the English string from en.json
 const enTranslations = require("./src/locales/en.json");
+const interpolate = (value, options = {}) =>
+  value.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, token) =>
+    options[token] == null ? `{{${token}}}` : String(options[token]),
+  );
+const mockT = (key, options = {}) => {
+  const pluralKey =
+    typeof options.count === "number" && options.count === 1
+      ? `${key}_one`
+      : `${key}_other`;
+  const value = enTranslations[pluralKey] ?? enTranslations[key] ?? key;
+  return typeof value === "string" ? interpolate(value, options) : value;
+};
+
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key) => enTranslations[key] ?? key,
+    t: mockT,
     i18n: { changeLanguage: jest.fn(), language: "en" },
   }),
   Trans: ({ children }) => children,

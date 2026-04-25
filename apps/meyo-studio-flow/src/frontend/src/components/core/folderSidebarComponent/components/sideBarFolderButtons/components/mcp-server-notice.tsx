@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useTranslation } from "react-i18next";
 import mcpNoticeImage from "@/assets/meyo-logo-wide.png";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { useCustomNavigate } from "@/customization/hooks/use-custom-navigate";
 export const MCPServerNotice: FC<{
   handleDismissDialog: () => void;
 }> = ({ handleDismissDialog }) => {
+  const { t } = useTranslation();
   const navigate = useCustomNavigate();
   return (
     <div className="relative flex flex-col gap-3 rounded-xl border p-4 shadow-md">
@@ -19,12 +21,18 @@ export const MCPServerNotice: FC<{
       </Button>
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <div className="font-mono text-sm text-muted-foreground">New</div>
-          <div className="">Projects as MCP Servers</div>
+          <div className="font-mono text-sm text-muted-foreground">
+            {t("mcp.notice.new")}
+          </div>
+          <div className="">{t("mcp.notice.title")}</div>
         </div>
-        <img src={mcpNoticeImage} alt="Meyo MCP Notice" className="rounded-xl" />
+        <img
+          src={mcpNoticeImage}
+          alt={t("mcp.notice.imageAlt")}
+          className="rounded-xl"
+        />
         <p className="text-sm text-secondary-foreground">
-          Expose flows as tools from clients like Cursor or Claude.
+          {t("mcp.notice.description")}
         </p>
       </div>
 
@@ -36,7 +44,7 @@ export const MCPServerNotice: FC<{
           }}
           className="w-full"
         >
-          <span>Go to Server</span>
+          <span>{t("mcp.notice.goToServer")}</span>
         </Button>
       </div>
     </div>

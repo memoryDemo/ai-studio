@@ -1,22 +1,24 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/utils";
 import { useDeploymentStepper } from "../contexts/deployment-stepper-context";
 
 const CREATE_STEPS = [
-  { number: 1, label: "Provider" },
-  { number: 2, label: "Type" },
-  { number: 3, label: "Attach Flows" },
-  { number: 4, label: "Review" },
+  { number: 1, labelKey: "deployments.steps.provider" },
+  { number: 2, labelKey: "deployments.steps.type" },
+  { number: 3, labelKey: "deployments.steps.attachFlows" },
+  { number: 4, labelKey: "deployments.steps.review" },
 ] as const;
 
 const EDIT_STEPS = [
-  { number: 1, label: "Type" },
-  { number: 2, label: "Attach Flows" },
-  { number: 3, label: "Review" },
+  { number: 1, labelKey: "deployments.steps.type" },
+  { number: 2, labelKey: "deployments.steps.attachFlows" },
+  { number: 3, labelKey: "deployments.steps.review" },
 ] as const;
 
 export const DEPLOYMENT_STEPS = CREATE_STEPS;
 
 export default function DeploymentStepper() {
+  const { t } = useTranslation();
   const { currentStep, isEditMode } = useDeploymentStepper();
   const steps = isEditMode ? EDIT_STEPS : CREATE_STEPS;
   const progressPercent = ((currentStep - 1) / (steps.length - 1)) * 100;
@@ -48,7 +50,7 @@ export default function DeploymentStepper() {
                 currentStep >= step.number && "font-medium",
               )}
             >
-              {step.label}
+              {t(step.labelKey)}
             </span>
           </div>
         ))}

@@ -1,5 +1,6 @@
 import { keepPreviousData } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ function EditableToolName({
   placeholder: string;
   onSave: (name: string) => void;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -63,7 +65,7 @@ function EditableToolName({
           type="button"
           onClick={confirm}
           className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-          title="Confirm"
+          title={t("deployments.review.confirmToolName")}
         >
           <ForwardedIconComponent name="Check" className="h-3.5 w-3.5" />
         </button>
@@ -83,7 +85,7 @@ function EditableToolName({
           setEditing(true);
         }}
         className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-        title="Edit tool name"
+        title={t("deployments.review.editToolName")}
         data-testid="edit-tool-name"
       >
         <ForwardedIconComponent name="Pencil" className="h-3.5 w-3.5" />
@@ -93,6 +95,7 @@ function EditableToolName({
 }
 
 export default function StepReview() {
+  const { t } = useTranslation();
   const {
     isEditMode,
     deploymentType,
@@ -143,7 +146,7 @@ export default function StepReview() {
         return { name: conn.name, isNew: conn.isNew ?? false, envVars };
       });
 
-      const flowName = flow?.name ?? "Unknown";
+      const flowName = flow?.name ?? t("deployments.review.unknown");
       return {
         flowId,
         flowName,
@@ -201,9 +204,9 @@ export default function StepReview() {
       // Check batch duplicates (two flows with same tool name in this deployment)
       const firstFlowId = batchNames.get(normalized);
       if (firstFlowId) {
-        errors.set(item.flowId, "Duplicate tool name within this deployment");
+        errors.set(item.flowId, t("deployments.review.duplicateToolName"));
         if (!errors.has(firstFlowId)) {
-          errors.set(firstFlowId, "Duplicate tool name within this deployment");
+          errors.set(firstFlowId, t("deployments.review.duplicateToolName"));
         }
       } else {
         batchNames.set(normalized, item.flowId);
@@ -223,7 +226,7 @@ export default function StepReview() {
         if (!skipProviderCheck) {
           errors.set(
             item.flowId,
-            "Edit tool name (already exists in provider)",
+            t("deployments.review.toolNameExists"),
           );
         }
       }
@@ -236,6 +239,7 @@ export default function StepReview() {
     isEditMode,
     preExistingFlowIds,
     initialToolNameByFlow,
+    t,
   ]);
 
   useEffect(() => {
@@ -249,9 +253,11 @@ export default function StepReview() {
   return (
     <div className="flex flex-col gap-4 py-3">
       <div>
-        <h2 className="text-lg font-semibold">Review & Confirm</h2>
+        <h2 className="text-lg font-semibold">
+          {t("deployments.review.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Review your deployment details before creating.
+          {t("deployments.review.description")}
         </p>
       </div>
 
@@ -260,23 +266,27 @@ export default function StepReview() {
           {/* Deployment column */}
           <div className="flex flex-col gap-3">
             <span className="text-sm font-medium text-foreground">
-              Deployment
+              {t("deployments.review.deployment")}
             </span>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="w-10 text-xs text-muted-foreground">Type</span>
+                <span className="w-10 text-xs text-muted-foreground">
+                  {t("deployments.review.type")}
+                </span>
                 <div className="flex items-center gap-1.5">
                   <ForwardedIconComponent
                     name={deploymentType === "agent" ? "Bot" : "Server"}
                     className="h-3.5 w-3.5 text-muted-foreground"
                   />
                   <span className="text-sm text-foreground capitalize">
-                    {deploymentType}
+                    {t(`deployments.type.${deploymentType}`)}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-10 text-xs text-muted-foreground">Name</span>
+                <span className="w-10 text-xs text-muted-foreground">
+                  {t("deployments.review.name")}
+                </span>
                 <span className="text-sm text-foreground">
                   {deploymentName || "—"}
                 </span>
@@ -284,7 +294,7 @@ export default function StepReview() {
               {selectedLlm && (
                 <div className="flex items-center gap-2">
                   <span className="w-10 text-xs text-muted-foreground">
-                    Model
+                    {t("deployments.review.model")}
                   </span>
                   <span className="text-sm text-foreground">{selectedLlm}</span>
                 </div>
@@ -295,7 +305,7 @@ export default function StepReview() {
           {/* Attached Flows column */}
           <div className="flex flex-col gap-3">
             <span className="text-sm font-medium text-foreground">
-              Attached Flows
+              {t("deployments.steps.attachFlows")}
             </span>
             <div className="flex flex-col gap-1.5">
               {reviewFlows.length === 0 ? (
@@ -389,7 +399,7 @@ export default function StepReview() {
                           {existingConns.length > 0 && (
                             <div className="flex flex-col gap-2">
                               <span className="text-xs font-medium text-muted-foreground">
-                                Existing Connections
+                                {t("deployments.review.existingConnections")}
                               </span>
                               {existingConns.map((conn) => (
                                 <span
@@ -404,7 +414,7 @@ export default function StepReview() {
                           {newConns.length > 0 && (
                             <div className="flex flex-col gap-2">
                               <span className="text-xs font-medium text-muted-foreground">
-                                New Connections
+                                {t("deployments.review.newConnections")}
                               </span>
                               {newConns.map((conn) => (
                                 <div
@@ -468,7 +478,7 @@ export default function StepReview() {
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
           <div className="flex flex-col gap-3">
             <span className="text-sm font-medium text-destructive">
-              Detaching
+              {t("deployments.review.detaching")}
             </span>
             <div className="flex flex-col gap-2">
               {Array.from(removedFlowIds).map((flowId) => {
@@ -483,22 +493,21 @@ export default function StepReview() {
                       className="h-3.5 w-3.5 shrink-0 text-destructive/60"
                     />
                     <span className="text-sm text-foreground">
-                      {flow?.name ?? "Unknown flow"}
+                      {flow?.name ?? t("deployments.review.unknownFlow")}
                     </span>
                     <Badge
                       variant="secondaryStatic"
                       size="tag"
                       className="bg-destructive/10 text-destructive"
                     >
-                      removing
+                      {t("deployments.review.removing")}
                     </Badge>
                   </div>
                 );
               })}
             </div>
             <p className="text-xs text-muted-foreground">
-              These tools will be detached from the agent. They will remain
-              available on your provider tenant.
+              {t("deployments.review.detachDescription")}
             </p>
           </div>
         </div>

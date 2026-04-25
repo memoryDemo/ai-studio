@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import ModelInputComponent, {
   type ModelOption,
@@ -21,7 +22,6 @@ import {
 import { cn } from "@/utils/utils";
 import { ACCEPTED_FILE_TYPES } from "../constants";
 import type { ColumnConfigRow } from "../types";
-import { ColumnConfig } from "./columnConfig/ColumnConfig";
 
 interface StepConfigurationProps {
   isAddSourcesMode: boolean;
@@ -72,17 +72,20 @@ export function StepConfiguration({
   columnConfig,
   onColumnConfigChange,
 }: StepConfigurationProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative">
       <div className="flex flex-col">
         {/* Name */}
         <div className="flex flex-col gap-2">
           <Label htmlFor="source-name" className="text-sm font-medium">
-            Name <span className="text-destructive">*</span>
+            {t("knowledgeUpload.name")}{" "}
+            <span className="text-destructive">*</span>
           </Label>
           <Input
             id="source-name"
-            placeholder="Enter a name for this knowledge base"
+            placeholder={t("knowledgeUpload.namePlaceholder")}
             value={sourceName}
             onChange={(e) => {
               onSourceNameChange(e.target.value);
@@ -102,7 +105,8 @@ export function StepConfiguration({
         {/* Model Selection */}
         <div className="flex flex-col gap-2 pt-4">
           <Label className="text-sm font-medium">
-            Embedding Model <span className="text-destructive">*</span>
+            {t("knowledgeUpload.embeddingModel")}{" "}
+            <span className="text-destructive">*</span>
           </Label>
           {isAddSourcesMode ? (
             <div className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-muted px-3 py-2 text-sm">
@@ -111,7 +115,7 @@ export function StepConfiguration({
                 className="h-4 w-4 shrink-0"
               />
               <span className="text-muted-foreground">
-                {existingEmbeddingModel || "Unknown"}
+                {existingEmbeddingModel || t("knowledgeUpload.unknown")}
               </span>
             </div>
           ) : (
@@ -132,7 +136,7 @@ export function StepConfiguration({
                   onFieldChange?.();
                 }}
                 options={embeddingModelOptions}
-                placeholder="Select embedding model"
+                placeholder={t("knowledgeUpload.selectEmbeddingModel")}
                 showEmptyState
               />
             </div>
@@ -184,9 +188,9 @@ export function StepConfiguration({
                   className="h-4 w-4 text-muted-foreground"
                 />
                 <span className="text-sm font-medium">
-                  Configure Sources
+                  {t("knowledgeUpload.configureSources")}
                   <span className="text-xs text-muted-foreground ml-1">
-                    (1 GB max upload)
+                    {t("knowledgeUpload.uploadLimit")}
                   </span>
                 </span>
               </div>
@@ -194,7 +198,7 @@ export function StepConfiguration({
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <Label className="text-xs text-muted-foreground">
-                    Sources
+                    {t("knowledgeUpload.sources")}
                   </Label>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -211,7 +215,7 @@ export function StepConfiguration({
                             name="Upload"
                             className="h-4 w-4"
                           />
-                          Add Sources
+                          {t("knowledgeUpload.addSourcesTitle")}
                         </span>
                         <ForwardedIconComponent
                           name="ChevronDown"
@@ -229,7 +233,7 @@ export function StepConfiguration({
                           name="FileText"
                           className="mr-2 h-4 w-4"
                         />
-                        Upload Files
+                        {t("knowledgeUpload.uploadFiles")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
@@ -240,7 +244,7 @@ export function StepConfiguration({
                           name="Folder"
                           className="mr-2 h-4 w-4"
                         />
-                        Upload Folder
+                        {t("knowledgeUpload.uploadFolder")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -297,7 +301,9 @@ export function StepConfiguration({
                   name="Settings2"
                   className="h-4 w-4 text-muted-foreground"
                 />
-                <span className="text-sm font-medium">Chunking Settings</span>
+                <span className="text-sm font-medium">
+                  {t("knowledgeUpload.chunkingSettings")}
+                </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -307,7 +313,7 @@ export function StepConfiguration({
                     htmlFor="chunk-size"
                     className="flex items-center gap-1 text-xs text-muted-foreground"
                   >
-                    Chunk Size
+                    {t("knowledgeUpload.chunkSize")}
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -319,8 +325,7 @@ export function StepConfiguration({
                           </span>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-[260px]">
-                          The maximum length of each chunk. Text is first split
-                          by separator, then chunks are merged up to this size.
+                          {t("knowledgeUpload.chunkSizeTooltip")}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -344,7 +349,7 @@ export function StepConfiguration({
                     htmlFor="chunk-overlap"
                     className="flex items-center gap-1 text-xs text-muted-foreground"
                   >
-                    Chunk Overlap
+                    {t("knowledgeUpload.chunkOverlap")}
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -356,7 +361,7 @@ export function StepConfiguration({
                           </span>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-[260px]">
-                          Number of characters to overlap between chunks.
+                          {t("knowledgeUpload.chunkOverlapTooltip")}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -381,7 +386,7 @@ export function StepConfiguration({
                   htmlFor="separator"
                   className="flex items-center gap-1 text-xs text-muted-foreground"
                 >
-                  Separator
+                  {t("knowledgeUpload.separator")}
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -393,9 +398,7 @@ export function StepConfiguration({
                         </span>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-[260px]">
-                        The character to split on. Use \n for newline. Examples:
-                        \n\n for paragraphs, \n for lines, . for sentences.
-                        Leave blank for no separator.
+                        {t("knowledgeUpload.separatorTooltip")}
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
