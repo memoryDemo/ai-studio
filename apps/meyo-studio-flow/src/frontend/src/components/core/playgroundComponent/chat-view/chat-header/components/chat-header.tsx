@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AnimatedConditional } from "@/components/ui/animated-close";
 import useAlertStore from "@/stores/alertStore";
 import { cn } from "@/utils/utils";
@@ -29,13 +30,19 @@ export function ChatHeader({
   onRenameSession,
   onClearChat,
 }: ChatHeaderProps & { sessions: string[] }) {
+  const { t } = useTranslation();
   // State to coordinate menu open/close
   const [sessionsDropdownOpen, setSessionsDropdownOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   // Determine the title based on the current session
   const sessionTitle = useMemo(
-    () => getSessionTitle(currentSessionId, currentFlowId),
-    [currentSessionId, currentFlowId],
+    () =>
+      getSessionTitle(
+        currentSessionId,
+        currentFlowId,
+        t("chat.defaultSession"),
+      ),
+    [currentSessionId, currentFlowId, t],
   );
 
   // Rename UI state — delegates actual rename to parent callback
@@ -57,13 +64,13 @@ export function ChatHeader({
   const handleDeleteSessionInternal = () => {
     if (!currentSessionId || isDefaultSession || !currentFlowId) return;
     onDeleteSession?.(currentSessionId);
-    setSuccessData({ title: "Session deleted successfully." });
+    setSuccessData({ title: t("success.sessionDeleted") });
   };
 
   const handleClearChat = () => {
     if (!currentSessionId || !isDefaultSession || !currentFlowId) return;
     onClearChat?.();
-    setSuccessData({ title: "Chat cleared successfully." });
+    setSuccessData({ title: t("chat.clearedSuccessfully") });
   };
 
   const { onMessageLogs } = useSessionMoreMenuHandlers({
@@ -91,7 +98,7 @@ export function ChatHeader({
         sideOffset={4}
         contentClassName="z-[100] [&>div.p-1]:!h-auto [&>div.p-1]:!min-h-0"
         isVisible={true}
-        tooltipContent="More options"
+        tooltipContent={t("chat.moreOptions")}
         tooltipSide="left"
         dataTestid="chat-header-more-menu"
         open={moreMenuOpen}

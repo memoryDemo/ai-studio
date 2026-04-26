@@ -289,7 +289,13 @@ export default function InputFileComponent({
                             strokeWidth={ICON_STROKE_WIDTH}
                           />
                         ) : (
-                          <div>Select file{isList ? "s" : ""}</div>
+                          <div>
+                            {t(
+                              isList
+                                ? "parameter.selectFiles"
+                                : "parameter.selectFile",
+                            )}
+                          </div>
                         )}
                       </Button>
                     </div>

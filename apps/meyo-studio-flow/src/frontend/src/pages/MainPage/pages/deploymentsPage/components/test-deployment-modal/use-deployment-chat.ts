@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useGetDeploymentRun } from "@/controllers/API/queries/deployments/use-get-deployment-run";
 import { usePostDeploymentRun } from "@/controllers/API/queries/deployments/use-post-deployment-run";
 import type { ChatMessage } from "./types";
@@ -36,6 +37,7 @@ export function useDeploymentChat({
   providerId,
   deploymentId,
 }: UseDeploymentChatOptions) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
@@ -123,7 +125,7 @@ export function useDeploymentChat({
             updateAssistantMessage(assistantMsgId, {
               content: "",
               isLoading: false,
-              error: "Run started but no run ID was returned.",
+              error: t("deployments.status.startRunMissingRunId"),
             });
           } else {
             const result = providerData?.result as
@@ -134,7 +136,7 @@ export function useDeploymentChat({
               extractTextFromResult(result) ||
               (typeof providerData?.status === "string"
                 ? providerData.status
-                : "Done.");
+                : t("deployments.status.done"));
             const toolTraces = extractToolTraces(result);
 
             updateAssistantMessage(assistantMsgId, {
@@ -148,7 +150,9 @@ export function useDeploymentChat({
         }
       } catch (err: unknown) {
         const message =
-          err instanceof Error ? err.message : "Failed to start run";
+          err instanceof Error
+            ? err.message
+            : t("deployments.status.startRunFailed");
         updateAssistantMessage(assistantMsgId, {
           content: "",
           isLoading: false,
@@ -174,7 +178,7 @@ export function useDeploymentChat({
             updateAssistantMessage(assistantMsgId, {
               content: "",
               isLoading: false,
-              error: "Run timed out. Please try again.",
+              error: t("deployments.status.runTimedOut"),
             });
             if (isMountedRef.current) setIsWaitingForResponse(false);
             return;
@@ -209,7 +213,8 @@ export function useDeploymentChat({
             }
 
             if (providerData?.failed_at || providerData?.cancelled_at) {
-              const errorMsg = providerData?.last_error ?? "Run failed.";
+              const errorMsg =
+                providerData?.last_error ?? t("deployments.status.runFailed");
               updateAssistantMessage(assistantMsgId, {
                 content: "",
                 isLoading: false,
@@ -224,7 +229,7 @@ export function useDeploymentChat({
                 extractTextFromResult(result) ||
                 (typeof providerData?.status === "string"
                   ? providerData.status
-                  : "Done.");
+                  : t("deployments.status.done"));
               const toolTraces = extractToolTraces(result);
 
               updateAssistantMessage(assistantMsgId, {
@@ -238,7 +243,9 @@ export function useDeploymentChat({
           } catch (err: unknown) {
             if (!isMountedRef.current) return;
             const message =
-              err instanceof Error ? err.message : "Failed to fetch run status";
+              err instanceof Error
+                ? err.message
+                : t("deployments.status.fetchRunStatusFailed");
             updateAssistantMessage(assistantMsgId, {
               content: "",
               isLoading: false,
@@ -260,6 +267,7 @@ export function useDeploymentChat({
       getRun,
       stopPolling,
       updateAssistantMessage,
+      t,
     ],
   );
 

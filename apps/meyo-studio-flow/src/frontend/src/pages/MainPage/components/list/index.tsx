@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import useDragStart from "@/components/core/cardComponent/hooks/use-on-drag-start";
@@ -37,6 +38,7 @@ const ListComponent = ({
   setSelected: (selected: boolean) => void;
   shiftPressed: boolean;
 }) => {
+  const { t } = useTranslation();
   const navigate = useCustomNavigate();
   const [openDelete, setOpenDelete] = useState(false);
   const setSuccessData = useAlertStore((state) => state.setSuccessData);
@@ -65,13 +67,13 @@ const ListComponent = ({
     deleteFlow({ id: [flowData.id] })
       .then(() => {
         setSuccessData({
-          title: "Selected items deleted successfully",
+          title: t("home.selectedItemsDeletedSuccessfully"),
         });
       })
       .catch((err) => {
         setErrorData({
-          title: "Error deleting items",
-          list: [getAxiosErrorMessage(err, "Error deleting items")],
+          title: t("home.errorDeletingItems"),
+          list: [getAxiosErrorMessage(err, t("home.errorDeletingItems"))],
         });
       });
   };
@@ -92,7 +94,9 @@ const ListComponent = ({
   const handleExport = () => {
     if (flowData.is_component) {
       downloadFlow(flowData, flowData.name, flowData.description);
-      setSuccessData({ title: `${flowData.name} exported successfully` });
+      setSuccessData({
+        title: t("home.exportedSuccessfully", { name: flowData.name }),
+      });
     } else {
       setOpenExportModal(true);
     }
@@ -171,7 +175,9 @@ const ListComponent = ({
               </div>
               <div className="flex min-w-0 flex-shrink text-xs text-muted-foreground">
                 <span className="truncate">
-                  Edited {timeElapsed(flowData.updated_at)} ago
+                  {t("home.editedAgo", {
+                    time: timeElapsed(flowData.updated_at, t),
+                  })}
                 </span>
               </div>
             </div>

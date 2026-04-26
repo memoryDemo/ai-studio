@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import Loading from "@/components/ui/loading";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useGetDeploymentAttachments } from "@/controllers/API/queries/deployments/use-get-deployment-attachments";
+import { useTranslation } from "react-i18next";
 
 interface DeploymentExpandedRowProps {
   deploymentId: string;
@@ -13,6 +14,7 @@ export default function DeploymentExpandedRow({
   deploymentId,
   colSpan,
 }: DeploymentExpandedRowProps) {
+  const { t } = useTranslation();
   const { data, isLoading, isError } = useGetDeploymentAttachments({
     deploymentId,
   });
@@ -27,21 +29,23 @@ export default function DeploymentExpandedRow({
             <div className="flex items-center gap-2 py-2">
               <Loading size={14} className="text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                Loading attached flows...
+                {t("deployments.details.loadingAttachedFlows")}
               </span>
             </div>
           ) : isError ? (
             <span className="text-sm text-destructive">
-              Failed to load attached flows
+              {t("deployments.details.loadAttachedFlowsFailed")}
             </span>
           ) : flows.length === 0 ? (
             <span className="text-sm text-muted-foreground">
-              No flows attached
+              {t("deployments.details.noFlowsAttached")}
             </span>
           ) : (
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">
-                Attached Flows
+                {t("deployments.details.attachedFlows", {
+                  count: flows.length,
+                })}
               </span>
               <div className="flex flex-wrap gap-2">
                 {flows.map((flow) => (
@@ -55,7 +59,9 @@ export default function DeploymentExpandedRow({
                       name="Workflow"
                       className="h-3 w-3 text-muted-foreground"
                     />
-                    <span>{flow.flow_name ?? "Untitled"}</span>
+                    <span>
+                      {flow.flow_name ?? t("deployments.details.untitled")}
+                    </span>
                     <span className="text-muted-foreground">
                       v{flow.version_number}
                     </span>

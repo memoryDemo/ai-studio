@@ -236,7 +236,7 @@ const AuthModal = ({
                         htmlFor="oauth-host"
                         className="!text-mmd font-medium"
                       >
-                      {t("mcp.authModal.host")}
+                        {t("mcp.authModal.host")}
                       </Label>
                       <Input
                         id="oauth-host"
@@ -253,7 +253,7 @@ const AuthModal = ({
                         htmlFor="oauth-port"
                         className="!text-mmd font-medium"
                       >
-                      {t("mcp.authModal.port")}
+                        {t("mcp.authModal.port")}
                       </Label>
                       <Input
                         id="oauth-port"
@@ -313,7 +313,7 @@ const AuthModal = ({
                     <Input
                       id="oauth-client-id"
                       type="text"
-                      placeholder="Enter Client ID"
+                      placeholder={t("mcp.authModal.enterClientId")}
                       value={authFields.oauthClientId || ""}
                       onChange={(e) =>
                         handleAuthFieldChange("oauthClientId", e.target.value)
@@ -330,7 +330,7 @@ const AuthModal = ({
                     <Input
                       id="oauth-client-secret"
                       type="password"
-                      placeholder="Enter Client Secret"
+                      placeholder={t("mcp.authModal.enterClientSecret")}
                       value={authFields.oauthClientSecret || ""}
                       onChange={(e) =>
                         handleAuthFieldChange(
@@ -432,7 +432,9 @@ const AuthModal = ({
           <span className="text-mmd text-muted-foreground">
             {installedClients && installedClients.length > 0
               ? t("mcp.authModal.reinstallWarningWithClients", {
-                  clients: installedClients.map((client) => toSpaceCase(client)).join(", "),
+                  clients: installedClients
+                    .map((client) => toSpaceCase(client))
+                    .join(", "),
                 })
               : t("mcp.authModal.reinstallWarning")}
           </span>

@@ -8,19 +8,12 @@ import LoadingTextComponent from "@/components/common/loadingTextComponent";
 import { usePostTemplateValue } from "@/controllers/API/queries/nodes/use-post-template-value";
 import useAlertStore from "@/stores/alertStore";
 import useFlowStore from "@/stores/flowStore";
-import { useTypesStore } from "@/stores/typesStore";
-import { scapedJSONStringfy } from "@/utils/reactflowUtils";
 import {
   convertStringToHTML,
   getStatusColor,
 } from "@/utils/stringManipulation";
 import type { DropDownComponent } from "../../../types/components";
-import {
-  cn,
-  filterNullOptions,
-  formatName,
-  groupByFamily,
-} from "../../../utils/utils";
+import { cn, filterNullOptions, formatName } from "../../../utils/utils";
 import { default as ForwardedIconComponent } from "../../common/genericIconComponent";
 import ShadTooltip from "../../common/shadTooltipComponent";
 import { Button } from "../../ui/button";
@@ -38,6 +31,8 @@ import {
   PopoverTrigger,
 } from "../../ui/popover";
 import type { BaseInputProps } from "../parameterRenderComponent/types";
+
+type DropdownMetadata = Record<string, unknown>;
 
 export default function Dropdown({
   disabled,
@@ -121,7 +116,7 @@ export default function Dropdown({
 
   // Utility functions
   const filterMetadataKeys = (
-    metadata: Record<string, any> = {},
+    metadata: DropdownMetadata = {},
     excludeKeys: string[] = [
       "api_endpoint",
       "icon",
@@ -181,7 +176,7 @@ export default function Dropdown({
     // Create a new metadata array that directly maps to filtered options
     if (optionsMetaData) {
       // Create a map of option -> metadata for quick lookup
-      const metadataMap: Record<string, any> = {};
+      const metadataMap: Record<string, unknown> = {};
       validOptions.forEach((option, index) => {
         if (optionsMetaData[index]) {
           metadataMap[option] = optionsMetaData[index];
@@ -288,7 +283,7 @@ export default function Dropdown({
 
         // Reset filteredMetadata to match the new filteredOptions
         if (optionsMetaData) {
-          const metadataMap: Record<string, any> = {};
+          const metadataMap: Record<string, unknown> = {};
           validOptions.forEach((option, index) => {
             if (optionsMetaData[index]) {
               metadataMap[option] = optionsMetaData[index];
@@ -447,7 +442,7 @@ export default function Dropdown({
       <input
         onChange={searchRoleByTerm}
         onKeyDown={handleInputKeyDown}
-        placeholder="Search options..."
+        placeholder={t("parameter.searchOptions")}
         className="flex h-9 w-full rounded-md bg-transparent py-3 text-[13px] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
         autoComplete="off"
         data-testid="dropdown_search_input"
@@ -615,24 +610,26 @@ export default function Dropdown({
                   name="RefreshCcw"
                   className={cn("h-3 w-3")}
                 />
-                Refresh list
+                {t("parameter.refreshList")}
               </div>
             </CommandItem>
           )}
-          <NodeDialog
-            open={openDialog}
-            dialogInputs={dialogInputs}
-            onClose={() => {
-              setOpenDialog(false);
-              setOpen(false);
-            }}
-            onCreated={(createdValue) => {
-              setPendingSelect(createdValue);
-            }}
-            nodeId={nodeId!}
-            name={name!}
-            nodeClass={nodeClass!}
-          />
+          {dialogInputs && (
+            <NodeDialog
+              open={openDialog}
+              dialogInputs={dialogInputs}
+              onClose={() => {
+                setOpenDialog(false);
+                setOpen(false);
+              }}
+              onCreated={(createdValue) => {
+                setPendingSelect(createdValue);
+              }}
+              nodeId={nodeId!}
+              name={name!}
+              nodeClass={nodeClass!}
+            />
+          )}
         </CommandGroup>
       )}
     </CommandList>
@@ -666,7 +663,7 @@ export default function Dropdown({
                     name="RefreshCcw"
                     className={cn("refresh-icon h-3 w-3 text-primary")}
                   />
-                  Refresh list
+                  {t("parameter.refreshList")}
                 </div>
               </Button>
             </CommandItem>
@@ -680,7 +677,7 @@ export default function Dropdown({
   if (Object.keys(validOptions).length === 0 && !combobox && isLoading) {
     return (
       <div>
-        <span className="text-sm italic">Loading...</span>
+        <span className="text-sm italic">{t("common.loading")}</span>
       </div>
     );
   }

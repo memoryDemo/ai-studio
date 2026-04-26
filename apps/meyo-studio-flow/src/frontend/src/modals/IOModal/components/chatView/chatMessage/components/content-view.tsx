@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ForwardedIconComponent } from "@/components/common/genericIconComponent";
@@ -8,6 +9,25 @@ import { cn } from "@/utils/utils";
 import CodeTabsComponent from "../../../../../../components/core/codeTabsComponent";
 import LogoIcon from "./chat-logo-icon";
 
+type ErrorBlockContent = {
+  component?: string;
+  field?: string;
+  reason?: string;
+  type: string;
+};
+
+type ErrorBlock = {
+  contents: ErrorBlockContent[];
+};
+
+type ErrorChat = {
+  properties?: {
+    source?: {
+      id?: string;
+    };
+  };
+};
+
 export const ErrorView = ({
   closeChat,
   fitViewNode,
@@ -16,13 +36,15 @@ export const ErrorView = ({
   lastMessage,
   blocks,
 }: {
-  blocks: any;
+  blocks: ErrorBlock[];
   showError: boolean;
   lastMessage: boolean;
   closeChat?: () => void;
   fitViewNode: (id: string) => void;
-  chat: any;
+  chat: ErrorChat;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="w-5/6 max-w-[768px] py-4 word-break-break-word">
@@ -37,7 +59,7 @@ export const ErrorView = ({
               <LogoIcon />
               <div className="flex items-center">
                 <TextShimmer className="" duration={1}>
-                  Flow running...
+                  {t("chat.flowRunning")}
                 </TextShimmer>
               </div>
             </motion.div>
@@ -67,7 +89,7 @@ export const ErrorView = ({
                             {content.component && (
                               <>
                                 <span>
-                                  An error occured in the{" "}
+                                  {t("chat.errorInComponentPrefix")}{" "}
                                   <span
                                     className={cn(
                                       closeChat ?? "cursor-pointer underline",
@@ -81,18 +103,21 @@ export const ErrorView = ({
                                   >
                                     <strong>{content.component}</strong>
                                   </span>{" "}
-                                  Component, stopping your flow. See below for
-                                  more details.
+                                  {t("chat.errorInComponentSuffix")}
                                 </span>
                               </>
                             )}
                           </div>
                           <div>
                             <h3 className="pb-3 font-semibold">
-                              Error details:
+                              {t("assistant.errorDetails")}:
                             </h3>
                             {content.field && (
-                              <p className="pb-1">Field: {content.field}</p>
+                              <p className="pb-1">
+                                {t("chat.errorField", {
+                                  field: content.field,
+                                })}
+                              </p>
                             )}
                             {content.reason && (
                               <span className="">

@@ -82,23 +82,27 @@ const ExportModal = forwardRef(
               );
 
               setSuccessData({
-                title: "Flow exported successfully",
+                title: t("flowSettings.exportSuccess"),
               });
               setOpen(false);
               track("Flow Exported", { flowId: currentFlow!.id });
             }
-          } catch (error: any) {
-            const detail = error?.response?.data?.detail;
+          } catch (error: unknown) {
+            const detail =
+              typeof error === "object" && error !== null && "response" in error
+                ? (error as { response?: { data?: { detail?: unknown } } })
+                    .response?.data?.detail
+                : undefined;
             setErrorData({
-              title: "Failed to export flow",
-              ...(detail ? { list: [detail] } : {}),
+              title: t("flowSettings.exportFailed"),
+              ...(typeof detail === "string" ? { list: [detail] } : {}),
             });
           }
         }}
       >
         <BaseModal.Trigger asChild>{props.children ?? <></>}</BaseModal.Trigger>
         <BaseModal.Header description={t("dialog.export")}>
-          <span className="pr-2">Export</span>
+          <span className="pr-2">{t("home.export")}</span>
           <IconComponent
             name="Download"
             className="h-6 w-6 pl-1 text-foreground"
@@ -133,7 +137,7 @@ const ExportModal = forwardRef(
 
         <BaseModal.Footer
           submit={{
-            label: "Export",
+            label: t("home.export"),
             loading: isBuilding,
             dataTestId: "modal-export-button",
           }}

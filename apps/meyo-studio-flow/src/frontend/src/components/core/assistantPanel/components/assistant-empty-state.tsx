@@ -1,10 +1,7 @@
+import { useTranslation } from "react-i18next";
 import meyoAssistantIcon from "@/assets/meyo-icon-square.png";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
-import {
-  ASSISTANT_SUGGESTIONS,
-  ASSISTANT_WELCOME_TEXT,
-} from "../assistant-panel.constants";
 
 interface AssistantEmptyStateProps {
   onSuggestionClick: (suggestion: string) => void;
@@ -13,6 +10,20 @@ interface AssistantEmptyStateProps {
 export function AssistantEmptyState({
   onSuggestionClick,
 }: AssistantEmptyStateProps) {
+  const { t } = useTranslation();
+  const suggestions = [
+    {
+      id: "build-agents",
+      icon: "Sparkles",
+      text: t("assistant.suggestionBuildAgents"),
+    },
+    {
+      id: "answer-questions",
+      icon: "Sparkles",
+      text: t("assistant.suggestionAnswerQuestions"),
+    },
+  ];
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-8">
       <div className="mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl">
@@ -23,10 +34,10 @@ export function AssistantEmptyState({
         />
       </div>
       <h3 className="mb-6 text-center text-base font-semibold leading-6 tracking-normal text-foreground">
-        {ASSISTANT_WELCOME_TEXT}
+        {t("assistant.welcome")}
       </h3>
       <div className="flex flex-col items-center gap-2">
-        {ASSISTANT_SUGGESTIONS.map((suggestion) => (
+        {suggestions.map((suggestion) => (
           <Button
             key={suggestion.id}
             variant="outline"

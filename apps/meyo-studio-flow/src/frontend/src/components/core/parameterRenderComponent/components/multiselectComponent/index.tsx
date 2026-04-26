@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../../../../utils/utils";
 import { default as ForwardedIconComponent } from "../../../../common/genericIconComponent";
 import ShadTooltip from "../../../../common/shadTooltipComponent";
@@ -31,6 +32,7 @@ export default function MultiselectComponent({
   hideOnSelection,
   inspectionPanel,
 }: InputProps<string[], MultiselectComponentType>): JSX.Element | null {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const treatedValue = typeof value === "string" ? [value] : value;
 
@@ -145,7 +147,7 @@ export default function MultiselectComponent({
         onChange={(event) => {
           setSearchValue(event.target.value);
         }}
-        placeholder="Search options..."
+        placeholder={t("parameter.searchOptions")}
         className="flex h-9 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
       />
       <Button
@@ -163,7 +165,7 @@ export default function MultiselectComponent({
 
   const renderOptionsList = () => (
     <CommandList className="overflow-y-scroll">
-      <CommandEmpty>No values found.</CommandEmpty>
+      <CommandEmpty>{t("parameter.noValuesFound")}</CommandEmpty>
       <CommandGroup>
         {filteredOptions.map((option, index) => (
           <ShadTooltip key={index} delayDuration={700} content={option}>

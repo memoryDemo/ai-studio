@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   PROVIDER_VARIABLE_MAPPING,
   ProviderVariable,
@@ -29,6 +30,22 @@ interface UseProviderConfigurationOptions {
 }
 
 type ValidationState = "idle" | "validating" | "valid" | "invalid";
+
+type ApiError = {
+  response?: {
+    data?: {
+      detail?: string;
+    };
+  };
+  message?: string;
+};
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (typeof error !== "object" || error === null) return fallback;
+
+  const apiError = error as ApiError;
+  return apiError.response?.data?.detail || apiError.message || fallback;
+};
 
 interface UseProviderConfigurationReturn {
   // State
@@ -70,6 +87,7 @@ interface UseProviderConfigurationReturn {
 export const useProviderConfiguration = ({
   selectedProvider,
 }: UseProviderConfigurationOptions): UseProviderConfigurationReturn => {
+  const { t } = useTranslation();
   const [variableValues, setVariableValues] = useState<Record<string, string>>(
     {},
   );
@@ -339,10 +357,12 @@ export const useProviderConfiguration = ({
         return true;
       } else {
         setValidationState("invalid");
-        setValidationError(result.error || "Validation failed");
+        setValidationError(
+          result.error || t("modelProviders.validationFailed"),
+        );
         return false;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ensure minimum 500ms duration even on error
       const elapsedTime = Date.now() - startTime;
       if (elapsedTime < 500) {
@@ -350,10 +370,12 @@ export const useProviderConfiguration = ({
       }
 
       setValidationState("invalid");
-      setValidationError(error?.message || "Validation failed");
+      setValidationError(
+        getErrorMessage(error, t("modelProviders.validationFailed")),
+      );
       return false;
     }
-  }, [selectedProvider, getVariablesForValidation, validateProvider]);
+  }, [selectedProvider, getVariablesForValidation, validateProvider, t]);
 
   // Debounced validation removed — validation now happens only on save button click
 
@@ -416,18 +438,17 @@ export const useProviderConfiguration = ({
       );
 
       // All succeeded — defer toast and value clear until after models refetch
-      pendingSuccessTitleRef.current = `${selectedProvider.provider} Configuration Saved`;
+      pendingSuccessTitleRef.current = t("modelProviders.configurationSaved", {
+        provider: selectedProvider.provider,
+      });
       setIsFetchingAfterSave(true);
       clearValuesAfterFetchRef.current = true;
       invalidateProviderQueries();
-    } catch (error: any) {
+    } catch (error: unknown) {
       setValidationFailed(true);
       setErrorData({
-        title: "Error Saving Configuration",
-        list: [
-          error?.response?.data?.detail ||
-            "An unexpected error occurred. Please try again.",
-        ],
+        title: t("modelProviders.errorSavingConfiguration"),
+        list: [getErrorMessage(error, t("modelProviders.unexpectedError"))],
       });
     } finally {
       setIsSaving(false);
@@ -442,6 +463,7 @@ export const useProviderConfiguration = ({
     setSuccessData,
     setErrorData,
     invalidateProviderQueries,
+    t,
   ]);
 
   // Activate providers that don't need API keys (e.g., Ollama)
@@ -456,9 +478,11 @@ export const useProviderConfiguration = ({
 
     if (!variableName) {
       setErrorData({
-        title: "Invalid Provider",
+        title: t("modelProviders.invalidProvider"),
         list: [
-          `Provider "${syncedSelectedProvider.provider}" is not supported.`,
+          t("modelProviders.providerNotSupported", {
+            provider: syncedSelectedProvider.provider,
+          }),
         ],
       });
       return;
@@ -486,15 +510,16 @@ export const useProviderConfiguration = ({
         });
       }
 
-      setSuccessData({ title: `${syncedSelectedProvider.provider} Activated` });
+      setSuccessData({
+        title: t("modelProviders.providerActivated", {
+          provider: syncedSelectedProvider.provider,
+        }),
+      });
       invalidateProviderQueries();
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorData({
-        title: "Error Activating Provider",
-        list: [
-          error?.response?.data?.detail ||
-            "An unexpected error occurred. Please try again.",
-        ],
+        title: t("modelProviders.errorActivatingProvider"),
+        list: [getErrorMessage(error, t("modelProviders.unexpectedError"))],
       });
     }
   }, [
@@ -506,6 +531,7 @@ export const useProviderConfiguration = ({
     setSuccessData,
     setErrorData,
     invalidateProviderQueries,
+    t,
   ]);
 
   // Disconnect / Deactivate provider
@@ -525,17 +551,16 @@ export const useProviderConfiguration = ({
       await deleteGlobalVariable({ id: existingVariable.id });
 
       setSuccessData({
-        title: `${syncedSelectedProvider.provider} Disconnected`,
+        title: t("modelProviders.providerDisconnected", {
+          provider: syncedSelectedProvider.provider,
+        }),
       });
       setIsFetchingAfterDisconnect(true);
       invalidateProviderQueries();
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorData({
-        title: "Error Disconnecting Provider",
-        list: [
-          error?.response?.data?.detail ||
-            "An unexpected error occurred. Please try again.",
-        ],
+        title: t("modelProviders.errorDisconnectingProvider"),
+        list: [getErrorMessage(error, t("modelProviders.unexpectedError"))],
       });
     }
   }, [
@@ -545,6 +570,7 @@ export const useProviderConfiguration = ({
     setSuccessData,
     setErrorData,
     invalidateProviderQueries,
+    t,
   ]);
 
   const pendingModelToggles = useRef<Record<string, boolean>>({});
@@ -576,16 +602,16 @@ export const useProviderConfiguration = ({
     updateEnabledModels(
       { updates },
       {
-        onError: (error: any) => {
+        onError: (error: unknown) => {
           if (previousData) {
             queryClient.setQueryData(["useGetEnabledModels"], previousData);
           }
-          const errorMessage =
-            error?.response?.data?.detail ||
-            error?.message ||
-            "Failed to update model status";
+          const errorMessage = getErrorMessage(
+            error,
+            t("modelProviders.failedUpdateModelStatus"),
+          );
           setErrorData({
-            title: "Error updating model status",
+            title: t("modelProviders.errorUpdatingModelStatus"),
             list: [errorMessage],
           });
         },
@@ -628,17 +654,17 @@ export const useProviderConfiguration = ({
       await updateEnabledModelsAsync({ updates });
       // Mutation succeeded — query invalidation is handled by
       // refreshAllModelInputs which runs after this promise resolves.
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Revert optimistic update on failure
       if (previousData) {
         queryClient.setQueryData(["useGetEnabledModels"], previousData);
       }
-      const errorMessage =
-        error?.response?.data?.detail ||
-        error?.message ||
-        "Failed to update model status";
+      const errorMessage = getErrorMessage(
+        error,
+        t("modelProviders.failedUpdateModelStatus"),
+      );
       setErrorData({
-        title: "Error updating model status",
+        title: t("modelProviders.errorUpdatingModelStatus"),
         list: [errorMessage],
       });
     }
@@ -648,6 +674,7 @@ export const useProviderConfiguration = ({
     queryClient,
     updateEnabledModelsAsync,
     setErrorData,
+    t,
   ]);
 
   const handleModelToggle = useCallback(

@@ -1,5 +1,4 @@
 import type { ColDef } from "ag-grid-community";
-import type { TFunction } from "i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import LoadingTextComponent from "@/components/common/loadingTextComponent";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { KnowledgeBaseInfo } from "@/controllers/API/queries/knowledge-bases/use-get-knowledge-bases";
+import type { TranslationFunction } from "@/types/i18n";
 import { formatFileSize } from "@/utils/stringManipulation";
 import { FILE_ICONS } from "@/utils/styleUtils";
 import { cn } from "@/utils/utils";
@@ -52,9 +52,10 @@ const fallbackTranslate = (
 
 export const createKnowledgeBaseColumns = (
   callbacks?: KnowledgeBaseColumnsCallbacks,
-  t?: TFunction,
+  t?: TranslationFunction,
 ): ColDef[] => {
-  const translate: TFunction = t ?? (fallbackTranslate as TFunction);
+  const translate: TranslationFunction =
+    t ?? (fallbackTranslate as TranslationFunction);
   const baseCellClass =
     "text-muted-foreground cursor-pointer select-text group-[.no-select-cells]:cursor-default group-[.no-select-cells]:select-none";
 
@@ -120,7 +121,8 @@ export const createKnowledgeBaseColumns = (
       editable: false,
       cellClass: baseCellClass,
       cellRenderer: (params: { data: KnowledgeBaseInfo }) => {
-        const model = params.data.embedding_model || translate("knowledge.unknown");
+        const model =
+          params.data.embedding_model || translate("knowledge.unknown");
         const provider =
           params.data.embedding_provider || translate("knowledge.unknown");
 

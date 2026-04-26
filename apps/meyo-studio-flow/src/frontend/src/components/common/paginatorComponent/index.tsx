@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   PAGINATION_PAGE,
   PAGINATION_ROWS_COUNT,
@@ -24,6 +25,7 @@ export default function PaginatorComponent({
   pages,
   isComponent,
 }: PaginatorComponentType) {
+  const { t } = useTranslation();
   const [size, setPageSize] = useState(pageSize);
   const [maxIndex, setMaxPageIndex] = useState(
     Math.ceil(totalRowsCount / pageSize),
@@ -35,6 +37,12 @@ export default function PaginatorComponent({
 
   const disableFirstPage = pageIndex <= 1;
   const disableLastPage = pageIndex === maxIndex;
+  const itemType =
+    isComponent === undefined
+      ? t("pagination.items", { count: totalRowsCount })
+      : isComponent
+        ? t("pagination.components", { count: totalRowsCount })
+        : t("pagination.flows", { count: totalRowsCount });
 
   const _handleValueChange = (pageSize: string) => {
     setPageSize(Number(pageSize));
@@ -48,12 +56,10 @@ export default function PaginatorComponent({
         {(pageIndex - 1) * pageSize + 1}-
         {Math.min(totalRowsCount, (pageIndex - 1) * pageSize + pageSize)}{" "}
         <span className="text-muted-foreground">
-          of {totalRowsCount}{" "}
-          {isComponent === undefined
-            ? "items"
-            : isComponent
-              ? "components"
-              : "flows"}
+          {t("pagination.ofCountType", {
+            count: totalRowsCount,
+            type: itemType,
+          })}
         </span>
       </div>
       <div className={"flex items-center gap-2"}>
@@ -76,7 +82,9 @@ export default function PaginatorComponent({
               ))}
             </SelectContent>
           </Select>
-          <span className="text-muted-foreground">of {maxIndex} pages</span>
+          <span className="text-muted-foreground">
+            {t("pagination.ofPages", { count: maxIndex })}
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <Button
@@ -89,7 +97,7 @@ export default function PaginatorComponent({
             variant="ghost"
             size={"iconMd"}
           >
-            <span className="sr-only">Go to previous page</span>
+            <span className="sr-only">{t("pagination.previousPage")}</span>
             <IconComponent name="ChevronLeft" className="h-4 w-4" />
           </Button>
           <Button
@@ -100,7 +108,7 @@ export default function PaginatorComponent({
             variant="ghost"
             size={"iconMd"}
           >
-            <span className="sr-only">Go to next page</span>
+            <span className="sr-only">{t("pagination.nextPage")}</span>
             <IconComponent name="ChevronRight" className="h-4 w-4" />
           </Button>
         </div>

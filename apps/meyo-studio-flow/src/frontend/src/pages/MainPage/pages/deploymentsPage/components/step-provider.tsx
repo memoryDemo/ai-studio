@@ -72,7 +72,7 @@ function EnvironmentList({
       </span>
       <div
         role="radiogroup"
-        aria-label="Existing environments"
+        aria-label={t("deployments.providers.existingEnvironmentsAria")}
         className="flex flex-col gap-3"
       >
         {environments.map((environment) => {

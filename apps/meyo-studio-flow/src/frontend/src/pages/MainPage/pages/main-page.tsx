@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 import SideBarFoldersButtonsComponent from "@/components/core/folderSidebarComponent/components/sideBarFolderButtons";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -15,6 +16,7 @@ import ModalsComponent from "../components/modalsComponent";
 import { shouldShowMainContent } from "./main-page-utils";
 
 export default function CollectionPage(): JSX.Element {
+  const { t } = useTranslation();
   const [openModal, setOpenModal] = useState(false);
   const [openDeleteFolderModal, setOpenDeleteFolderModal] = useState(false);
   const setFolderToEdit = useFolderStore((state) => state.setFolderToEdit);
@@ -41,15 +43,17 @@ export default function CollectionPage(): JSX.Element {
       {
         onSuccess: () => {
           setSuccessData({
-            title: "Project deleted successfully.",
+            title: t("mainPage.projectDeletedSuccessfully"),
           });
           navigate("/all");
         },
         onError: (err) => {
           console.error(err);
           setErrorData({
-            title: "Error deleting project.",
-            list: [getAxiosErrorMessage(err, "Error deleting project.")],
+            title: t("mainPage.errorDeletingProject"),
+            list: [
+              getAxiosErrorMessage(err, t("mainPage.errorDeletingProject")),
+            ],
           });
         },
       },

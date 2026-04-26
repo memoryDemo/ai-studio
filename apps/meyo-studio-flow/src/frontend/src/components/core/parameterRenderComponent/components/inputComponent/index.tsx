@@ -1,5 +1,6 @@
 import * as Form from "@radix-ui/react-form";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Input } from "@/components/ui/input";
 import { ICON_STROKE_WIDTH } from "@/constants/constants";
@@ -20,7 +21,7 @@ export default function InputComponent({
   isForm = false,
   password,
   editNode = false,
-  placeholder = "Type something...",
+  placeholder,
   className,
   id = "",
   blurOnEnter = false,
@@ -30,7 +31,7 @@ export default function InputComponent({
   selectedOptions = [],
   setSelectedOptions,
   options = [],
-  optionsPlaceholder = "Search options...",
+  optionsPlaceholder,
   optionsButton,
   optionButton,
   objectOptions,
@@ -45,10 +46,14 @@ export default function InputComponent({
   hasRefreshButton = false,
   inspectionPanel = false,
 }: InputComponentType): JSX.Element {
+  const { t } = useTranslation();
   const [pwdVisible, setPwdVisible] = useState(false);
   const [cursor, setCursor] = useState<number | null>(null);
   const refInput = useRef<HTMLInputElement>(null);
   const [showOptions, setShowOptions] = useState<boolean>(false);
+  const resolvedPlaceholder = placeholder ?? t("input.placeholder");
+  const resolvedOptionsPlaceholder =
+    optionsPlaceholder ?? t("parameter.searchOptions");
 
   useEffect(() => {
     if (disabled && value && onChange && value !== "") {
@@ -90,7 +95,9 @@ export default function InputComponent({
               password && !editNode ? "pr-10" : "",
               className!,
             )}
-            placeholder={password && editNode ? "Key" : placeholder}
+            placeholder={
+              password && editNode ? t("input.key") : resolvedPlaceholder
+            }
             onChange={(e) => {
               setCursor(e.target.selectionStart);
               if (onChangeFolderName) {
@@ -131,9 +138,9 @@ export default function InputComponent({
               disabled={disabled}
               setShowOptions={setShowOptions}
               required={required}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               blurOnEnter={blurOnEnter}
-              optionsPlaceholder={optionsPlaceholder}
+              optionsPlaceholder={resolvedOptionsPlaceholder}
               className={className}
               inspectionPanel={inspectionPanel}
             />
@@ -159,10 +166,10 @@ export default function InputComponent({
               password={password}
               pwdVisible={pwdVisible}
               editNode={editNode}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               blurOnEnter={blurOnEnter}
               options={options}
-              optionsPlaceholder={optionsPlaceholder}
+              optionsPlaceholder={resolvedOptionsPlaceholder}
               nodeStyle={nodeStyle}
               popoverWidth={popoverWidth}
               commandWidth={commandWidth}

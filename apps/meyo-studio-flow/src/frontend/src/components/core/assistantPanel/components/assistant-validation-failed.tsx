@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AlertTriangle, ChevronDown, ChevronUp, Code2 } from "lucide-react";
 import SimplifiedCodeTabComponent from "@/components/core/codeTabsComponent";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ export function AssistantValidationFailed({
   result,
   onRetry,
 }: AssistantValidationFailedProps) {
+  const { t } = useTranslation();
   const [showCode, setShowCode] = useState(false);
   const [showErrorDetails, setShowErrorDetails] = useState(false);
 
@@ -24,15 +26,14 @@ export function AssistantValidationFailed({
         <div className="flex items-center gap-2 border-b border-destructive/20 px-4 py-3">
           <AlertTriangle className="h-4 w-4 text-destructive" />
           <span className="text-sm font-medium text-destructive">
-            Component generation failed
+            {t("assistant.validationFailedTitle")}
           </span>
         </div>
 
         {/* Friendly message */}
         <div className="p-4">
           <p className="text-sm text-foreground">
-            The selected model was unable to generate valid component code. Try
-            again or use a more capable model.
+            {t("assistant.validationFailedDescription")}
           </p>
 
           {/* Collapsible error details */}
@@ -48,7 +49,7 @@ export function AssistantValidationFailed({
                 ) : (
                   <ChevronDown className="h-3 w-3" />
                 )}
-                Error details
+                {t("assistant.errorDetails")}
               </button>
               {showErrorDetails && (
                 <div className="mt-2 max-h-[200px] overflow-auto rounded-md bg-muted/50 p-3">
@@ -71,7 +72,7 @@ export function AssistantValidationFailed({
               className="h-8 gap-2 text-muted-foreground"
             >
               <Code2 className="h-3.5 w-3.5" />
-              {showCode ? "Hide code" : "View code"}
+              {showCode ? t("assistant.hideCode") : t("assistant.viewCode")}
               {showCode ? (
                 <ChevronUp className="h-3.5 w-3.5" />
               ) : (

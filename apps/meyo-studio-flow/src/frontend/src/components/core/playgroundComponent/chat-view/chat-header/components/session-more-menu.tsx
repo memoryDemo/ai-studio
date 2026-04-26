@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import ShadTooltip from "@/components/common/shadTooltipComponent";
 import {
@@ -52,14 +53,16 @@ export function SessionMoreMenu({
   triggerClassName,
   contentClassName,
   isVisible = true,
-  tooltipContent = "More options",
+  tooltipContent,
   tooltipSide = "left",
   dataTestid,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
 }: SessionMoreMenuProps) {
+  const { t } = useTranslation();
   const [selectValue, setSelectValue] = useState("");
   const [internalOpen, setInternalOpen] = useState(false);
+  const tooltipLabel = tooltipContent ?? t("chat.moreOptions");
 
   // Use controlled state if provided, otherwise use internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -96,7 +99,7 @@ export function SessionMoreMenu({
         <ShadTooltip
           styleClasses="z-50"
           side={tooltipSide}
-          content={tooltipContent}
+          content={tooltipLabel}
         >
           <SelectTrigger
             className={cn(
@@ -104,7 +107,7 @@ export function SessionMoreMenu({
               !isVisible && "invisible group-hover:visible",
               triggerClassName,
             )}
-            aria-label={tooltipContent}
+            aria-label={tooltipLabel}
             aria-haspopup="true"
             onClick={(e) => {
               e.stopPropagation();
@@ -136,7 +139,7 @@ export function SessionMoreMenu({
                   name="SquarePen"
                   className="mr-2 h-4 w-4"
                 />
-                Rename
+                {t("chat.renameSession")}
               </div>
             </SelectItem>
           )}
@@ -151,7 +154,7 @@ export function SessionMoreMenu({
                   name="Scroll"
                   className="mr-2 h-4 w-4"
                 />
-                Message logs
+                {t("chat.messageLogs")}
               </div>
             </SelectItem>
           )}
@@ -163,7 +166,7 @@ export function SessionMoreMenu({
             >
               <div className="flex items-center text-status-red hover:text-status-red">
                 <ForwardedIconComponent name="X" className="mr-2 h-4 w-4" />
-                Clear chat
+                {t("chat.clearChat")}
               </div>
             </SelectItem>
           )}
@@ -178,7 +181,9 @@ export function SessionMoreMenu({
                   name="Trash2"
                   className="mr-2 h-4 w-4"
                 />
-                {isDefaultSession ? "Clear session" : "Delete session"}
+                {isDefaultSession
+                  ? t("chat.clearSession")
+                  : t("chat.deleteSession")}
               </div>
             </SelectItem>
           )}

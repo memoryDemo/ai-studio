@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import meyoAssistantIcon from "@/assets/meyo-icon-square.png";
@@ -42,6 +43,7 @@ export function AssistantMessageItem({
   onApprove,
   onRetry,
 }: AssistantMessageItemProps) {
+  const { t } = useTranslation();
   const isUser = message.role === "user";
   const isStreaming = message.status === "streaming";
   const hasValidatedResult =
@@ -131,7 +133,7 @@ export function AssistantMessageItem({
     if (message.status === "cancelled") {
       return (
         <span className="text-sm text-muted-foreground/60 italic">
-          Cancelled
+          {t("assistant.cancelled")}
         </span>
       );
     }
@@ -270,7 +272,7 @@ export function AssistantMessageItem({
               isUser ? "text-foreground" : "text-accent-pink-foreground",
             )}
           >
-            {isUser ? "User" : "Meyo Assistant"}
+            {isUser ? t("assistant.user") : t("assistant.name")}
           </span>
           <div className="mt-3 overflow-hidden">{renderContent()}</div>
         </div>

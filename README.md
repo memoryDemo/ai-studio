@@ -2,7 +2,7 @@
 
 Meyo 是一个私有化的 `LangGraph-first` AgentOS 框架壳。
 
-名字来自 `张梦瑶` 的音感变体：从 `Mengyao` 收敛成更短、更像框架名的 `Meyo`。它不追求公开营销感，目标是作为这个项目长期使用的私有化框架品牌。
+名字来自 `梦瑶` 的音感变体：从 `Mengyao` 收敛成更短、更像框架名的 `Meyo`。不追求公开营销感，目标是作为这个项目长期使用的私有化框架品牌。
 
 ## 定位
 
@@ -177,6 +177,8 @@ meyo-chatbot dev --host 0.0.0.0 --port 8080
 cd apps/meyo-chatbot
 npm run dev
 ```
+
+普通前端开发不会预拉 Pyodide。需要调试浏览器端 Python/代码执行能力时，先运行一次 `npm run pyodide:fetch`，或直接使用 `npm run dev:pyodide`。
 
 在 Docker Compose 或容器网络里，`OPENAI_API_BASE_URL` 不要写 `127.0.0.1`，应写 Meyo 服务名，例如：
 

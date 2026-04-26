@@ -1,4 +1,9 @@
-export const timeElapsed = (dateTimeString: string | undefined): string => {
+import type { TranslationFunction } from "@/types/i18n";
+
+export const timeElapsed = (
+  dateTimeString: string | undefined,
+  t?: TranslationFunction,
+): string => {
   if (!dateTimeString) {
     return "";
   }
@@ -15,16 +20,36 @@ export const timeElapsed = (dateTimeString: string | undefined): string => {
   const years = Math.floor(months / 12);
 
   if (years > 0) {
-    return years === 1 ? `${years} year` : `${years} years`;
+    return t
+      ? t("time.year", { count: years })
+      : years === 1
+        ? `${years} year`
+        : `${years} years`;
   } else if (months > 0) {
-    return months === 1 ? `${months} month` : `${months} months`;
+    return t
+      ? t("time.month", { count: months })
+      : months === 1
+        ? `${months} month`
+        : `${months} months`;
   } else if (days > 0) {
-    return days === 1 ? `${days} day` : `${days} days`;
+    return t
+      ? t("time.day", { count: days })
+      : days === 1
+        ? `${days} day`
+        : `${days} days`;
   } else if (hours > 0) {
-    return hours === 1 ? `${hours} hour` : `${hours} hours`;
+    return t
+      ? t("time.hour", { count: hours })
+      : hours === 1
+        ? `${hours} hour`
+        : `${hours} hours`;
   } else if (minutes > 0) {
-    return minutes === 1 ? `${minutes} minute` : `${minutes} minutes`;
+    return t
+      ? t("time.minute", { count: minutes })
+      : minutes === 1
+        ? `${minutes} minute`
+        : `${minutes} minutes`;
   } else {
-    return "less than a minute";
+    return t ? t("time.lessThanMinute") : "less than a minute";
   }
 };

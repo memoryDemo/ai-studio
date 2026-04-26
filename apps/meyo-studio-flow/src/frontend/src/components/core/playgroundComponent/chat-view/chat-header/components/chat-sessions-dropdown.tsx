@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ export function ChatSessionsDropdown({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
 }: ChatSessionsDropdownProps) {
+  const { t } = useTranslation();
   const currentFlowId = useGetFlowId();
   const hasSessions: boolean = sessions.length > 0;
   const [internalOpen, setInternalOpen] = useState(false);
@@ -44,7 +46,7 @@ export function ChatSessionsDropdown({
           variant="ghost"
           size="icon"
           className="h-8 w-8 rounded"
-          aria-label="Chat sessions"
+          aria-label={t("chat.sessions")}
           data-testid="session-selector-trigger"
         >
           <ForwardedIconComponent name="ListRestart" className="h-4 w-4" />
@@ -67,7 +69,9 @@ export function ChatSessionsDropdown({
                       setOpen(false);
                     }}
                   >
-                    {session === currentFlowId ? "Default Session" : session}
+                    {session === currentFlowId
+                      ? t("chat.defaultSession")
+                      : session}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
@@ -83,7 +87,7 @@ export function ChatSessionsDropdown({
                   }}
                 >
                   <ForwardedIconComponent name="Plus" className="h-4 w-4" />
-                  New Session
+                  {t("chat.newSession")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </div>
@@ -98,7 +102,7 @@ export function ChatSessionsDropdown({
               }}
             >
               <ForwardedIconComponent name="Plus" className="h-4 w-4" />
-              New Session
+              {t("chat.newSession")}
             </DropdownMenuItem>
           </div>
         )}

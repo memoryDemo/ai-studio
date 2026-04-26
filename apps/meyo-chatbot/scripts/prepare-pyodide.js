@@ -26,7 +26,7 @@ const pypiPackages = ['black', 'pathspec', 'mypy_extensions', 'pytokens'];
 
 import { loadPyodide } from 'pyodide';
 import { setGlobalDispatcher, ProxyAgent } from 'undici';
-import { writeFile, readFile, copyFile, readdir, rmdir, access } from 'fs/promises';
+import { writeFile, readFile, copyFile, readdir, rm, access } from 'fs/promises';
 
 /**
  * Loading network proxy configurations from the environment variables.
@@ -61,6 +61,24 @@ function initNetworkProxyFromEnv() {
 async function downloadPackages() {
 	console.log('Setting up pyodide + micropip');
 
+	const pyodidePackage = JSON.parse(await readFile('node_modules/pyodide/package.json'));
+	const pyodideVersion = pyodidePackage.version.replace('^', '');
+
+	try {
+		const staticPyodidePackage = JSON.parse(await readFile('static/pyodide/package.json'));
+		const staticPyodideVersion = staticPyodidePackage.version.replace('^', '');
+
+		if (pyodideVersion !== staticPyodideVersion) {
+			console.log('Pyodide version mismatch, removing static/pyodide directory');
+			await rm('static/pyodide', { recursive: true, force: true });
+		} else if (await hasPreparedPyodide()) {
+			console.log(`Pyodide ${pyodideVersion} already prepared; skipping download.`);
+			return false;
+		}
+	} catch (err) {
+		console.log('Pyodide package not found, proceeding with download.', err);
+	}
+
 	let pyodide;
 	try {
 		pyodide = await loadPyodide({
@@ -68,22 +86,7 @@ async function downloadPackages() {
 		});
 	} catch (err) {
 		console.error('Failed to load Pyodide:', err);
-		return;
-	}
-
-	const packageJson = JSON.parse(await readFile('package.json'));
-	const pyodideVersion = packageJson.dependencies.pyodide.replace('^', '');
-
-	try {
-		const pyodidePackageJson = JSON.parse(await readFile('static/pyodide/package.json'));
-		const pyodidePackageVersion = pyodidePackageJson.version.replace('^', '');
-
-		if (pyodideVersion !== pyodidePackageVersion) {
-			console.log('Pyodide version mismatch, removing static/pyodide directory');
-			await rmdir('static/pyodide', { recursive: true });
-		}
-	} catch (err) {
-		console.log('Pyodide package not found, proceeding with download.', err);
+		return false;
 	}
 
 	try {
@@ -100,7 +103,7 @@ async function downloadPackages() {
 			}
 		} catch (err) {
 			console.error('Package installation failed:', err);
-			return;
+			return false;
 		}
 
 		console.log('Pyodide packages downloaded, freezing into lock file');
@@ -113,6 +116,22 @@ async function downloadPackages() {
 		}
 	} catch (err) {
 		console.error('Failed to load or install micropip:', err);
+		return false;
+	}
+
+	return true;
+}
+
+async function hasPreparedPyodide() {
+	try {
+		await access('static/pyodide/pyodide.mjs');
+		await access('static/pyodide/pyodide.asm.wasm');
+		await access('static/pyodide/python_stdlib.zip');
+		const lockData = JSON.parse(await readFile('static/pyodide/pyodide-lock.json', 'utf-8'));
+
+		return pypiPackages.every((pkg) => lockData.packages?.[pkg.replace(/-/g, '_')]);
+	} catch {
+		return false;
 	}
 }
 
@@ -196,6 +215,7 @@ async function downloadPyPIWheels() {
 }
 
 initNetworkProxyFromEnv();
-await downloadPackages();
-await copyPyodide();
-await downloadPyPIWheels();
+if (await downloadPackages()) {
+	await copyPyodide();
+	await downloadPyPIWheels();
+}

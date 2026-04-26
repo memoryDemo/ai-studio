@@ -1,5 +1,6 @@
 import { cloneDeep } from "lodash";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import useSaveFlow from "@/hooks/flows/use-save-flow";
 import { useUtilityStore } from "@/stores/utilityStore";
 import IconComponent from "../../components/common/genericIconComponent";
@@ -26,6 +27,12 @@ import ConfirmationModal from "../confirmationModal";
 import ExportModal from "../exportModal";
 import getTagsIds from "./utils/get-tags-ids";
 
+type StoreComponentNameResult = {
+  id: string;
+  is_component?: boolean;
+  name: string;
+};
+
 export default function ShareModal({
   component,
   is_component,
@@ -41,6 +48,7 @@ export default function ShareModal({
   setOpen?: (open: boolean) => void;
   disabled?: boolean;
 }): JSX.Element {
+  const { t } = useTranslation();
   const version = useDarkStore((state) => state.version);
   const hasStore = useStoreStore((state) => state.hasStore);
   const hasApiKey = useStoreStore((state) => state.hasApiKey);
@@ -52,7 +60,9 @@ export default function ShareModal({
       ? [open, setOpen]
       : useState(children ? false : true);
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
-  const nameComponent = is_component ? "component" : "workflow";
+  const nameComponent = is_component
+    ? t("share.component")
+    : t("share.workflow");
   const [sharePublic, setSharePublic] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [unavaliableNames, setUnavaliableNames] = useState<
@@ -81,7 +91,7 @@ export default function ShareModal({
       fields: ["name", "id", "is_component"],
       filterByUser: true,
     }).then((res) => {
-      res?.results?.forEach((element: any) => {
+      res?.results?.forEach((element: StoreComponentNameResult) => {
         if ((element.is_component ?? false) === is_component)
           unavaliableNames.push({ name: element.name, id: element.id });
       });
@@ -107,7 +117,7 @@ export default function ShareModal({
         saveFlow(flow);
       }
       setSuccessData({
-        title: `${is_component ? "Component" : "Flow"} shared successfully!`,
+        title: t(is_component ? "share.componentShared" : "share.flowShared"),
       });
     }
 
@@ -118,7 +128,11 @@ export default function ShareModal({
         sharePublic,
       ).then(successShare, (err) => {
         setErrorData({
-          title: "Error sharing " + (is_component ? "component" : "flow"),
+          title: t(
+            is_component
+              ? "share.errorSharingComponent"
+              : "share.errorSharingFlow",
+          ),
           list: [err["response"]["data"]["detail"]],
         });
       });
@@ -130,7 +144,11 @@ export default function ShareModal({
         unavaliableNames.find((e) => e.name === name)!.id,
       ).then(successShare, (err) => {
         setErrorData({
-          title: "Error sharing " + is_component ? "component" : "flow",
+          title: t(
+            is_component
+              ? "share.errorSharingComponent"
+              : "share.errorSharingFlow",
+          ),
           list: [err["response"]["data"]["detail"]],
         });
       });
@@ -151,9 +169,9 @@ export default function ShareModal({
       <>
         <ConfirmationModal
           open={openConfirmationModal}
-          title={`Replace`}
-          cancelText="Cancel"
-          confirmationText="Replace"
+          title={t("share.replace")}
+          cancelText={t("common.cancel")}
+          confirmationText={t("share.replace")}
           size={"x-small"}
           icon={"SaveAll"}
           index={6}
@@ -166,13 +184,10 @@ export default function ShareModal({
           }}
         >
           <ConfirmationModal.Content>
-            <span>
-              It seems {name} already exists. Do you want to replace it with the
-              current?
-            </span>
+            <span>{t("share.replaceExisting", { name })}</span>
             <br></br>
             <span className="text-xs text-destructive">
-              Note: This action is irreversible.
+              {t("share.irreversibleNote")}
             </span>
           </ConfirmationModal.Content>
         </ConfirmationModal>
@@ -184,6 +199,7 @@ export default function ShareModal({
     loadingNames,
     handleShareComponent,
     openConfirmationModal,
+    t,
   ]);
 
   return (
@@ -209,11 +225,11 @@ export default function ShareModal({
           {children ? children : <></>}
         </BaseModal.Trigger>
         <BaseModal.Header
-          description={`Publish ${
-            is_component ? "your component" : "workflow"
-          } to the Langflow Store.`}
+          description={t("share.publishDescription", {
+            type: nameComponent,
+          })}
         >
-          <span className="pr-2">Share</span>
+          <span className="pr-2">{t("share.title")}</span>
           <IconComponent
             name="Share3"
             className="-m-0.5 h-6 w-6 text-foreground"
@@ -248,12 +264,12 @@ export default function ShareModal({
                   htmlFor="public"
                   className="export-modal-save-api text-sm"
                 >
-                  Set {nameComponent} status to public
+                  {t("share.setPublicStatus", { type: nameComponent })}
                 </label>
               </div>
               <span className="text-xs text-destructive">
-                <b>Attention:</b> API keys in specified fields are automatically
-                removed upon sharing.
+                <b>{t("share.attention")}:</b>{" "}
+                {t("share.apiKeysRemovedOnShare")}
               </span>
             </>
           )}
@@ -261,7 +277,7 @@ export default function ShareModal({
 
         <BaseModal.Footer
           submit={{
-            label: `Share ${is_component ? "Component" : "Flow"}`,
+            label: t(is_component ? "share.shareComponent" : "share.shareFlow"),
             loading: loadingNames,
             dataTestId: "share-modal-button-flow",
           }}
@@ -278,7 +294,7 @@ export default function ShareModal({
                   }}
                 >
                   <IconComponent name="Download" className="h-4 w-4" />
-                  Export
+                  {t("home.export")}
                 </Button>
               </ExportModal>
             )}
@@ -293,7 +309,7 @@ export default function ShareModal({
                 }}
               >
                 <IconComponent name="Download" className="h-4 w-4" />
-                Export
+                {t("home.export")}
               </Button>
             )}
           </>

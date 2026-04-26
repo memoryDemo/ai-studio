@@ -69,8 +69,8 @@ const ZH_TEMPLATE_TEXT: Record<string, TemplateDisplayText> = {
     description: "集成 NVIDIA RTX Remix Toolkit REST API 和相关文档。",
   },
   "Pokédex Agent": {
-    name: "图鉴智能体",
-    description: "使用专用智能体和 Pokédex API 查询信息。",
+    name: "图鉴 Agent",
+    description: "使用专用 Agent 和 Pokédex API 查询信息。",
   },
   "Portfolio Website Code Generator": {
     name: "作品集网站生成器",
@@ -81,7 +81,7 @@ const ZH_TEMPLATE_TEXT: Record<string, TemplateDisplayText> = {
     description: "跨多个电商平台搜索并比较商品价格。",
   },
   "Research Agent": {
-    name: "研究智能体",
+    name: "研究 Agent",
     description: "制定研究计划，执行网页搜索，并综合生成报告。",
   },
   "Research Translation Loop": {
@@ -97,27 +97,27 @@ const ZH_TEMPLATE_TEXT: Record<string, TemplateDisplayText> = {
     description: "基于成本、利润率和订阅用户数计算 SaaS 定价。",
   },
   "Search agent": {
-    name: "搜索智能体",
+    name: "搜索 Agent",
     description: "在网页上搜索信息。",
   },
   "Sequential Tasks Agents": {
-    name: "顺序任务智能体",
+    name: "顺序任务 Agents",
     description: "按预设顺序系统执行一系列任务。",
   },
   "Simple Agent": {
-    name: "简单智能体",
-    description: "一个简单但强大的入门智能体。",
+    name: "简单 Agent",
+    description: "一个简单但强大的入门 Agent。",
   },
   "Social Media Agent": {
-    name: "社交媒体智能体",
-    description: "使用工具搜索并分析社交媒体资料。",
+    name: "社交媒体 Agent",
+    description: "使用 Tool 搜索并分析社交媒体资料。",
   },
   "Text Sentiment Analysis": {
     name: "文本情感分析",
     description: "加载文本数据并使用 AI 分析情感倾向。",
   },
   "Travel Planning Agents": {
-    name: "旅行规划智能体",
+    name: "旅行规划 Agents",
     description: "创建旅行规划聊天机器人，生成个性化行程。",
   },
   "Twitter Thread Generator": {
@@ -126,7 +126,7 @@ const ZH_TEMPLATE_TEXT: Record<string, TemplateDisplayText> = {
   },
   "Vector Store RAG": {
     name: "向量库 RAG",
-    description: "加载数据作为聊天上下文，进行检索增强生成。",
+    description: "加载数据作为聊天上下文，执行 RAG。",
   },
   "YouTube Analysis": {
     name: "YouTube 分析",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ShadTooltip from "@/components/common/shadTooltipComponent";
+import { useTranslation } from "react-i18next";
 import { ICON_STROKE_WIDTH } from "@/constants/constants";
 import { ENABLE_MCP_COMPOSER } from "@/customization/feature-flags";
 import ToolsModal from "@/modals/toolsModal";
@@ -9,6 +9,13 @@ import { Badge } from "../../../../ui/badge";
 import { Button } from "../../../../ui/button";
 import { Skeleton } from "../../../../ui/skeleton";
 import type { InputProps, ToolsComponentType } from "../../types";
+
+type ToolAction = {
+  description: string;
+  name: string;
+  status: boolean;
+  tags: string[];
+};
 
 export default function ToolsComponent({
   description,
@@ -22,9 +29,12 @@ export default function ToolsComponent({
   title,
   icon,
   disabled = false,
-  template,
   showParameter = true,
-}: InputProps<any[] | undefined, ToolsComponentType>): JSX.Element | null {
+}: InputProps<
+  ToolAction[] | undefined,
+  ToolsComponentType
+>): JSX.Element | null {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const actions = value
     ?.filter((action) => action.status === true)
@@ -119,7 +129,7 @@ export default function ToolsComponent({
             ))}
             {remainingCount > 0 && (
               <span className="ml-1 self-center text-xs font-normal text-muted-foreground">
-                +{remainingCount} more
+                {t("tools.moreActions", { count: remainingCount })}
               </span>
             )}
           </div>
@@ -128,10 +138,10 @@ export default function ToolsComponent({
           isAction && (
             <div className="mt-2 flex w-full flex-col items-center gap-2 rounded-md border border-dashed p-8">
               <span className="text-sm text-muted-foreground">
-                No actions added to this server
+                {t("tools.noActionsAdded")}
               </span>
               <Button size={"sm"} onClick={() => setIsModalOpen(true)}>
-                <span>Add actions</span>
+                <span>{t("tools.addActions")}</span>
               </Button>
             </div>
           )
@@ -150,8 +160,8 @@ export default function ToolsComponent({
             <span>
               {placeholder ||
                 (value.length === 0
-                  ? "No actions available"
-                  : "Select actions")}
+                  ? t("tools.noActionsAvailable")
+                  : t("tools.selectActions"))}
             </span>
           </Button>
         )}

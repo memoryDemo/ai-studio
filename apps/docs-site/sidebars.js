@@ -43,6 +43,8 @@ const sidebars = {
         { type: "doc", id: "design/project_architecture_dependency_design", label: "项目架构与按需依赖设计" },
         { type: "doc", id: "design/model_provider_manager_design", label: "Model Provider Manager 详细设计" },
         { type: "doc", id: "design/logging_system_design", label: "日志系统设计" },
+        { type: "doc", id: "design/meyo_chatbot_migration_design", label: "Meyo Chatbot 迁移与改造设计" },
+        { type: "doc", id: "design/meyo_studio_flow_migration_design", label: "Meyo Studio Flow 迁移与改造设计" },
       ],
     },
   ],

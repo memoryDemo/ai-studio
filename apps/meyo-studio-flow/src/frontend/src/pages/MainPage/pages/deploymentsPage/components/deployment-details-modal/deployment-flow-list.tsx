@@ -1,4 +1,5 @@
 import type { DeploymentFlowVersionItem } from "@/controllers/API/queries/deployments/use-get-deployment-attachments";
+import { useTranslation } from "react-i18next";
 import FlowVersionItem from "./flow-version-item";
 
 interface DeploymentFlowListProps {
@@ -10,13 +11,19 @@ export default function DeploymentFlowList({
   flowVersions,
   getConnectionNames,
 }: DeploymentFlowListProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-3">
       <span className="text-sm font-medium text-foreground">
-        Attached Flows ({flowVersions.length})
+        {t("deployments.details.attachedFlows", {
+          count: flowVersions.length,
+        })}
       </span>
       {flowVersions.length === 0 ? (
-        <span className="text-sm text-muted-foreground">No flows attached</span>
+        <span className="text-sm text-muted-foreground">
+          {t("deployments.details.noFlowsAttached")}
+        </span>
       ) : (
         <div className="flex flex-col gap-2">
           {flowVersions.map((fv) => (

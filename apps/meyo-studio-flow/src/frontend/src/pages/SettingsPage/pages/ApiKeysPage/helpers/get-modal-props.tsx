@@ -1,23 +1,26 @@
-export const getModalPropsApiKey = () => {
+import type { TranslationFunction } from "@/types/i18n";
+
+export const getModalPropsApiKey = (t: TranslationFunction) => {
   const modalProps = {
-    title: "Create API Key",
-    description: "Create a secret API Key to use Langflow API.",
-    inputPlaceholder: "My API Key",
-    buttonText: "Generate API Key",
+    title: t("apiKeys.createTitle"),
+    description: t("apiKeys.createDescription"),
+    inputPlaceholder: t("apiKeys.inputPlaceholder"),
+    buttonText: t("apiKeys.generateButton"),
     generatedKeyMessage: (
       <>
         {" "}
-        Please save this secret key somewhere safe and accessible. For security
-        reasons, <strong>you won't be able to view it again</strong> through
-        your account. If you lose this secret key, you'll need to generate a new
-        one.
+        {t("apiKeys.generatedKeyMessageBefore")}{" "}
+        <strong>{t("apiKeys.generatedKeyMessageStrong")}</strong>{" "}
+        {t("apiKeys.generatedKeyMessageAfter")}
       </>
     ),
     showIcon: true,
     inputLabel: (
       <>
-        <span className="text-sm">Description</span>{" "}
-        <span className="text-xs text-muted-foreground">(optional)</span>
+        <span className="text-sm">{t("flowSettings.description")}</span>{" "}
+        <span className="text-xs text-muted-foreground">
+          {t("apiKeys.optional")}
+        </span>
       </>
     ),
   };

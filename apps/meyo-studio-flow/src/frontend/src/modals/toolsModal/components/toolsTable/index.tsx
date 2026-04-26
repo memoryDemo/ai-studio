@@ -2,6 +2,7 @@ import type { ColDef } from "ag-grid-community";
 import type { AgGridReact } from "ag-grid-react";
 import { cloneDeep } from "lodash";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { handleOnNewValueType } from "@/CustomNodes/hooks/use-handle-new-value";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import ShadTooltip from "@/components/common/shadTooltipComponent";
@@ -20,6 +21,23 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { parseString, sanitizeMcpName } from "@/utils/stringManipulation";
 
+type ToolArg = {
+  title?: string;
+  description?: string | null;
+};
+
+export type ToolsTableRow = {
+  name: string;
+  display_name?: string;
+  display_description?: string;
+  description?: string | null;
+  status?: boolean;
+  tags?: string[];
+  readonly?: boolean;
+  args?: Record<string, ToolArg>;
+  _uniqueId?: string;
+};
+
 export default function ToolsTable({
   rows,
   data,
@@ -29,19 +47,22 @@ export default function ToolsTable({
   open,
   handleOnNewValue,
 }: {
-  rows: any[];
-  data: any[];
-  setData: (data: any[]) => void;
+  rows: ToolsTableRow[];
+  data: ToolsTableRow[];
+  setData: (data: ToolsTableRow[]) => void;
   open: boolean;
   handleOnNewValue: handleOnNewValueType;
   isAction: boolean;
   placeholder: string;
 }) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRows, setSelectedRows] = useState<any[] | null>(null);
+  const [selectedRows, setSelectedRows] = useState<ToolsTableRow[] | null>(
+    null,
+  );
   const agGrid = useRef<AgGridReact>(null);
 
-  const [focusedRow, setFocusedRow] = useState<any | null>(null);
+  const [focusedRow, setFocusedRow] = useState<ToolsTableRow | null>(null);
   const [sidebarName, setSidebarName] = useState<string>("");
   const [sidebarDescription, setSidebarDescription] = useState<string>("");
 
@@ -54,7 +75,7 @@ export default function ToolsTable({
   const { setOpen: setSidebarOpen } = useSidebar();
 
   const getRowId = useMemo(() => {
-    return (params: any) =>
+    return (params: { data: ToolsTableRow }) =>
       params.data._uniqueId ||
       `${params.data.name}_${params.data.display_name}`;
   }, []);
@@ -183,7 +204,7 @@ export default function ToolsTable({
   const columnDefs: ColDef[] = [
     {
       field: isAction ? "display_name" : "name",
-      headerName: isAction ? "Flow Name" : "Name",
+      headerName: isAction ? t("tools.flowName") : t("tools.name"),
       flex: 1,
       valueGetter: (params) =>
         !isAction
@@ -197,13 +218,13 @@ export default function ToolsTable({
     },
     {
       field: "description",
-      headerName: "Description",
+      headerName: t("tools.description"),
       flex: 2,
       cellClass: "text-muted-foreground",
     },
     {
       field: "name",
-      headerName: isAction ? "Tool" : "Slug",
+      headerName: isAction ? "Tool" : t("tools.slug"),
       flex: 1,
       resizable: false,
       valueGetter: (params) =>
@@ -215,7 +236,7 @@ export default function ToolsTable({
             ])
           : isAction
             ? sanitizeMcpName(params.data.display_name, 46).toUpperCase()
-            : parseString(params.data.tags.join(", "), [
+            : parseString((params.data.tags ?? []).join(", "), [
                 "snake_case",
                 "uppercase",
               ]),
@@ -223,7 +244,7 @@ export default function ToolsTable({
     },
     {
       field: "tags",
-      headerName: "Tags",
+      headerName: t("tools.tags"),
       flex: 1,
       hide: true,
     },
@@ -276,13 +297,11 @@ export default function ToolsTable({
   };
 
   const actionArgs = useMemo(() => {
-    return Object.entries(focusedRow?.args ?? {}).map(
-      ([key, value]: [string, any]) => ({
-        display_name: value.title,
-        name: key,
-        description: value.description ?? null,
-      }),
-    );
+    return Object.entries(focusedRow?.args ?? {}).map(([key, value]) => ({
+      display_name: value.title ?? key,
+      name: key,
+      description: value.description ?? null,
+    }));
   }, [focusedRow]);
 
   const handleDescriptionChange = (e) => {
@@ -329,7 +348,7 @@ export default function ToolsTable({
         <div className="flex-none px-4">
           <Input
             icon="Search"
-            placeholder="Search tools..."
+            placeholder={t("tools.searchPlaceholder")}
             inputClassName="h-8"
             value={searchQuery}
             onChange={handleSearchChange}
@@ -369,7 +388,7 @@ export default function ToolsTable({
                     className="text-mmd font-medium"
                     htmlFor="sidebar-name-input"
                   >
-                    {isAction ? "Tool name" : "Slug"}
+                    {isAction ? t("tools.toolName") : t("tools.slug")}
                   </label>
 
                   <Input
@@ -377,13 +396,13 @@ export default function ToolsTable({
                     value={sidebarName}
                     onChange={handleNameChange}
                     maxLength={46}
-                    placeholder="Edit name..."
+                    placeholder={t("tools.editName")}
                     data-testid="input_update_name"
                   />
                   <div className="text-xs text-muted-foreground">
                     {isAction
-                      ? "Used as the function name when this flow is exposed to clients."
-                      : "Used as the function name when this tool is exposed to the agent."}
+                      ? t("tools.flowNameHelp")
+                      : t("tools.toolNameHelp")}
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -391,21 +410,23 @@ export default function ToolsTable({
                     className="text-mmd font-medium"
                     htmlFor="sidebar-desc-input"
                   >
-                    {isAction ? "Tool description" : "Description"}
+                    {isAction
+                      ? t("tools.toolDescription")
+                      : t("tools.description")}
                   </label>
 
                   <Textarea
                     id="sidebar-desc-input"
                     value={sidebarDescription}
                     onChange={handleDescriptionChange}
-                    placeholder="Edit description..."
+                    placeholder={t("tools.editDescription")}
                     className="h-24"
                     data-testid="input_update_description"
                   />
                   <div className="text-xs text-muted-foreground">
                     {isAction
-                      ? "This is the description for the tool exposed to a client."
-                      : "This is the description for the tool exposed to the agents."}
+                      ? t("tools.flowDescriptionHelp")
+                      : t("tools.toolDescriptionHelp")}
                   </div>
                 </div>
               </div>
@@ -436,9 +457,11 @@ export default function ToolsTable({
                   <div className="flex h-full flex-col gap-4">
                     {actionArgs.length > 0 && (
                       <div className="flex flex-col gap-1.5">
-                        <h3 className="text-base font-medium">Parameters</h3>
+                        <h3 className="text-base font-medium">
+                          {t("tools.parameters")}
+                        </h3>
                         <p className="text-mmd text-muted-foreground">
-                          Manage inputs for this tool
+                          {t("tools.manageInputs")}
                         </p>
                       </div>
                     )}
@@ -461,7 +484,7 @@ export default function ToolsTable({
                         <Input
                           id="sidebar-desc-input"
                           disabled
-                          placeholder="Input controlled by the agent"
+                          placeholder={t("tools.inputControlledByAgent")}
                           onChange={(e) => {}}
                         />
                       </div>
@@ -480,7 +503,7 @@ export default function ToolsTable({
               onClick={handleClose}
               data-testid="btn_close_tools_modal"
             >
-              Close
+              {t("common.close")}
             </Button>
           </div>
         </SidebarFooter>

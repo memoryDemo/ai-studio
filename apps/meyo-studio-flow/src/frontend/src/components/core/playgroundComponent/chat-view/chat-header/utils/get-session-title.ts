@@ -1,9 +1,10 @@
 export function getSessionTitle(
   currentSessionId?: string,
   currentFlowId?: string,
+  defaultSessionName = "Default Session",
 ): string {
   if (!currentSessionId || currentSessionId === currentFlowId) {
-    return "Default Session";
+    return defaultSessionName;
   }
   return currentSessionId;
 }
