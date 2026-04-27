@@ -19,6 +19,9 @@ schema = "public"
 [service.model.worker]
 host = "127.0.0.1"
 
+[service.model.api]
+controller_addr = "http://127.0.0.1:5670"
+
 [rag.storage]
 [rag.storage.vector]
 type = "milvus"
@@ -28,16 +31,17 @@ alias = "default"
 
 [models]
 [[models.llms]]
-name = "deepseek-ai/DeepSeek-V3"
+name = "${env:MEYO_LANGUAGE_MODEL_NAME:-Pro/zai-org/GLM-5.1}"
 provider = "proxy/siliconflow"
 api_key = "${env:SILICONFLOW_API_KEY}"
 
 [[models.embeddings]]
-name = "BAAI/bge-m3"
+name = "${env:MEYO_EMBEDDING_MODEL_NAME:-Qwen/Qwen3-Embedding-8B}"
 provider = "proxy/siliconflow"
+backend = "${env:MEYO_EMBEDDING_MODEL_NAME:-Qwen/Qwen3-Embedding-8B}"
 api_key = "${env:SILICONFLOW_API_KEY}"
 
 [[models.rerankers]]
-name = "BAAI/bge-reranker-v2-m3"
+name = "${env:MEYO_RERANKER_MODEL_NAME:-BAAI/bge-reranker-v2-m3}"
 provider = "proxy/siliconflow"
 api_key = "${env:SILICONFLOW_API_KEY}"
