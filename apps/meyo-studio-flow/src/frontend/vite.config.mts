@@ -1,6 +1,6 @@
 import react from "@vitejs/plugin-react-swc";
 import * as dotenv from "dotenv";
-import path from "path";
+import * as path from "node:path";
 import { defineConfig, loadEnv } from "vite";
 import istanbul from "vite-plugin-istanbul";
 import svgr from "vite-plugin-svgr";
@@ -46,7 +46,10 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       "import.meta.env.BACKEND_URL": JSON.stringify(
-        envLangflow.BACKEND_URL ?? "http://localhost:7860",
+        env.BACKEND_URL ??
+          process.env.BACKEND_URL ??
+          envLangflow.BACKEND_URL ??
+          "http://localhost:7860",
       ),
       "import.meta.env.ACCESS_TOKEN_EXPIRE_SECONDS": JSON.stringify(
         envLangflow.ACCESS_TOKEN_EXPIRE_SECONDS ?? 60,
@@ -60,6 +63,15 @@ export default defineConfig(({ mode }) => {
       ),
     },
     plugins: [
+      {
+        name: "meyo-html-base",
+        transformIndexHtml(html) {
+          return html.replace(
+            '<base href="/" />',
+            `<base href="${BASENAME || "/"}" />`,
+          );
+        },
+      },
       react(),
       svgr(),
       tsconfigPaths(),

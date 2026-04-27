@@ -6,8 +6,8 @@ encrypt_key = "${env:MEYO_ENCRYPT_KEY:-your_secret_key}"
 
 # 服务配置
 [service.web]
-host = "0.0.0.0"
-port = 5670
+host = "${env:MEYO_WEB_HOST:-0.0.0.0}"
+port = "${env:MEYO_WEB_PORT:-5670}"
 
 [service.web.database]
 type = "sqlite"

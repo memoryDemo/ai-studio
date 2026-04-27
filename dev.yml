@@ -1,0 +1,270 @@
+name: meyo
+
+services:
+  meyo-postgres:
+    image: postgres:18.3
+    container_name: meyo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${MEYO_PG_DATABASE:-meyo}
+      POSTGRES_USER: ${MEYO_PG_USER:-meyo}
+      POSTGRES_PASSWORD: "Zjmzu5EqZzB_4dk7JA7N3yqULeLG@+dq"
+    ports:
+      - "${MEYO_PG_PORT:-14001}:5432"
+    volumes:
+      - meyo_pg_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${MEYO_PG_USER:-meyo} -d ${MEYO_PG_DATABASE:-meyo}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  meyo-redis-stack:
+    image: redis/redis-stack:7.4.0-v8
+    container_name: meyo-redis-stack
+    restart: unless-stopped
+    environment:
+      REDIS_ARGS: --requirepass PkXWBhDJbeT23W=zGRGyA.6NUkyuTpcx
+    ports:
+      - "${MEYO_REDIS_PORT:-14002}:6379"
+      - "${MEYO_REDIS_INSIGHT_PORT:-14003}:8001"
+    volumes:
+      - meyo_redis_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -a 'PkXWBhDJbeT23W=zGRGyA.6NUkyuTpcx' -h 127.0.0.1 -p 6379 ping | grep -q PONG",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  meyo-neo4j:
+    image: neo4j:2026.03.1-community
+    container_name: meyo-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: "neo4j/2@e93GSJrFE50_-o+kGz0XfJWtLzlpJ0"
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      NO_PROXY: 127.0.0.1,localhost,meyo-neo4j
+      no_proxy: 127.0.0.1,localhost,meyo-neo4j
+    ports:
+      - "${MEYO_NEO4J_HTTP_PORT:-14004}:7474"
+      - "${MEYO_NEO4J_BOLT_PORT:-14005}:7687"
+    volumes:
+      - meyo_neo4j_data:/data
+      - meyo_neo4j_logs:/logs
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "cypher-shell -a bolt://127.0.0.1:7687 -u neo4j -p 2@e93GSJrFE50_-o+kGz0XfJWtLzlpJ0 'RETURN 1;' >/dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+
+  meyo-etcd:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: meyo-etcd
+    restart: unless-stopped
+    command: >
+      etcd
+      -advertise-client-urls=http://meyo-etcd:2379
+      -listen-client-urls=http://0.0.0.0:2379
+      --data-dir /etcd
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: "1000"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+      ETCD_SNAPSHOT_COUNT: "50000"
+    ports:
+      - "${MEYO_ETCD_PORT:-14006}:2379"
+    volumes:
+      - meyo_etcd_data:/etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "--endpoints=http://127.0.0.1:2379", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  meyo-minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    container_name: meyo-minio
+    command: minio server /minio_data --console-address ":9001"
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MEYO_MINIO_ROOT_USER:-meyominio}
+      MINIO_ROOT_PASSWORD: "N8zbG0lNNvnSs3R8.Ea6-ARgy-VpejB@"
+    ports:
+      - "${MEYO_MINIO_API_PORT:-14007}:9000"
+      - "${MEYO_MINIO_CONSOLE_PORT:-14008}:9001"
+    volumes:
+      - meyo_minio_data:/minio_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  meyo-milvus:
+    image: milvusdb/milvus:v2.6.15
+    container_name: meyo-milvus
+    command:
+      - /bin/sh
+      - -c
+      - |
+          cat > /milvus/configs/user.yaml <<'EOF'
+          common:
+            security:
+              authorizationEnabled: true
+              defaultRootPassword: "KW1vK=1Amq8vowOQa.m9aORfUA8A+fyT"
+          EOF
+          exec milvus run standalone
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      ETCD_ENDPOINTS: meyo-etcd:2379
+      MINIO_ADDRESS: meyo-minio:9000
+      MINIO_ACCESS_KEY_ID: ${MEYO_MINIO_ROOT_USER:-meyominio}
+      MINIO_SECRET_ACCESS_KEY: "N8zbG0lNNvnSs3R8.Ea6-ARgy-VpejB@"
+      MINIO_REGION: us-east-1
+      MQ_TYPE: woodpecker
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      NO_PROXY: 127.0.0.1,localhost,meyo-etcd,meyo-minio,meyo-milvus
+      no_proxy: 127.0.0.1,localhost,meyo-etcd,meyo-minio,meyo-milvus
+    ports:
+      - "${MEYO_MILVUS_PORT:-14009}:19530"
+      - "${MEYO_MILVUS_HTTP_PORT:-14010}:9091"
+    volumes:
+      - meyo_milvus_data:/var/lib/milvus
+    depends_on:
+      meyo-etcd:
+        condition: service_healthy
+      meyo-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 3 bash -lc '</dev/tcp/127.0.0.1/19530'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  meyo-stack:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_HASH: ${BUILD_HASH:-dev-build}
+    image: ${MEYO_STACK_IMAGE:-meyo-stack:dev}
+    container_name: meyo-stack
+    restart: unless-stopped
+    env_file:
+      - .env
+      - apps/meyo-chatbot/.env
+    environment:
+      ENV: dev
+      MEYO_CONFIG: /opt/meyo/configs/meyo-proxy-siliconflow-pg-milvus.toml
+      MEYO_LANG: ${MEYO_LANG:-zh}
+      MEYO_ENCRYPT_KEY: ${MEYO_ENCRYPT_KEY:-meyo_local_encrypt_key}
+      MEYO_LOG_LEVEL: ${MEYO_LOG_LEVEL:-INFO}
+      SILICONFLOW_API_KEY: ${SILICONFLOW_API_KEY:-}
+      MEYO_WEB_HOST: 127.0.0.1
+      MEYO_WEB_PORT: 5670
+      CHATBOT_HOST: 127.0.0.1
+      CHATBOT_PORT: 8080
+      STUDIO_HOST: 127.0.0.1
+      STUDIO_PORT: 7860
+      STUDIO_LOG_LEVEL: ${STUDIO_LOG_LEVEL:-info}
+      ENABLE_OPENAI_API: "true"
+      ENABLE_OLLAMA_API: "false"
+      OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL:-http://127.0.0.1:5670/api/v1}
+      RAG_OPENAI_API_BASE_URL: ${RAG_OPENAI_API_BASE_URL:-http://127.0.0.1:5670/api/v1}
+      RAG_EMBEDDING_ENGINE: ${RAG_EMBEDDING_ENGINE:-openai}
+      RAG_EMBEDDING_MODEL: ${RAG_EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-8B}
+      RAG_EMBEDDING_MODEL_AUTO_UPDATE: ${RAG_EMBEDDING_MODEL_AUTO_UPDATE:-false}
+      RAG_RERANKING_MODEL_AUTO_UPDATE: ${RAG_RERANKING_MODEL_AUTO_UPDATE:-false}
+      OFFLINE_MODE: ${OFFLINE_MODE:-true}
+      MEYO_OPENAI_API_BASE_URL: http://127.0.0.1:5670/api/v1
+      MEYO_LANGUAGE_MODEL_NAME: ${MEYO_LANGUAGE_MODEL_NAME:-Pro/zai-org/GLM-5.1}
+      MEYO_EMBEDDING_MODEL_NAME: ${MEYO_EMBEDDING_MODEL_NAME:-Qwen/Qwen3-Embedding-8B}
+      MEYO_OPENAI_API_KEY: ${MEYO_OPENAI_API_KEY:-}
+      DATA_DIR: /data/meyo-chatbot
+      LANGFLOW_CONFIG_DIR: /data/meyo-studio-flow
+      LANGFLOW_SAVE_DB_IN_CONFIG_DIR: "true"
+      LANGFLOW_DATABASE_URL: sqlite+aiosqlite:////data/meyo-studio-flow/langflow.db
+      LANGFLOW_KNOWLEDGE_BASES_DIR: /data/meyo-studio-flow/knowledge_bases
+      LANGFLOW_ROOT_PATH: /studio
+      LANGFLOW_AUTO_LOGIN: "true"
+      LANGFLOW_SKIP_AUTH_AUTO_LOGIN: "true"
+      LANGFLOW_STORE_ENVIRONMENT_VARIABLES: ${LANGFLOW_STORE_ENVIRONMENT_VARIABLES:-false}
+      SCARF_NO_ANALYTICS: "true"
+      DO_NOT_TRACK: "true"
+      ANONYMIZED_TELEMETRY: "false"
+      MEYO_PG_HOST: meyo-postgres
+      MEYO_PG_PORT: 5432
+      MEYO_PG_DATABASE: ${MEYO_PG_DATABASE:-meyo}
+      MEYO_PG_USER: ${MEYO_PG_USER:-meyo}
+      MEYO_PG_PASSWORD: "Zjmzu5EqZzB_4dk7JA7N3yqULeLG@+dq"
+      MEYO_MILVUS_HOST: meyo-milvus
+      MEYO_MILVUS_PORT: 19530
+      MILVUS_USERNAME: root
+      MILVUS_PASSWORD: "KW1vK=1Amq8vowOQa.m9aORfUA8A+fyT"
+      WEBSOCKET_MANAGER: redis
+      WEBSOCKET_REDIS_URL: redis://:PkXWBhDJbeT23W=zGRGyA.6NUkyuTpcx@meyo-redis-stack:6379/0
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:-}
+    ports:
+      - "${MEYO_STACK_PORT:-14000}:80"
+    volumes:
+      - meyo_stack_chatbot_data:/data/meyo-chatbot
+      - meyo_stack_studio_data:/data/meyo-studio-flow
+      - meyo_stack_pilot:/opt/meyo/pilot
+      - meyo_stack_logs:/opt/meyo/logs
+      - ./configs:/opt/meyo/configs:ro
+    depends_on:
+      meyo-postgres:
+        condition: service_healthy
+      meyo-redis-stack:
+        condition: service_healthy
+      meyo-neo4j:
+        condition: service_healthy
+      meyo-etcd:
+        condition: service_healthy
+      meyo-minio:
+        condition: service_healthy
+      meyo-milvus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail http://127.0.0.1/healthz >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+
+volumes:
+  meyo_pg_data:
+  meyo_redis_data:
+  meyo_neo4j_data:
+  meyo_neo4j_logs:
+  meyo_etcd_data:
+  meyo_minio_data:
+  meyo_milvus_data:
+  meyo_stack_chatbot_data:
+  meyo_stack_studio_data:
+  meyo_stack_pilot:
+  meyo_stack_logs:
