@@ -47,6 +47,30 @@ const sidebars = {
         { type: "doc", id: "design/meyo_studio_flow_migration_design", label: "Meyo Studio Flow 迁移与改造设计" },
       ],
     },
+    {
+      type: "category",
+      label: "前沿专题",
+      collapsed: false,
+      collapsible: true,
+      items: [
+        { type: "doc", id: "feature/enterprise-ai-methodology-radar", label: "企业 AI App 前沿技术方法论雷达" },
+        { type: "doc", id: "feature/ontology-graphrag-enterprise-ai", label: "Ontology + GraphRAG 企业落地说明" },
+        { type: "doc", id: "feature/opentelemetry-genai-observability", label: "OpenTelemetry GenAI 可观测架构说明" },
+        { type: "doc", id: "feature/ap2-ucp-agent-commerce", label: "AP2 / UCP Agent Commerce 协议说明" },
+        { type: "doc", id: "feature/harness-engineering-agentos-development", label: "Harness Engineering：AgentOS 壳项目的开发方法" },
+        { type: "doc", id: "feature/google-design-md-methodology", label: "Google DESIGN.md 设计思路与 Meyo 落地说明" },
+      ],
+    },
+    {
+      type: "category",
+      label: "部署运维",
+      collapsed: false,
+      collapsible: true,
+      items: [
+        { type: "doc", id: "deploy/deployment_process", label: "部署流程" },
+        { type: "doc", id: "deploy/deployment_faq", label: "部署常见问题" },
+      ],
+    },
   ],
 };
 
