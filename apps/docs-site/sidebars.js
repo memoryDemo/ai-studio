@@ -45,6 +45,28 @@ const sidebars = {
         { type: "doc", id: "design/logging_system_design", label: "日志系统设计" },
         { type: "doc", id: "design/meyo_chatbot_migration_design", label: "Meyo Chatbot 迁移与改造设计" },
         { type: "doc", id: "design/meyo_studio_flow_migration_design", label: "Meyo Studio Flow 迁移与改造设计" },
+        { type: "doc", id: "design/inference_runtime_framework_design", label: "Meyo 推理入口运行框架设计" },
+        {
+          type: "category",
+          label: "数据库设计",
+          collapsed: false,
+          collapsible: true,
+          items: [
+            { type: "doc", id: "design/database/init", label: "数据库表字典" },
+            { type: "doc", id: "design/database/inference_scene_runtime_db", label: "Meyo 数据库表字典" },
+            { type: "doc", id: "design/database/meyo_chatbot", label: "Meyo Chatbot 数据库表字典" },
+            { type: "doc", id: "design/database/meyo_studio_flow", label: "Meyo Studio Flow 数据库表字典" },
+          ],
+        },
+        {
+          type: "category",
+          label: "Scene Workflows",
+          collapsed: false,
+          collapsible: true,
+          items: [
+            { type: "doc", id: "design/scenes/rag_qa_scene_workflow_design", label: "RAG 问答 Scene Workflow 设计" },
+          ],
+        },
       ],
     },
     {
@@ -59,6 +81,7 @@ const sidebars = {
         { type: "doc", id: "feature/ap2-ucp-agent-commerce", label: "AP2 / UCP Agent Commerce 协议说明" },
         { type: "doc", id: "feature/harness-engineering-agentos-development", label: "Harness Engineering：AgentOS 壳项目的开发方法" },
         { type: "doc", id: "feature/google-design-md-methodology", label: "Google DESIGN.md 设计思路与 Meyo 落地说明" },
+        { type: "doc", id: "feature/dataops-rag-agentos-implementation", label: "Meyo DataOps + RAG 企业级完整方案" },
       ],
     },
     {

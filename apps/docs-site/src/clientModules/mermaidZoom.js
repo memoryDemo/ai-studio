@@ -99,6 +99,9 @@ function ensureStyle() {
       cursor: default;
       margin: 0;
     }
+    .mermaid-zoom-stage > .docusaurus-mermaid-container {
+      overflow: hidden !important;
+    }
     /* 克隆进来的 container 在 overlay 内不再需要 hover 提示气泡 */
     .mermaid-zoom-stage > .docusaurus-mermaid-container::after {
       display: none !important;
@@ -165,6 +168,41 @@ function ensureStyle() {
   document.head.appendChild(style);
 }
 
+function parseViewBox(svg, fallbackWidth, fallbackHeight) {
+  const raw = svg.getAttribute("viewBox");
+  const values = raw ? raw.trim().split(/[\s,]+/).map(Number) : [];
+  if (
+    values.length === 4 &&
+    values.every(Number.isFinite) &&
+    values[2] > 0 &&
+    values[3] > 0
+  ) {
+    return {
+      x: values[0],
+      y: values[1],
+      width: values[2],
+      height: values[3],
+    };
+  }
+  return {
+    x: 0,
+    y: 0,
+    width: Math.max(1, fallbackWidth),
+    height: Math.max(1, fallbackHeight),
+  };
+}
+
+function formatViewBox(viewBox) {
+  return [
+    viewBox.x,
+    viewBox.y,
+    viewBox.width,
+    viewBox.height,
+  ]
+    .map((value) => Number(value.toFixed(3)))
+    .join(" ");
+}
+
 function openZoom(sourceSvg) {
   const overlay = document.createElement("div");
   overlay.className = "mermaid-zoom-overlay";
@@ -216,15 +254,25 @@ function openZoom(sourceSvg) {
   clone.style.height = "100%";
   clone.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-  stage.style.width = `${Math.round(w)}px`;
-  stage.style.height = `${Math.round(h)}px`;
+  const baseW = Math.round(w);
+  const baseH = Math.round(h);
+  stage.style.width = `${baseW}px`;
+  stage.style.height = `${baseH}px`;
+
+  const baseViewBox = parseViewBox(
+    clone,
+    srcRect.width || baseW,
+    srcRect.height || baseH,
+  );
+  let currentViewBox = { ...baseViewBox };
+  clone.setAttribute("viewBox", formatViewBox(currentViewBox));
 
   stage.appendChild(containerClone || clone);
   overlay.appendChild(stage);
 
   const hint = document.createElement("div");
   hint.className = "mermaid-zoom-hint";
-  hint.textContent = "滚轮缩放 · 拖拽移动 · 双击复位 · ESC / 点外部关闭";
+  hint.textContent = "滚轮无级缩放 · 拖拽移动 · 双击复位 · ESC / 点外部关闭";
   overlay.appendChild(hint);
 
   const closeBtn = document.createElement("button");
@@ -237,29 +285,65 @@ function openZoom(sourceSvg) {
   const prevOverflow = document.body.style.overflow;
   document.body.style.overflow = "hidden";
 
-  let scale = 1;
-  let tx = 0;
-  let ty = 0;
+  const minZoom = 0.25;
+  const maxZoom = 512;
+  let zoom = 1;
   let dragging = false;
   let lastX = 0;
   let lastY = 0;
 
+  function getSvgRect() {
+    const rect = clone.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) return rect;
+    return stage.getBoundingClientRect();
+  }
+
   function apply() {
-    stage.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
+    clone.setAttribute("viewBox", formatViewBox(currentViewBox));
+  }
+
+  function zoomAt(clientX, clientY, factor) {
+    const rect = getSvgRect();
+    const px =
+      rect.width > 0
+        ? Math.min(1, Math.max(0, (clientX - rect.left) / rect.width))
+        : 0.5;
+    const py =
+      rect.height > 0
+        ? Math.min(1, Math.max(0, (clientY - rect.top) / rect.height))
+        : 0.5;
+    const anchorX = currentViewBox.x + currentViewBox.width * px;
+    const anchorY = currentViewBox.y + currentViewBox.height * py;
+    const nextZoom = Math.max(minZoom, Math.min(maxZoom, zoom * factor));
+    if (nextZoom === zoom) return;
+
+    const nextWidth = baseViewBox.width / nextZoom;
+    const nextHeight = baseViewBox.height / nextZoom;
+    currentViewBox = {
+      x: anchorX - nextWidth * px,
+      y: anchorY - nextHeight * py,
+      width: nextWidth,
+      height: nextHeight,
+    };
+    zoom = nextZoom;
+    apply();
+  }
+
+  function zoomAtCenter(factor) {
+    const rect = getSvgRect();
+    zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, factor);
   }
 
   function reset() {
-    scale = 1;
-    tx = 0;
-    ty = 0;
+    zoom = 1;
+    currentViewBox = { ...baseViewBox };
     apply();
   }
 
   function onWheel(e) {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    scale = Math.max(0.3, Math.min(8, scale * delta));
-    apply();
+    const factor = Math.exp(-e.deltaY * 0.0015);
+    zoomAt(e.clientX, e.clientY, factor);
   }
 
   function onMouseDown(e) {
@@ -273,8 +357,16 @@ function openZoom(sourceSvg) {
 
   function onMouseMove(e) {
     if (!dragging) return;
-    tx += e.clientX - lastX;
-    ty += e.clientY - lastY;
+    const rect = getSvgRect();
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    currentViewBox = {
+      ...currentViewBox,
+      x: currentViewBox.x - (dx / Math.max(1, rect.width)) * currentViewBox.width,
+      y:
+        currentViewBox.y -
+        (dy / Math.max(1, rect.height)) * currentViewBox.height,
+    };
     lastX = e.clientX;
     lastY = e.clientY;
     apply();
@@ -297,11 +389,9 @@ function openZoom(sourceSvg) {
     if (e.key === "Escape") close();
     else if (e.key === "0" || e.key.toLowerCase() === "f") reset();
     else if (e.key === "+" || e.key === "=") {
-      scale = Math.min(8, scale * 1.15);
-      apply();
+      zoomAtCenter(1.2);
     } else if (e.key === "-") {
-      scale = Math.max(0.3, scale / 1.15);
-      apply();
+      zoomAtCenter(1 / 1.2);
     }
   }
 
