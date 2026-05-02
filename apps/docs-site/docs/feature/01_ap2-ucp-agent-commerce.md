@@ -6,6 +6,18 @@ tags: [agent-commerce, ap2, ucp, payments, commerce-protocol]
 
 # AP2 / UCP Agent Commerce 协议说明
 
+## 0. 事实边界说明
+
+这篇文档不是 AP2 或 UCP 的官方规范翻译，而是 `Meyo` 对 Agent Commerce 能力的架构判断。请按三层阅读：
+
+| 类型 | 含义 | 本文位置 |
+|---|---|---|
+| 官方事实 | 来自 Google Cloud AP2 公告、AP2 规范文档、Google Merchant Center UCP 文档 | AP2 面向 agent-led payments，UCP 面向 agentic commerce / merchant integration |
+| 本文归纳 | 把 AP2、UCP、MCP、A2A 放在同一张企业 AI 架构图中解释其分工 | 第 3 节协议关系、第 5-6 节风险分类 |
+| Meyo 建议 | 针对 `Meyo` 是否要把 AP2/UCP 纳入平台能力的判断 | P2 优先级、optional module、最小可行能力、合同模板 |
+
+本文中的 `User Mandate Contract`、`Purchase Intent Contract`、`Order Draft Contract` 是 `Meyo` 的示例合同，不是 AP2/UCP 官方字段定义。
+
 ## 1. 一句话结论
 
 AP2 / UCP 不是所有企业 AI App 都必须上的能力，它主要面向 Agent Commerce：让 AI Agent 在用户授权下完成商品发现、比较、下单、支付、售后等商业交易流程。
@@ -236,5 +248,6 @@ AP2 / UCP 的真实价值是让 Agent 从“建议系统”走向“交易执行
 ## 13. 参考资料
 
 - Google Merchant Center - Universal Commerce Protocol: https://developers.google.com/merchant/ucp
-- AP2 reporting: https://omni.se/a/RzkWqO
-- Klarna backs UCP/AP2 reporting: https://letsdatascience.com/news/klarna-backs-googles-universal-commerce-protocol-ff0ad455
+- Google Cloud Blog - Announcing Agent Payments Protocol (AP2): https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol
+- Agent Payments Protocol Specification: https://ap2-protocol.org/specification/
+- AP2 Introduction: https://agentpaymentsprotocol.info/docs/introduction/

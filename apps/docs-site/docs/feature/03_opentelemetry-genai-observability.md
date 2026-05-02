@@ -6,9 +6,21 @@ tags: [opentelemetry, genai, observability, tracing, audit, llmops]
 
 # OpenTelemetry GenAI 可观测架构说明
 
+## 0. 事实边界说明
+
+这篇文档不是 OpenTelemetry GenAI Semantic Conventions 的逐字段翻译，而是 `Meyo` 对 AI Runtime 可观测、审计和治理的落地设计。请按三层阅读：
+
+| 类型 | 含义 | 本文位置 |
+|---|---|---|
+| 官方事实 | OpenTelemetry 提供 GenAI 语义约定，包含 `gen_ai.*` 等标准化属性、span/event/metric 命名方向；官方也在持续演进 AI agent observability 相关实践 | 第 2 节、参考资料 |
+| 本文归纳 | 将 AI App 链路拆成 request、agent、retrieval、model call、tool call、state transition、audit 等观测对象 | 第 3-5 节 |
+| Meyo 建议 | 针对 `Meyo` 设计的 span 名称、业务属性、指标体系、audit 边界和分阶段落地方案 | 第 6-12 节 |
+
+第 6-7 节中的字段并不全是 OpenTelemetry 官方语义约定；其中 `gen_ai.*` 应优先对齐官方 semconv，`agent.*`、`skill.*`、`retrieval.*`、`state.*`、`tool.*` 等是本文建议的 `Meyo` 自定义命名空间。
+
 ## 1. 一句话结论
 
-OpenTelemetry GenAI 不是“日志增强”，而是企业 AI App 进入生产环境后必须具备的可观测与审计标准。
+OpenTelemetry GenAI 不是“日志增强”。对 `Meyo` 这类企业 AI App 而言，本文建议把它作为进入生产环境前必须具备的可观测与审计基线。
 
 它解决的问题是：一个用户请求为什么慢、为什么回答错、用了哪个模型、调用了哪个工具、检索了哪些文档、Prompt 是哪个版本、花了多少钱、哪个状态被谁改了、是否可复现。
 
@@ -109,6 +121,8 @@ ui.render_payload
 ```
 
 ## 6. 核心属性设计
+
+以下属性模型是 `Meyo` 推荐设计，包含 OpenTelemetry 官方 `gen_ai.*` 语义约定和本项目自定义业务属性。落地时应优先复用官方字段；官方没有覆盖的部分，再放到项目自定义 namespace 中。
 
 ### 6.1 通用属性
 

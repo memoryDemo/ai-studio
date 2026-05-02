@@ -17,6 +17,18 @@ DESIGN.md = 可版本化的设计系统源文件
           + 可被 lint / diff / export 的工程契约
 ```
 
+## 0. 事实边界说明
+
+这篇文档不是 Google `DESIGN.md` 官方 README 的逐段翻译，而是 `Meyo` 对该项目的采用说明。请按三层阅读：
+
+| 类型 | 含义 | 本文位置 |
+|---|---|---|
+| 官方事实 | `google-labs-code/design.md` 是描述 visual identity 给 coding agents 的格式规范；它使用 YAML front matter 存放机器可读 tokens，用 Markdown prose 存放设计理由；CLI 支持 `lint`、`diff`、`export`、`spec` | 第 1-6 节 |
+| 本文归纳 | 将其解释为类似 `AGENTS.md` 的视觉契约，并总结 tokens + prose 对 coding agent 的价值 | 第 1-6 节 |
+| Meyo 建议 | 为什么 `Meyo` 只在根目录放 `DESIGN.md`，暂不把 TypeScript CLI monorepo 接入 Python `uv workspace` | 第 7 节之后 |
+
+Google `DESIGN.md` 官方 README 标注该格式当前处于 `alpha`，schema 和 CLI 仍可能变化。本文的 Meyo 落地方式是项目内选择，不是 Google 官方推荐的唯一用法。
+
 ## 1. 它要解决什么问题
 
 AI coding agent 做前端时，常见问题不是不会写 CSS，而是缺少稳定的视觉上下文：
@@ -319,3 +331,9 @@ Google `DESIGN.md` 的思路可以概括为一句话：
 ```
 
 这对 Meyo 很适合，因为 Meyo 本身就是面向 agent、tool mesh、runtime 和工程治理的私有化平台。根目录 `DESIGN.md` 不只是视觉说明，它会成为后续 coding agent 在 Meyo 仓库里做 UI、文档页、控制台和工作台时的稳定设计上下文。
+
+## 11. 参考资料
+
+- Google Labs Code - DESIGN.md: https://github.com/google-labs-code/design.md
+- Google DESIGN.md Specification: https://github.com/google-labs-code/design.md/blob/main/docs/spec.md
+- Design Tokens Community Group Format: https://tr.designtokens.org/format/

@@ -6,6 +6,18 @@ tags: [ontology, knowledge-graph, graphrag, rag, semantic-layer]
 
 # Ontology + GraphRAG 企业落地说明
 
+## 0. 事实边界说明
+
+这篇文档不是 Microsoft GraphRAG 官方文档翻译，也不是本体工程教科书，而是 `Meyo` 对企业 AI App 中 “Ontology + Knowledge Graph + GraphRAG” 的落地说明。请按三层阅读：
+
+| 类型 | 含义 | 本文位置 |
+|---|---|---|
+| 官方/通用事实 | Ontology、Knowledge Graph、RAG 是通用技术概念；Microsoft GraphRAG 官方资料描述了基于文本抽取、图构建、社区摘要和检索增强的 GraphRAG 方法 | 第 2-3 节概念分工、参考资料 |
+| 本文归纳 | 将 Ontology、KG、GraphRAG 拆成“类型系统 / 事实关系 / 图增强检索”三层，便于企业架构设计 | 第 3-6 节 |
+| Meyo 建议 | 针对财务分摊、企业流程助手等场景给出的实施模式和架构原则 | 第 7-11 节 |
+
+文中的业务实体、关系、阶段路线和架构原则是 `Meyo` 的落地建议，不是 Microsoft GraphRAG 或任何本体标准的官方要求。
+
 ## 1. 一句话结论
 
 Ontology + GraphRAG 的价值不是“把 RAG 包装成知识图谱”，而是为企业 AI App 建立一个可解释、可治理、可审计的业务语义层。
